@@ -71,7 +71,7 @@ object MyBuild extends Build {
                    |
                    |This project is only a technological preview. The API may change in the future.
                    |""".stripMargin,
-    spHomepage := "https://github.com/krapsh/kraps-server",
+    spHomepage := "https://github.com/tjhunter/karps-server",
     spAppendScalaVersion := true,
     libraryDependencies := nonShadedDependencies,
     libraryDependencies ++= sparkDependencies.map(_ % "provided"),
