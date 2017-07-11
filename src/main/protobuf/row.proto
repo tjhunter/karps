@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package karps.core;
+
+message Cell {
+  oneof element {
+    bool emptyCell = 1;
+    int64 int_value = 2;
+    string string_value = 3;
+    float float_value = 4;
+    double doube_value = 5;
+    ArrayCell array_value = 10;
+    StructCell struct_value = 11;
+  };
+};
+
+message ArrayCell {
+  repeated Cell values = 1;
+};
+
+message StructCell {
+  repeated Cell values = 1;
+}
+
+message Row {
+  repeated Cell values = 1;
+}

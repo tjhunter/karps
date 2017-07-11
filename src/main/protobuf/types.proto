@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package karps.core;
+
+// A type used to describe the data in Karps.
+message SQLType {
+  // The primitive types.
+  enum BasicType {
+    INT = 0; DOUBLE = 1; STRING = 2; BOOL = 3;
+  };
+  oneof strict_type {
+    BasicType basic_type = 1;
+    SQLType array_type = 2;  
+    StructType struct_type = 3;
+  };
+  bool nullable = 4;
+};
+
+message StructType {
+  repeated StructField fields = 1;
+};
+
+message StructField {
+  string field_name = 1;
+  SQLType field_type = 2;
+};

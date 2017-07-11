@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package karps.core;
+
+import "graph.proto";
+import "row.proto";
+
+enum ResultStatus {
+  SCHEDULED = 0;
+  RUNNING = 1;
+  FINISHED_SUCCESS = 2;
+  FINISHED_FAILURE = 3;
+};
+
+message Result {
+  ResultStatus status = 1;
+  string final_error = 2;
+  Cell final_result = 3;
+  SparkStats spark_stats = 4;
+};
+
+message SparkStats {};
+
+message ComputationResult {
+  Path local_path = 1;
+  Result result = 2;
+};
+
+// ----------- Common structures ------------
+
+message ResourcePath {
+  string uri = 1;
+};
+
+message ComputationId {
+  string id = 1;
+};
+
+message SessionId {
+  string id = 1;
+};
