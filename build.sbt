@@ -69,7 +69,7 @@ lazy val shaded = Project("shaded", file(".")).settings(
 ).settings(commonSettings: _*)
 
 
-lazy val distribute = Project("distribution", file(".")).settings(
+val distribute = Project("ks_distribution", file(".")).settings(
   target := target.value / "distribution",
   spName := "karps/karps-server",
   credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
@@ -89,7 +89,7 @@ lazy val distribute = Project("distribution", file(".")).settings(
   assembly in spPackage := (assembly in shaded).value
 ).settings(commonSettings: _*)
 
-lazy val testing = Project("ks_testing", file(".")).settings(
+val testing = Project("ks_testing", file(".")).settings(
   target := target.value / "testing",
   libraryDependencies ++= sparkDependencies.map(_ % "provided"),
   libraryDependencies ++= nonShadedDependencies,
@@ -102,6 +102,12 @@ lazy val testing = Project("ks_testing", file(".")).settings(
     ShadeRule.rename("com.google.protobuf.**" -> "org.tensorframes.protobuf3shade.@1").inAll,
     ShadeRule.rename("shapeless.**" -> "org.karps.shaded.shapeless.@1").inAll
   ),
+  assemblyMergeStrategy in assembly := {
+    case PathList("META-INF", "io.netty.versions.properties") => MergeStrategy.first
+    case x =>
+        val oldStrategy = (assemblyMergeStrategy in assembly).value
+        oldStrategy(x)
+  },
   assemblyOption in assembly := (assemblyOption in assembly).value.copy(includeScala = false)
 ).settings(commonSettings: _*)
 
