@@ -1,9 +1,11 @@
 package org.karps
 
 import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
-import spray.json.DefaultJsonProtocol._
+// import spray.json.DefaultJsonProtocol._
 
-import org.karps.structures.CellWithType
+import org.karps.structures.{AugmentedDataType, CellWithType}
+import karps.core.{graph => G}
+import karps.core.{computation => C}
 
 /**
  * The identifier of a spark session.
@@ -25,6 +27,10 @@ object Path {
     require(repr.size >= 1, repr)
     Path(repr)
   }
+  
+  def fromProto(p: G.Path): Path = {
+    Path.create(p.path)
+  }
 }
 
 /**
@@ -37,6 +43,10 @@ case class ComputationId(repr: String) extends AnyVal {
 
 object ComputationId {
   val UnknownComputation = ComputationId("-1")
+  
+  def fromProto(p: C.ComputationId): ComputationId = {
+    ComputationId(p.id)
+  }
 }
 
 case class GlobalPath private (
@@ -64,7 +74,7 @@ case class SparkComputationStats(
     rddInfo: Seq[RDDInfo])
 
 object SparkComputationStats {
-  implicit val formatter = jsonFormat1(SparkComputationStats.apply)
+//   implicit val formatter = jsonFormat1(SparkComputationStats.apply)
 }
 
 sealed trait Locality
@@ -128,11 +138,11 @@ case class UntypedNode(
     parents: Seq[Path],
     logicalDependencies: Seq[Path],
     extra: OpExtra,
-    _type: SQLType) {
+    _type: AugmentedDataType) {
 
   def ppString: String = {
-    val ps = parents.map(p => "\n    - " + Path.create(p)).mkString("")
-    val deps = logicalDependencies.map(p => "\n    - " + Path.create(p)).mkString("")
+    val ps = parents.map(p => "\n    - " + p).mkString("")
+    val deps = logicalDependencies.map(p => "\n    - " + p).mkString("")
     s"""{
        |  path: $path
        |  op: $op
@@ -145,3 +155,8 @@ case class UntypedNode(
      """.stripMargin
   }
 }
+
+object UntypedNode {
+  def pprint(s: Seq[UntypedNode]): String = s.map(_.ppString).mkString("\n")
+}
+

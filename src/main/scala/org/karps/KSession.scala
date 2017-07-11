@@ -28,8 +28,8 @@ class KSession(val id: SessionId) extends Logging {
 
   def compute(
       compId: ComputationId,
-      raw: Seq[UntypedNodeJson]): Unit = synchronized {
-    logger.debug(s"Getting computation info (raw):\n" + UntypedNodeJson2.pprint(raw))
+      raw: Seq[UntypedNode]): Unit = synchronized {
+    logger.debug(s"Getting computation info (raw):\n" + UntypedNode.pprint(raw))
     def currentResults() = { state.results }
     val items = GlobalRegistry.registry.getItems(raw, id, compId, currentResults)
     logger.debug(s"Getting computation info (parsed and sorted):\n" + items.map(_.path))

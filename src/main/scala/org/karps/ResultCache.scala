@@ -5,7 +5,7 @@ import org.apache.spark.SparkContext
 import org.apache.spark.scheduler.{SparkListener, SparkListenerStageCompleted, SparkListenerStageSubmitted}
 import org.apache.spark.sql.SparkSession
 import org.karps.ops.{HdfsPath, HdfsResourceResult, SourceStamps}
-
+import org.karps.structures.CellWithType
 
 class ResultCache(
   private val map: Map[GlobalPath, ComputationResult] = Map.empty,

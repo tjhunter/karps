@@ -73,7 +73,7 @@ class ExecutionItem(
     val path: GlobalPath,
     cache: () => ResultCache,
     builder: OpBuilder,
-    raw: UntypedNodeJson,
+    raw: UntypedNode,
     session: SparkSession) extends Logging {
 
   /**

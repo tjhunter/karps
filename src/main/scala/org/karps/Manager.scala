@@ -47,7 +47,7 @@ class Manager extends Logging {
   def execute(
       session: SessionId,
       compId: ComputationId,
-      data: Seq[UntypedNodeJson]): Unit = {
+      data: Seq[UntypedNode]): Unit = {
     logger.debug(s"Executing computation $compId on session $session")
     sessions.get(session).get.compute(compId, data)
   }

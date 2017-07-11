@@ -4,7 +4,7 @@ import scala.collection.JavaConversions._
 import scala.util.{Failure, Success}
 import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
 import org.apache.spark.SparkContext
-import spray.json.{JsString, JsValue}
+// import spray.json.{JsString, JsValue}
 import org.apache.spark.sql._
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
@@ -140,22 +140,24 @@ object SparkRegistry extends Logging {
   }
 
   val locLiteral = createTypedBuilder0("org.spark.LocalLiteral") { z =>
-    val typedCell = LocalSparkConversion.deserializeLocal(z) match {
-      case Success(ct) => ct
-      case Failure(e) =>
-        throw new Exception(s"Deserialization failed", e)
-    }
+    val typedCell = ???
+//     val typedCell = LocalSparkConversion.deserializeLocal(z) match {
+//       case Success(ct) => ct
+//       case Failure(e) =>
+//         throw new Exception(s"Deserialization failed", e)
+//     }
     val session = SparkSession.builder().getOrCreate()
     val df = session.createDataFrame(Seq(typedCell.row), typedCell.rowType)
     DataFrameWithType.create(df, typedCell.cellType).get
   }
 
   val dLiteral = createTypedBuilder0("org.spark.DistributedLiteral") { z =>
-    val cellCol = DistributedSparkConversion.deserializeDistributed(z) match {
-      case Success(cc) => cc
-      case Failure(e) =>
-        throw new Exception(s"Deserialization failed", e)
-    }
+    val cellCol = ???
+//     val cellCol = DistributedSparkConversion.deserializeDistributed(z) match {
+//       case Success(cc) => cc
+//       case Failure(e) =>
+//         throw new Exception(s"Deserialization failed", e)
+//     }
     val session = SparkSession.builder().getOrCreate()
     logger.debug(s"constant: data=$cellCol")
     val rows = cellCol.normalizedData.map(AlgebraicRow.toRow)
@@ -212,7 +214,7 @@ object SparkRegistry extends Logging {
 
     override def build(
         parents: Seq[ExecutionOutput],
-        extra: JsValue,
+        extra: OxExtra,
         session: SparkSession): DataFrameWithType = {
       val (dfwt, cellwt) = parents match {
         case Seq(DisExecutionOutput(x), LocalExecOutput(y)) => x -> y
@@ -257,7 +259,7 @@ object SparkRegistry extends Logging {
 
     override def build(
         parents: Seq[ExecutionOutput],
-        extra: JsValue,
+        extra: OxExtra,
         session: SparkSession): DataFrameWithType = {
       require(parents.nonEmpty)
       val cellswt = parents.map {
@@ -274,7 +276,7 @@ object SparkRegistry extends Logging {
     override def op = "org.spark.PlaceholderCache"
     override def build(
         p: Seq[ExecutionOutput],
-        ex: JsValue,
+        ex: OpExtra,
         session: SparkSession): DataFrameWithType = {
       val df = session.createDataFrame(Seq(typedCell.row), typedCell.rowType)
       DataFrameWithType.create(df, typedCell.cellType).get
@@ -286,7 +288,7 @@ object SparkRegistry extends Logging {
     override def op = "org.spark.InferSchema"
     override def build(
         p: Seq[ExecutionOutput],
-        ex: JsValue,
+        ex: OpExtra,
         session: SparkSession): DataFrameWithType = {
       require(p.isEmpty, (ex, p))
       val reader = session.read
@@ -304,7 +306,7 @@ object SparkRegistry extends Logging {
     override def op = "org.spark.GenericDatasource"
     override def build(
         p: Seq[ExecutionOutput],
-        ex: JsValue,
+        ex: OxExtra,
         session: SparkSession): DataFrameWithType = {
       require(p.isEmpty, (ex, p))
       val reader = session.read
@@ -362,7 +364,7 @@ object SparkRegistry extends Logging {
 
     override def build(
         parents: Seq[ExecutionOutput],
-        extra: JsValue, session: SparkSession): DataFrameWithType = {
+        extra: OxExtra, session: SparkSession): DataFrameWithType = {
       logger.debug(s"select: parents=$parents js=$extra")
       // Get the dataframe input:
       val adf = parents match {

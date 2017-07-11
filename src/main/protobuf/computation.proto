@@ -25,6 +25,11 @@ message ComputationResult {
   Result result = 2;
 };
 
+message PointerPath {
+  ComputationId computation = 1;
+  Path local_path = 2;
+}
+
 // ---------- Spark statistics ----------
 
 message SparkStats {

@@ -80,7 +80,7 @@ object ColumnTransforms extends Logging {
     }
   }
   
-  private def checkFieldNames(s: Seq[Option[String]]): Try[Seq[FieldName]] = {
+  def checkFieldNames(s: Seq[Option[String]]): Try[Seq[FieldName]] = {
     sequence(s.map {
       case None => Failure(new Exception("Missing name"))
       case Some(s) => Success(FieldName(s))

@@ -36,12 +36,12 @@ message Aggregation {
     AggregationFunction op = 1;
     AggregationStructure struct = 2;
   }
+  string field_name = 3;
 }
 
 message AggregationFunction {
   string function_name = 1;
-  string field_name = 2;
-  repeated ColumnExtraction inputs = 3;
+  repeated ColumnExtraction inputs = 2;
 }
 
 message AggregationStructure {

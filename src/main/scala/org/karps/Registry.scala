@@ -5,6 +5,7 @@ import scala.util.{Failure, Success, Try}
 
 import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
 // import spray.json.{JsObject, JsValue}
+import com.trueaccord.scalapb.json.JsonFormat
 
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.functions.{struct => sqlStruct}
@@ -14,6 +15,7 @@ import org.apache.spark.sql._
 import org.karps.ops.Extraction
 import org.karps.row.Cell
 import org.karps.structures._
+import karps.core.{computation => C}
 
 
 /**
@@ -218,16 +220,15 @@ class Registry extends Logging {
         raw: UntypedNode,
         done: Map[Path, ExecutionItem]): ExecutionItem = {
       val parents = raw.parents.map { path =>
-        done.getOrElse(Path.create(path), throw new Exception(s"Missing $path"))
+        done.getOrElse(path, throw new Exception(s"Missing $path"))
       }
       val logicalDependencies = raw.logicalDependencies.map { path =>
-        done.getOrElse(Path.create(path), throw new Exception(s"Missing $path"))
+        done.getOrElse(path, throw new Exception(s"Missing $path"))
       }
       // Special case here for the pointer constants.
       val builder = if (raw.op == "org.spark.PlaceholderCache") {
         val c = cache()
-        val extra = OpExtra(raw.extra)
-        val pointerPath = Registry.extractPointerPath(sessionId, extra).get
+        val pointerPath = Registry.extractPointerPath(sessionId, raw.extra).get
         val res = c.status(pointerPath) match {
           case Some(d: ComputationDone) =>
             d.result.getOrElse {
@@ -240,12 +241,8 @@ class Registry extends Logging {
       } else {
         ops.getOrElse(raw.op, throw new Exception(s"Operation ${raw.op} not registered"))
       }
-      val locality = raw.locality match {
-        case "local" => Local
-        case "distributed" => Distributed
-      }
-      val path = GlobalPath.from(sessionId, computationId, Path.create(raw.path))
-      new ExecutionItem(parents, logicalDependencies, locality,
+      val path = GlobalPath.from(sessionId, computationId, raw.path)
+      new ExecutionItem(parents, logicalDependencies, raw.locality,
         path, cache, builder, raw, sparkSession)
     }
 
@@ -258,10 +255,10 @@ class Registry extends Logging {
       }
       // Find all the elements for which all the dependencies have been resolved:
       val (now, later) = todo.partition { raw =>
-        (raw.parents ++ raw.logicalDependencies).map(Path.create).forall(done.contains)
+        (raw.parents ++ raw.logicalDependencies).forall(done.contains)
       }
       require(now.nonEmpty, (todo, done))
-      val processed = now.map(raw => Path.create(raw.path) -> getItem(raw, done))
+      val processed = now.map(raw => raw.path -> getItem(raw, done))
       val done2 = done ++ processed
       getItems(later, done2, doneInOrder ++ processed.map(_._2))
     }
@@ -285,15 +282,23 @@ class Registry extends Logging {
 object Registry {
 //   import JsonSparkConversions._
 
-  def extractPointerPath(sid: SessionId, js: OpExtra): Try[GlobalPath] = js match {
-    case JsObject(m) =>
-      for {
-        p <- getStringList(m, "path")
-        comp <- getString(m, "computation")
-      } yield {
-        GlobalPath.from(sid, ComputationId(comp), Path.create(p))
-      }
-    case _ => Failure(new Exception(s"Expected object, got $js"))
+//   def extractPointerPath(sid: SessionId, js: OpExtra): Try[GlobalPath] = js match {
+//     case JsObject(m) =>
+//       for {
+//         p <- getStringList(m, "path")
+//         comp <- getString(m, "computation")
+//       } yield {
+//         GlobalPath.from(sid, ComputationId(comp), Path.create(p))
+//       }
+//     case _ => Failure(new Exception(s"Expected object, got $js"))
+//   }
+  
+  def extractPointerPath(sid: SessionId, js: OpExtra): Try[GlobalPath] = {
+    // TODO: could be more robust here
+    val proto = JsonFormat.fromJsonString[C.PointerPath](js.content)
+    Success(GlobalPath.from(sid,
+      ComputationId.fromProto(proto.computation.get),
+      Path.fromProto(proto.localPath.get)))
   }
 }
 
