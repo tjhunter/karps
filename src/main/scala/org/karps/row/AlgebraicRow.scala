@@ -1,12 +1,14 @@
 package org.karps.row
 
+import scala.util.{Failure, Success, Try}
+// import spray.json.{DefaultJsonProtocol, JsArray, JsBoolean, JsNull, JsNumber, JsObject, JsString, JsValue, RootJsonFormat}
 
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.types._
-import org.karps.structures.{AugmentedDataType, IsNullable}
-import spray.json.{DefaultJsonProtocol, JsArray, JsBoolean, JsNull, JsNumber, JsObject, JsString, JsValue, RootJsonFormat}
 
-import scala.util.{Failure, Success, Try}
+import org.karps.structures.{AugmentedDataType, IsNullable}
+
+import karps.core.{row => R}
 
 /**
  * A representation of a row that is easy to manipulate with
@@ -15,9 +17,11 @@ import scala.util.{Failure, Success, Try}
 case class AlgebraicRow(cells: Seq[Cell])
 
 
-object AlgebraicRow extends DefaultJsonProtocol {
+object AlgebraicRow
+// extends DefaultJsonProtocol
+{
 
-  import org.karps.structures.JsonSparkConversions.{sequence, get}
+  import org.karps.structures.ProtoUtils.sequence
   import Cell.CellOrdering
 
   def fromRow(r: Row, st: StructType): Try[AlgebraicRow] = {
@@ -29,6 +33,10 @@ object AlgebraicRow extends DefaultJsonProtocol {
   }
 
   def toRow(ar: AlgebraicRow): Row = Row(ar.cells.map(Cell.toAny):_*)
+  
+  def fromProto(r: R.Row): AlgebraicRow = {
+    AlgebraicRow(r.values.map(Cell.fromProto))
+  }
 
   /**
    * Attempts to denormalize the row.
@@ -48,7 +56,5 @@ object AlgebraicRow extends DefaultJsonProtocol {
       Cell.CellOrdering.compare(RowArray(x.cells), RowArray(y.cells))
     }
   }
-
-
 }
 

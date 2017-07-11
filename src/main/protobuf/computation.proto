@@ -19,11 +19,23 @@ message Result {
   SparkStats spark_stats = 4;
 };
 
-message SparkStats {};
 
 message ComputationResult {
   Path local_path = 1;
   Result result = 2;
+};
+
+// ---------- Spark statistics ----------
+
+message SparkStats {
+  RDDInfo rdd_info = 1;
+};
+
+message RDDInfo {
+  int64 rdd_id = 1;
+  string class_name = 2;
+  string repr = 3;
+  repeated int64 parents = 4;
 };
 
 // ----------- Common structures ------------

@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package karps.core;
+
+message Column {
+  oneof content {
+    ColumnOperation op = 1;
+    ColumnStructure struct = 2;
+  };
+  // The name assigned by the user (only required with structs)
+  string field_name = 3; 
+};
+
+message ColumnStructure {
+  repeated Column fields = 1;
+};
+
+message ColumnOperation {
+  oneof col_op {
+    ColumnFunction function = 1;
+    ColumnExtraction extraction = 2;
+  }
+};
+
+message ColumnFunction {
+  string function_name = 1;
+  repeated ColumnOperation inputs = 3;
+}
+
+message ColumnExtraction {
+  repeated string path = 1;
+}
+
+message Aggregation {
+  oneof agg_op {
+    AggregationFunction op = 1;
+    AggregationStructure struct = 2;
+  }
+}
+
+message AggregationFunction {
+  string function_name = 1;
+  string field_name = 2;
+  repeated ColumnExtraction inputs = 3;
+}
+
+message AggregationStructure {
+  repeated Aggregation fields = 1;
+}

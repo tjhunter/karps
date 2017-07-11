@@ -9,43 +9,45 @@ import org.apache.spark.sql.catalyst.analysis.FunctionRegistry
 import org.karps.{ColumnWithType, DataFrameWithType, KarpsException$}
 import org.karps.ops.Extraction.{FieldName, FieldPath}
 import org.karps.structures._
-import spray.json.{JsArray, JsObject, JsValue}
+import karps.core.{structured_transform => ST}
+// import spray.json.{JsArray, JsObject, JsValue}
 
 import scala.util.{Failure, Success, Try}
 
 
 // TODO: refactor to use ColumnWithType, it will simplify things.
 object ColumnTransforms extends Logging {
+  import org.karps.structures.ProtoUtils.sequence
 
-  import org.karps.structures.JsonSparkConversions.{getString, get, sequence}
+//   import org.karps.structures.JsonSparkConversions.{getString, get, sequence}
 
-  /**
-   * Starts from an unrectified dataframe represented as a column, and
-   * recursively extracts the requested fields.
-   * @return
-   */
-  def select(adf: DataFrameWithType, js: JsValue): Try[(Seq[Column], AugmentedDataType)] = {
-    def convert(cwt: ColumnWithType): (Seq[Column], AugmentedDataType) = {
-      cwt.rectifiedSchema.topLevelStruct match {
-        case Some(st) =>
-          // Unroll the computations at the top.
-          val cols = st.fieldNames.map(fname => cwt.col.getField(fname).as(fname)).toSeq
-          cols -> cwt.rectifiedSchema
-        case None =>
-          Seq(cwt.col) -> cwt.rectifiedSchema
-      }
-    }
-    val cwt = DataFrameWithType.asTypedColumn(adf)
-    logger.debug(s"select: cwt=$cwt")
-    for {
-        trans <- parseTrans(js)
-        res <- select0(cwt, trans)
-    } yield {
-      logger.debug(s"select: trans = $trans")
-      logger.debug(s"select: res = $res")
-      convert(res)
-    }
-  }
+//   /**
+//    * Starts from an unrectified dataframe represented as a column, and
+//    * recursively extracts the requested fields.
+//    * @return
+//    */
+//   def select(adf: DataFrameWithType, js: JsValue): Try[(Seq[Column], AugmentedDataType)] = {
+//     def convert(cwt: ColumnWithType): (Seq[Column], AugmentedDataType) = {
+//       cwt.rectifiedSchema.topLevelStruct match {
+//         case Some(st) =>
+//           // Unroll the computations at the top.
+//           val cols = st.fieldNames.map(fname => cwt.col.getField(fname).as(fname)).toSeq
+//           cols -> cwt.rectifiedSchema
+//         case None =>
+//           Seq(cwt.col) -> cwt.rectifiedSchema
+//       }
+//     }
+//     val cwt = DataFrameWithType.asTypedColumn(adf)
+//     logger.debug(s"select: cwt=$cwt")
+//     for {
+//         trans <- parseTrans(js)
+//         res <- select0(cwt, trans)
+//     } yield {
+//       logger.debug(s"select: trans = $trans")
+//       logger.debug(s"select: res = $res")
+//       convert(res)
+//     }
+//   }
 
   private sealed trait ColOp
   private case class ColExtraction(path: FieldPath) extends ColOp
@@ -53,69 +55,116 @@ object ColumnTransforms extends Logging {
 
   private case class Field(fieldName: FieldName, fieldTrans: StructuredTransform)
 
-  private sealed trait StructuredTransform
-  private case class InnerOp(op: ColOp) extends StructuredTransform
-  private case class InnerStruct(fields: Seq[Field]) extends StructuredTransform
-
-  private def parseTrans(js: JsValue): Try[StructuredTransform] = js match {
-    case JsArray(arr) =>
-      sequence(arr.map(parseField)).map(arr2 => InnerStruct(arr2))
-    case obj: JsObject =>
-      parseOp(obj).map(op => InnerOp(op))
-    case x => Failure(new Exception(s"Expected array or object, got $x"))
+  private sealed trait StructuredTransform {
+    def name: Option[String]
   }
-
-  private def parseOp(js: JsObject): Try[ColOp] = {
-    def opSelect(s: String) = s match {
-      case "extraction" =>
+  private case class InnerOp(op: ColOp, name: Option[String]) extends StructuredTransform
+  private case class InnerStruct(fields: Seq[Field], name: Option[String]) extends StructuredTransform
+  
+  private def fromProto(t: ST.Column): Try[StructuredTransform] = {
+    val fname = Option(t.fieldName)
+    t.content match {
+      case ST.Column.Content.Op(op) =>
+        fromProto(op).map(co => InnerOp(co, fname))
+      case ST.Column.Content.Struct(ST.ColumnStructure(fields)) =>
+        val fst = sequence(fields.map(fromProto))
         for {
-          p <- JsonSparkConversions.getFlatten(js.fields, "field")(Extraction.getFieldPath)
+          fs <- fst
+          fieldNames <- checkFieldNames(fs.map(_.name))
         } yield {
-          ColExtraction(p)
+          val fs2 = fs.zip(fieldNames).map { case (f, fn) => Field(fn, f) }
+          InnerStruct(fs2, fname)
         }
-      case "fun" =>
-        // It is a function
-        for {
-          fname <- JsonSparkConversions.getString(js.fields, "function")
-          p <- JsonSparkConversions.getFlatten(js.fields, "args")(parseFunArgs)
-        } yield {
-          ColFunction(fname, p)
-        }
-      case s: String =>
-        Failure(new Exception(s"Cannot understand op '$s' in $js"))
+      case ST.Column.Content.Empty =>
+        Failure(new Exception(s"Missing content"))
     }
-
-    for {
-      op <- getString(js.fields, "colOp")
-      z <- opSelect(op)
-    } yield z
   }
-
-  private def parseOp(js: JsValue): Try[ColOp] = js match {
-    case o: JsObject => parseOp(o)
-    case _ =>
-      Failure(new Exception(s"Expected object, got $js"))
+  
+  private def checkFieldNames(s: Seq[Option[String]]): Try[Seq[FieldName]] = {
+    sequence(s.map {
+      case None => Failure(new Exception("Missing name"))
+      case Some(s) => Success(FieldName(s))
+    })
   }
-
-  private def parseFunArgs(js: JsValue): Try[Seq[ColOp]] = js match {
-    case JsArray(arr) =>
-      JsonSparkConversions.sequence(arr.map(parseOp))
-    case _ =>
-      Failure(new Exception(s"expected array, got $js"))
+  
+  private def fromProto(t: ST.ColumnOperation): Try[ColOp] = {
+    import ST.ColumnOperation.ColOp
+    t.colOp match {
+      case ColOp.Empty =>
+        Failure(new Exception("missing col_op"))
+      case ColOp.Function(ST.ColumnFunction(fnam, cf)) =>
+        val ops = sequence(cf.map(fromProto))
+        if (fnam == null) {
+          Failure(new Exception(s"Missing name"))
+        } else {
+          ops.map(ops2 => ColFunction(fnam, ops2))
+        }
+      case ColOp.Extraction(ST.ColumnExtraction(path)) =>
+        val fp = FieldPath(path.map(FieldName.apply).toList)
+        Success(ColExtraction(fp))
+    }
   }
+  
 
-  private def parseField(js: JsValue): Try[Field] = js match {
-    case JsObject(m) =>
-      for {
-        fName <- getString(m, "name")
-        op <- get(m, "op")
-        trans <- parseTrans(op)
-      } yield {
-        Field(FieldName(fName), trans)
-      }
-    case _ =>
-      Failure(new Exception(s"expected object, got $js"))
-  }
+//   private def parseTrans(js: JsValue): Try[StructuredTransform] = js match {
+//     case JsArray(arr) =>
+//       sequence(arr.map(parseField)).map(arr2 => InnerStruct(arr2))
+//     case obj: JsObject =>
+//       parseOp(obj).map(op => InnerOp(op))
+//     case x => Failure(new Exception(s"Expected array or object, got $x"))
+//   }
+// 
+//   private def parseOp(js: JsObject): Try[ColOp] = {
+//     def opSelect(s: String) = s match {
+//       case "extraction" =>
+//         for {
+//           p <- JsonSparkConversions.getFlatten(js.fields, "field")(Extraction.getFieldPath)
+//         } yield {
+//           ColExtraction(p)
+//         }
+//       case "fun" =>
+//         // It is a function
+//         for {
+//           fname <- JsonSparkConversions.getString(js.fields, "function")
+//           p <- JsonSparkConversions.getFlatten(js.fields, "args")(parseFunArgs)
+//         } yield {
+//           ColFunction(fname, p)
+//         }
+//       case s: String =>
+//         Failure(new Exception(s"Cannot understand op '$s' in $js"))
+//     }
+// 
+//     for {
+//       op <- getString(js.fields, "colOp")
+//       z <- opSelect(op)
+//     } yield z
+//   }
+// 
+//   private def parseOp(js: JsValue): Try[ColOp] = js match {
+//     case o: JsObject => parseOp(o)
+//     case _ =>
+//       Failure(new Exception(s"Expected object, got $js"))
+//   }
+// 
+//   private def parseFunArgs(js: JsValue): Try[Seq[ColOp]] = js match {
+//     case JsArray(arr) =>
+//       JsonSparkConversions.sequence(arr.map(parseOp))
+//     case _ =>
+//       Failure(new Exception(s"expected array, got $js"))
+//   }
+// 
+//   private def parseField(js: JsValue): Try[Field] = js match {
+//     case JsObject(m) =>
+//       for {
+//         fName <- getString(m, "name")
+//         op <- get(m, "op")
+//         trans <- parseTrans(op)
+//       } yield {
+//         Field(FieldName(fName), trans)
+//       }
+//     case _ =>
+//       Failure(new Exception(s"expected object, got $js"))
+//   }
 
   private def selectOp(op: ColOp, cwt: ColumnWithType): Try[ColumnWithType] = {
     op match {
@@ -142,10 +191,10 @@ object ColumnTransforms extends Logging {
   private def select0(
       cwt: ColumnWithType,
       trans: StructuredTransform): Try[ColumnWithType] = trans match {
-    case InnerOp(colOp) =>
+    case InnerOp(colOp, _) =>
       selectOp(colOp, cwt)
 
-    case InnerStruct(fields) =>
+    case InnerStruct(fields, _) =>
       val fst = sequence(fields.map { f =>
         select0(cwt, f.fieldTrans).map { cwt2 =>
           val c2 = cwt2.col.as(f.fieldName.name)

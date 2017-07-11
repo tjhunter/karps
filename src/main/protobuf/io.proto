@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package karps.core;
+
+import "types.proto";
+
+// The I/O related data structures.
+
+message SourceDescription {
+  string path = 1;
+  string source = 2; // The type of the source
+  SQLType schema = 3; // Missing <-> will be inferred.
+  repeated InputOption options = 4;
+  string stamp = 5; // The expected stamp.
+};
+
+message InputOption {
+  string key = 1;
+  oneof value {
+    int32 int_value = 2;
+    double double_value = 3;
+    string str_value = 4;
+    bool bool_value = 5;
+  };
+}
