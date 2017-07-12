@@ -3,6 +3,8 @@ package org.karps
 import scala.collection.JavaConversions._
 import scala.util.{Failure, Success}
 import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
+import com.trueaccord.scalapb.json.JsonFormat
+
 import org.apache.spark.SparkContext
 // import spray.json.{JsString, JsValue}
 import org.apache.spark.sql._
@@ -11,6 +13,7 @@ import org.apache.spark.sql.types._
 import org.karps.row.{AlgebraicRow, Cell, RowArray, RowCell}
 import org.karps.ops.{ColumnTransforms, GroupedReduction, Readers, TypeConversions}
 import org.karps.structures._
+import karps.core.{row => R}
 
 object UDF {
   /**
@@ -140,24 +143,26 @@ object SparkRegistry extends Logging {
   }
 
   val locLiteral = createTypedBuilder0("org.spark.LocalLiteral") { z =>
-    val typedCell = ???
-//     val typedCell = LocalSparkConversion.deserializeLocal(z) match {
-//       case Success(ct) => ct
-//       case Failure(e) =>
-//         throw new Exception(s"Deserialization failed", e)
-//     }
+    val typedCell = ProtoUtils.fromExtra[R.CellWithType](z)
+        .flatMap(CellWithType.fromProto) match {
+      case Success(ct) => ct
+      case Failure(e) =>
+        throw new Exception(s"Deserialization failed", e)
+    }
     val session = SparkSession.builder().getOrCreate()
     val df = session.createDataFrame(Seq(typedCell.row), typedCell.rowType)
     DataFrameWithType.create(df, typedCell.cellType).get
   }
 
   val dLiteral = createTypedBuilder0("org.spark.DistributedLiteral") { z =>
-    val cellCol = ???
-//     val cellCol = DistributedSparkConversion.deserializeDistributed(z) match {
-//       case Success(cc) => cc
-//       case Failure(e) =>
-//         throw new Exception(s"Deserialization failed", e)
-//     }
+    val cell = ProtoUtils.fromExtra[R.CellWithType](z)
+        .flatMap(CellWithType.fromProto)
+        .flatMap(DistributedSparkConversion.deserializeDistributed)
+    val cellCol = cell match {
+      case Success(cc) => cc
+      case Failure(e) =>
+        throw new Exception(s"Deserialization failed", e)
+    }
     val session = SparkSession.builder().getOrCreate()
     logger.debug(s"constant: data=$cellCol")
     val rows = cellCol.normalizedData.map(AlgebraicRow.toRow)
@@ -214,7 +219,7 @@ object SparkRegistry extends Logging {
 
     override def build(
         parents: Seq[ExecutionOutput],
-        extra: OxExtra,
+        extra: OpExtra,
         session: SparkSession): DataFrameWithType = {
       val (dfwt, cellwt) = parents match {
         case Seq(DisExecutionOutput(x), LocalExecOutput(y)) => x -> y
@@ -259,7 +264,7 @@ object SparkRegistry extends Logging {
 
     override def build(
         parents: Seq[ExecutionOutput],
-        extra: OxExtra,
+        extra: OpExtra,
         session: SparkSession): DataFrameWithType = {
       require(parents.nonEmpty)
       val cellswt = parents.map {
@@ -306,7 +311,7 @@ object SparkRegistry extends Logging {
     override def op = "org.spark.GenericDatasource"
     override def build(
         p: Seq[ExecutionOutput],
-        ex: OxExtra,
+        ex: OpExtra,
         session: SparkSession): DataFrameWithType = {
       require(p.isEmpty, (ex, p))
       val reader = session.read
@@ -364,7 +369,7 @@ object SparkRegistry extends Logging {
 
     override def build(
         parents: Seq[ExecutionOutput],
-        extra: OxExtra, session: SparkSession): DataFrameWithType = {
+        extra: OpExtra, session: SparkSession): DataFrameWithType = {
       logger.debug(s"select: parents=$parents js=$extra")
       // Get the dataframe input:
       val adf = parents match {
@@ -404,12 +409,8 @@ object SparkRegistry extends Logging {
     }
     require(key1f == key2f,
       s"The two dataframe keys are not compatible: $key1f in $df1 ... $key2f in $df2")
-    val joinType = js match {
-      case JsString(s) =>
-        require(List("inner").contains(s), s"Unknown join type: $s")
-        s
-      case _ => throw new Exception(s"Unknown join data type: $js")
-    }
+    val joinType = js.content
+    require(joinType == "inner", s"Unknown join type: $joinType")
 
     val res = df1.join(df2, usingColumns = Seq(key1f.name), joinType = joinType)
     res

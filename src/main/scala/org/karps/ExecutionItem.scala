@@ -2,14 +2,17 @@ package org.karps
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success}
+
+import spray.json.{JsArray, JsNumber, JsObject, JsString, JsValue, RootJsonFormat}
 import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
+
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql._
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
+
 import org.karps.row.Cell
-import org.karps.structures.{CellWithType, UntypedNodeJson}
-import spray.json.{JsArray, JsNumber, JsObject, JsString, JsValue, RootJsonFormat}
+import org.karps.structures._
 
 
 case class RDDId private (repr: Int) extends AnyVal

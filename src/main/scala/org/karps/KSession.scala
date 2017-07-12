@@ -2,13 +2,15 @@ package org.karps
 
 import java.util.concurrent.Executors
 
+import scala.util.control.NonFatal
+import scala.util.{Failure, Success, Try}
+
 import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
 import org.apache.spark.sql.Row
+
 import org.karps.row.AlgebraicRow
 import org.karps.structures._
 
-import scala.util.control.NonFatal
-import scala.util.{Failure, Success, Try}
 
 
 

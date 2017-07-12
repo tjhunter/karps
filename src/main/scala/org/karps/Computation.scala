@@ -3,7 +3,7 @@ package org.karps
 import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
 // import spray.json.DefaultJsonProtocol._
 
-import org.karps.structures.CellWithType
+import org.karps.structures._
 
 /**
  * A computation is a unit of computations (as the name suggests).

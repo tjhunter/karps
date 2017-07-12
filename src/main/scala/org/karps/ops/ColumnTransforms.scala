@@ -9,6 +9,7 @@ import org.apache.spark.sql.catalyst.analysis.FunctionRegistry
 import org.karps.{ColumnWithType, DataFrameWithType, KarpsException$}
 import org.karps.ops.Extraction.{FieldName, FieldPath}
 import org.karps.structures._
+import org.karps.OpExtra
 import karps.core.{structured_transform => ST}
 // import spray.json.{JsArray, JsObject, JsValue}
 
@@ -18,6 +19,31 @@ import scala.util.{Failure, Success, Try}
 // TODO: refactor to use ColumnWithType, it will simplify things.
 object ColumnTransforms extends Logging {
   import org.karps.structures.ProtoUtils.sequence
+  
+  def select(adf: DataFrameWithType, ex: OpExtra): Try[(Seq[Column], AugmentedDataType)] = {
+    def convert(cwt: ColumnWithType): (Seq[Column], AugmentedDataType) = {
+      cwt.rectifiedSchema.topLevelStruct match {
+        case Some(st) =>
+          // Unroll the computations at the top.
+          val cols = st.fieldNames.map(fname => cwt.col.getField(fname).as(fname)).toSeq
+          cols -> cwt.rectifiedSchema
+        case None =>
+          Seq(cwt.col) -> cwt.rectifiedSchema
+      }
+    }
+    val cwt = DataFrameWithType.asTypedColumn(adf)
+    logger.debug(s"select: cwt=$cwt")
+    for {
+        p <- ProtoUtils.fromExtra[ST.Column](ex)
+        trans <- fromProto(p)
+        res <- select0(cwt, trans)
+    } yield {
+      logger.debug(s"select: trans = $trans")
+      logger.debug(s"select: res = $res")
+      convert(res)
+    }
+    
+  }
 
 //   import org.karps.structures.JsonSparkConversions.{getString, get, sequence}
 

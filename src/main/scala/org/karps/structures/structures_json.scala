@@ -2,32 +2,32 @@ package org.karps.structures
 
 import org.apache.spark.sql.Row
 import org.karps._
-import spray.json.DefaultJsonProtocol._
+// import spray.json.DefaultJsonProtocol._
 import spray.json.{DefaultJsonProtocol, JsArray, JsBoolean, JsNull, JsNumber, JsString, JsValue}
 
-case class UntypedNodeJson(
-    locality: String,
-    path: Seq[String],
-    op: String,
-    parents: Seq[Seq[String]],
-    logicalDependencies: Seq[Seq[String]],
-    extra: JsValue,
-    _type: JsValue) {
-  def ppString: String = {
-    val ps = parents.map(p => "\n    - " + Path.create(p)).mkString("")
-    val deps = logicalDependencies.map(p => "\n    - " + Path.create(p)).mkString("")
-    s"""{
-       |  path: $path
-       |  op: $op
-       |  parents:$ps
-       |  dependencies:$deps
-       |  extra:$extra
-       |  (type):${_type}
-       |  (locality): $locality
-       |}
-     """.stripMargin
-  }
-}
+// case class UntypedNodeJson(
+//     locality: String,
+//     path: Seq[String],
+//     op: String,
+//     parents: Seq[Seq[String]],
+//     logicalDependencies: Seq[Seq[String]],
+//     extra: JsValue,
+//     _type: JsValue) {
+//   def ppString: String = {
+//     val ps = parents.map(p => "\n    - " + Path.create(p)).mkString("")
+//     val deps = logicalDependencies.map(p => "\n    - " + Path.create(p)).mkString("")
+//     s"""{
+//        |  path: $path
+//        |  op: $op
+//        |  parents:$ps
+//        |  dependencies:$deps
+//        |  extra:$extra
+//        |  (type):${_type}
+//        |  (locality): $locality
+//        |}
+//      """.stripMargin
+//   }
+// }
 
 case class ComputationResultWithIdJson(
     localPath: Seq[String],
@@ -57,9 +57,9 @@ case class ComputationResultJson(
 
 object ComputationResultJson {
 
-  implicit val computationResultJsonFormatter = jsonFormat4(ComputationResultJson.apply)
-  implicit val formatter1 = jsonFormat3(ComputationResultWithIdJson.apply)
-  implicit val formatter2 = jsonFormat2(BatchComputationResultJson.apply)
+//   implicit val computationResultJsonFormatter = jsonFormat4(ComputationResultJson.apply)
+//   implicit val formatter1 = jsonFormat3(ComputationResultWithIdJson.apply)
+//   implicit val formatter2 = jsonFormat2(BatchComputationResultJson.apply)
 
   val empty = ComputationResultJson(null, None, None, None)
 
@@ -76,6 +76,6 @@ object ComputationResultJson {
 }
 
 
-object UntypedNodeJson2 {
-  def pprint(s: Seq[UntypedNodeJson]): String = s.map(_.ppString).mkString("\n")
-}
+// object UntypedNodeJson2 {
+//   def pprint(s: Seq[UntypedNodeJson]): String = s.map(_.ppString).mkString("\n")
+// }

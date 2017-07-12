@@ -10,6 +10,7 @@ import scala.util.{Failure, Success, Try}
 import karps.core.{io => IO}
 import karps.core.{types => T}
 import org.karps.structures._
+import org.karps.OpExtra
 
 /**
  * Reader objects for Spark.
@@ -38,7 +39,11 @@ object Readers {
 //     }
 //   }
   
-  def buildDF(reader: DataFrameReader, opts: IO.SourceDescription): Try[DataFrame] = {
+  def buildDF(reader: DataFrameReader, ex: OpExtra): Try[DataFrame] = {
+    ProtoUtils.fromExtra[IO.SourceDescription](ex).flatMap(buildDF(reader, _))
+  }
+  
+  private def buildDF(reader: DataFrameReader, opts: IO.SourceDescription): Try[DataFrame] = {
     for {
       inputPath <- checkField(opts.path, "path")
       inputSource <- checkField(opts.source, "source")

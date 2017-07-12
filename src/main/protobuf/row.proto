@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package karps.core;
 
+import "types.proto";
+
 message Cell {
   oneof element {
     int64 int_value = 2;
@@ -20,8 +22,13 @@ message ArrayCell {
 
 message StructCell {
   repeated Cell values = 1;
-}
+};
 
 message Row {
   repeated Cell values = 1;
-}
+};
+
+message CellWithType {
+  Cell cell = 1;
+  SQLType cell_type = 2;
+};

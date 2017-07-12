@@ -13,7 +13,7 @@ import spray.httpx.SprayJsonSupport
 import spray.json.DefaultJsonProtocol
 import spray.routing._
 
-import org.karps.structures.{BatchComputationResultJson, ComputationResultJson, UntypedNodeJson}
+import org.karps.structures._
 import org.karps.ops.{HdfsPath, HdfsResourceResult}
 
 
@@ -59,13 +59,13 @@ class MyServiceActor extends Actor with MyService {
 
 case class Person(name: String, favoriteNumber: Int)
 
-object KarpsServerImplicits extends DefaultJsonProtocol with SprayJsonSupport {
-  implicit val PortofolioFormats = jsonFormat2(Person)
-  implicit val UntypedNodeJsonF = jsonFormat7(UntypedNodeJson)
-  implicit val HdfsResourceResultF = jsonFormat3(HdfsResourceResult)
-}
+// object KarpsServerImplicits extends DefaultJsonProtocol with SprayJsonSupport {
+//   implicit val PortofolioFormats = jsonFormat2(Person)
+//   implicit val UntypedNodeJsonF = jsonFormat7(UntypedNodeJson)
+//   implicit val HdfsResourceResultF = jsonFormat3(HdfsResourceResult)
+// }
 
-import KarpsServerImplicits._
+// import KarpsServerImplicits._
 
 
 
@@ -99,21 +99,13 @@ trait MyService extends HttpService with Logging {
       val sessionId = SessionId(sessionIdTxt)
 
       post {
-        entity(as[Seq[String]]) { paths =>
-          val ps = paths.map(HdfsPath.apply)
+        entity(as[String]) { paths =>
+          val ps = ??? //paths.map(HdfsPath.apply)
           logger.debug(s"Requesting status for paths $ps")
           val s = manager.resourceStatus(sessionId, ps)
           s.foreach(st => logger.debug(s"Status received: $st"))
-          complete(s)
-        }
-      }
-    } ~
-    path("sessions" / Segment ) { sessionIdTxt => // TOOD: that one is useless
-      val sessionId = SessionId(sessionIdTxt)
-
-      get {
-        complete {
-          Person(sessionIdTxt, 32)
+          val x = ???
+          complete(x)
         }
       }
     } ~
@@ -122,9 +114,9 @@ trait MyService extends HttpService with Logging {
       val computationId = ComputationId(computationIdTxt)
 
       post {
-        entity(as[Seq[UntypedNodeJson]]) { nodes =>
-          manager.execute(sessionId, computationId, nodes)
-          complete(nodes.size.toString)
+        entity(as[String]) { nodes =>
+          manager.execute(sessionId, computationId, ???)
+          complete(???)
         }
       }
     } ~
@@ -140,6 +132,7 @@ trait MyService extends HttpService with Logging {
               throw new Exception(s"$sessionId $computationId"))
             import ComputationResultJson._
             BatchComputationResultJson.fromResult(s)
+            ???
           }
         }
       } else {
@@ -151,6 +144,7 @@ trait MyService extends HttpService with Logging {
           complete {
             val s = manager.status(gp).getOrElse(throw new Exception(gp.toString))
             ComputationResultJson.fromResult(s)
+            ???
           }
         }
       }

@@ -19,7 +19,8 @@ import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
 import org.apache.spark.sql.types._
 
 import karps.core.{types => T}
-import org.karps.row.{AlgebraicRow, Cell, RowCell}
+import karps.core.{row => R}
+import org.karps.row.{AlgebraicRow, Cell, RowCell, RowArray}
 import org.karps.KarpsException
 import org.karps.structures.ProtoUtils._
 
@@ -287,6 +288,17 @@ object CellWithType {
     }
     for (cell <- ct) yield { CellWithType(cell, dt) }
   }
+  
+  def fromProto(p: R.CellWithType): Try[CellWithType] = {
+    for {
+      pc <- checkField(p.cell, "cell")
+      pt <- checkField(p.cellType, "cell_type")
+      t <- AugmentedDataType.fromProto(pt)
+    } yield {
+      val c = Cell.fromProto(pc)
+      CellWithType(c, t)
+    }
+  }
 
 
 
@@ -477,6 +489,16 @@ object DistributedSparkConversion {
 
 //   import JsonSparkConversions.{get, sequence}
   import LocalSparkConversion.normalizeDataType
+  
+  // Takes a cell with a type and attempts to convert it to a cell collection.
+  def deserializeDistributed(cwt: CellWithType): Try[CellCollection] = {
+    (cwt.cellData, cwt.cellType) match {
+      case (RowArray(seq), AugmentedDataType(ArrayType(inner, nl2), nl)) =>
+        ???
+//         val normed = seq.map
+      case x => Failure(new Exception(s"Expected array, got $x"))
+    }
+  }
 
 //   /**
 //    * Deserializes, with a normalization process to try to
