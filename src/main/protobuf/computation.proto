@@ -12,18 +12,20 @@ enum ResultStatus {
   FINISHED_FAILURE = 3;
 };
 
-message Result {
-  ResultStatus status = 1;
-  string final_error = 2;
-  Cell final_result = 3;
-  SparkStats spark_stats = 4;
-};
-
-
 message ComputationResult {
   Path local_path = 1;
-  Result result = 2;
+  ResultStatus status = 2;
+  string final_error = 3;
+  CellWithType final_result = 4;
+  SparkStats spark_stats = 5;
+  repeated Path dependencies = 6;
 };
+
+
+message BatchComputationResult {
+  Path target_path = 1;
+  repeated ComputationResult results = 2;
+}
 
 message PointerPath {
   ComputationId computation = 1;

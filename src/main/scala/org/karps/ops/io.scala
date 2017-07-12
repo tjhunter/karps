@@ -10,7 +10,6 @@ import scala.util.{Failure, Success, Try}
 import karps.core.{io => IO}
 import karps.core.{types => T}
 import org.karps.structures._
-import org.karps.OpExtra
 
 /**
  * Reader objects for Spark.

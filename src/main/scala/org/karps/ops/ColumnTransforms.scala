@@ -9,7 +9,6 @@ import org.apache.spark.sql.catalyst.analysis.FunctionRegistry
 import org.karps.{ColumnWithType, DataFrameWithType, KarpsException$}
 import org.karps.ops.Extraction.{FieldName, FieldPath}
 import org.karps.structures._
-import org.karps.OpExtra
 import karps.core.{structured_transform => ST}
 // import spray.json.{JsArray, JsObject, JsValue}
 

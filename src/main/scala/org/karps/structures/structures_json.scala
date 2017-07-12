@@ -34,20 +34,20 @@ case class ComputationResultWithIdJson(
     pathDependencies: Seq[Seq[String]],
     result: ComputationResultJson) extends Serializable
 
-case class BatchComputationResultJson(
-    targetLocalPath: Seq[String], // The target node
-    results: List[ComputationResultWithIdJson])
-
-object BatchComputationResultJson {
-   def fromResult(status: BatchComputationResult): BatchComputationResultJson = {
-     val res = status.results.map { case (k, deps, s) =>
-       ComputationResultWithIdJson(
-         k.local.repr,
-         deps.map(_.local.repr),
-         ComputationResultJson.fromResult(s))}
-     BatchComputationResultJson(status.target.local.repr, res.toList)
-   }
-}
+// case class BatchComputationResultJson(
+//     targetLocalPath: Seq[String], // The target node
+//     results: List[ComputationResultWithIdJson])
+// 
+// object BatchComputationResultJson {
+//    def fromResult(status: BatchComputationResult): BatchComputationResultJson = {
+//      val res = status.results.map { case (k, deps, s) =>
+//        ComputationResultWithIdJson(
+//          k.local.repr,
+//          deps.map(_.local.repr),
+//          ComputationResultJson.fromResult(s))}
+//      BatchComputationResultJson(status.target.local.repr, res.toList)
+//    }
+// }
 
 case class ComputationResultJson(
     status: String, // scheduled, running, finished_success, finished_failure

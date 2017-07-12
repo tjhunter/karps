@@ -7,6 +7,7 @@ import akka.io.IO
 import akka.pattern.ask
 import akka.util.Timeout
 import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
+import com.trueaccord.scalapb.json.JsonFormat
 import spray.can.Http
 import spray.http.MediaTypes._
 import spray.httpx.SprayJsonSupport
@@ -130,9 +131,8 @@ trait MyService extends HttpService with Logging {
           complete {
             val s = manager.statusComputation(sessionId, computationId).getOrElse(
               throw new Exception(s"$sessionId $computationId"))
-            import ComputationResultJson._
-            BatchComputationResultJson.fromResult(s)
-            ???
+            val proto = BatchComputationResult.toProto(s)
+            JsonFormat.toJsonString(proto)
           }
         }
       } else {
@@ -143,8 +143,8 @@ trait MyService extends HttpService with Logging {
         get {
           complete {
             val s = manager.status(gp).getOrElse(throw new Exception(gp.toString))
-            ComputationResultJson.fromResult(s)
-            ???
+            val proto = ComputationResult.toProto(s, gp, Nil)
+            JsonFormat.toJsonString(proto)
           }
         }
       }

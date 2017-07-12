@@ -5,8 +5,6 @@ import scala.util.{Failure, Success, Try}
 import com.trueaccord.scalapb.{GeneratedMessage, Message, GeneratedMessageCompanion}
 import com.trueaccord.scalapb.json._
 
-import org.karps.OpExtra
-
 object ProtoUtils {
   def checkField[X](x: X, fieldName: String): Try[X] = {
     if (x == null) {

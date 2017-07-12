@@ -9,10 +9,10 @@ import com.trueaccord.scalapb.json.JsonFormat
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.RelationalGroupedDataset
 
-import org.karps.{ColumnWithType, DataFrameWithType, OpExtra}
+import org.karps.{ColumnWithType, DataFrameWithType}
 import org.karps.ops.Extraction.{FieldName, FieldPath}
 import org.karps.ops.SQLFunctionsExtraction.SQLFunctionName
-import org.karps.structures.{AugmentedDataType, IsStrict}
+import org.karps.structures.{AugmentedDataType, IsStrict, OpExtra}
 import karps.core.{structured_transform => ST}
 
 object GroupedReduction extends Logging {

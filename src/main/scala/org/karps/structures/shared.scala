@@ -31,6 +31,8 @@ object Path {
   def fromProto(p: G.Path): Path = {
     Path.create(p.path)
   }
+  
+  def toProto(p: Path): G.Path = G.Path(path=p.repr)
 }
 
 /**

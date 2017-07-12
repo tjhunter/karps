@@ -117,6 +117,8 @@ object AugmentedDataType {
     AugmentedDataType(f.dataType, nl)
   }
   
+  def toProto(adt: AugmentedDataType): T.SQLType = ???
+  
   def fromProto(t: T.SQLType): Try[AugmentedDataType] = {
     val nl = checkField(t.nullable, "nullable")
     val strict = t.strictType match {
@@ -298,6 +300,13 @@ object CellWithType {
       val c = Cell.fromProto(pc)
       CellWithType(c, t)
     }
+  }
+  
+  def toProto(p: CellWithType): R.CellWithType = {
+    R.CellWithType(
+      cell = Some(Cell.toProto(p.cellData)),
+      cellType = Some(AugmentedDataType.toProto(p.cellType))
+    )
   }
 
 
