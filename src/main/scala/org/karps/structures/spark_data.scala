@@ -117,7 +117,29 @@ object AugmentedDataType {
     AugmentedDataType(f.dataType, nl)
   }
   
-  def toProto(adt: AugmentedDataType): T.SQLType = ???
+  def toProto(adt: AugmentedDataType): T.SQLType = {
+    import T.SQLType.StrictType
+    import T.SQLType.BasicType._
+    
+    val strict: StrictType = adt.dataType match {
+      case _: IntegerType => StrictType.BasicType(INT)
+      case _: DoubleType => StrictType.BasicType(DOUBLE)
+      case _: StringType => StrictType.BasicType(STRING)
+      case _: BooleanType => StrictType.BasicType(BOOL)
+      case x: ArrayType =>
+        val sub = AugmentedDataType(x.elementType, Nullable.fromNullability(x.containsNull))
+        val sub2 = toProto(sub)
+        StrictType.ArrayType(sub2)
+      case st: StructType =>
+        val fs = st.fields.map { f =>
+          val sub = AugmentedDataType(f.dataType, Nullable.fromNullability(f.nullable))
+          val sub2 = toProto(sub)
+          T.StructField().withFieldName(f.name).withFieldType(sub2)
+        }
+        StrictType.StructType(T.StructType(fs))
+    }
+    T.SQLType(strictType=strict, nullable=adt.isNullable)
+  }
   
   def fromProto(t: T.SQLType): Try[AugmentedDataType] = {
     val nl = checkField(t.nullable, "nullable")
@@ -502,8 +524,11 @@ object DistributedSparkConversion {
   // Takes a cell with a type and attempts to convert it to a cell collection.
   def deserializeDistributed(cwt: CellWithType): Try[CellCollection] = {
     (cwt.cellData, cwt.cellType) match {
-      case (RowArray(seq), AugmentedDataType(ArrayType(inner, nl2), nl)) =>
-        ???
+      case (RowArray(seq), AugmentedDataType(ArrayType(inner, nl2), nl)) if nl == IsStrict =>
+        val rows = seq.map(normalizeCell)
+        val adt = AugmentedDataType(inner, Nullable.fromNullability(nl2))
+        val st = LocalSparkConversion.normalizeDataTypeIfNeeded(adt)
+        Success(CellCollection(adt, st, rows))
 //         val normed = seq.map
       case x => Failure(new Exception(s"Expected array, got $x"))
     }

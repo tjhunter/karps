@@ -1,7 +1,6 @@
 package org.karps.row
 
 import scala.util.{Failure, Success, Try}
-// import spray.json.{DefaultJsonProtocol, JsArray, JsBoolean, JsNull, JsNumber, JsObject, JsString, JsValue, RootJsonFormat}
 
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.types._

@@ -1,5 +1,7 @@
 package org.karps.structures
 
+import scala.util.{Failure, Success, Try}
+
 import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
 // import spray.json.DefaultJsonProtocol._
 
@@ -13,6 +15,14 @@ import karps.core.{computation => C}
  * @param id
  */
 case class SessionId(id: String) extends AnyVal
+
+object SessionId {
+  def fromProto(p: C.SessionId): Try[SessionId] = {
+    if (p.id == null) {
+      Failure(new Exception("Empty session id"))
+    } else { Success(SessionId(p.id)) }
+  }
+}
 
 /**
  * The local path in a computation. Does not include the session or the computation.
@@ -76,3 +86,11 @@ object GlobalPath {
 sealed trait Locality
 case object Distributed extends Locality
 case object Local extends Locality
+
+object Locality {
+  def fromProto(l: G.Locality): Try[Locality] = l match {
+    case G.Locality.LOCAL => Success(Local)
+    case G.Locality.DISTRIBUTED => Success(Distributed)
+    case G.Locality.Unrecognized(x) => Failure(new Exception(s"Unknown locality: $x"))
+  }
+}

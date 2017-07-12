@@ -3,7 +3,7 @@ package org.karps.structures
 import org.apache.spark.sql.Row
 import org.karps._
 // import spray.json.DefaultJsonProtocol._
-import spray.json.{DefaultJsonProtocol, JsArray, JsBoolean, JsNull, JsNumber, JsString, JsValue}
+// import spray.json.{DefaultJsonProtocol, JsArray, JsBoolean, JsNull, JsNumber, JsString, JsValue}
 
 // case class UntypedNodeJson(
 //     locality: String,
@@ -29,10 +29,10 @@ import spray.json.{DefaultJsonProtocol, JsArray, JsBoolean, JsNull, JsNumber, Js
 //   }
 // }
 
-case class ComputationResultWithIdJson(
-    localPath: Seq[String],
-    pathDependencies: Seq[Seq[String]],
-    result: ComputationResultJson) extends Serializable
+// case class ComputationResultWithIdJson(
+//     localPath: Seq[String],
+//     pathDependencies: Seq[Seq[String]],
+//     result: ComputationResultJson) extends Serializable
 
 // case class BatchComputationResultJson(
 //     targetLocalPath: Seq[String], // The target node
@@ -49,31 +49,31 @@ case class ComputationResultWithIdJson(
 //    }
 // }
 
-case class ComputationResultJson(
-    status: String, // scheduled, running, finished_success, finished_failure
-    finalError: Option[String], // TODO: better formatting
-    finalResult: Option[CellWithType],
-    stats: Option[SparkComputationStats]) extends Serializable
-
-object ComputationResultJson {
-
-//   implicit val computationResultJsonFormatter = jsonFormat4(ComputationResultJson.apply)
-//   implicit val formatter1 = jsonFormat3(ComputationResultWithIdJson.apply)
-//   implicit val formatter2 = jsonFormat2(BatchComputationResultJson.apply)
-
-  val empty = ComputationResultJson(null, None, None, None)
-
-  def fromResult(status: ComputationResult): ComputationResultJson = status match {
-    case ComputationScheduled =>
-      empty.copy(status="scheduled")
-    case ComputationRunning(stats) =>
-      empty.copy(status="running", stats=stats)
-    case ComputationDone(cwt, stats) =>
-      empty.copy(status="finished_success", finalResult = cwt, stats=stats)
-    case ComputationFailed(e) =>
-      empty.copy(status="finished_failure", finalError = Some(e.getLocalizedMessage))
-  }
-}
+// case class ComputationResultJson(
+//     status: String, // scheduled, running, finished_success, finished_failure
+//     finalError: Option[String], // TODO: better formatting
+//     finalResult: Option[CellWithType],
+//     stats: Option[SparkComputationStats]) extends Serializable
+// 
+// object ComputationResultJson {
+// 
+// //   implicit val computationResultJsonFormatter = jsonFormat4(ComputationResultJson.apply)
+// //   implicit val formatter1 = jsonFormat3(ComputationResultWithIdJson.apply)
+// //   implicit val formatter2 = jsonFormat2(BatchComputationResultJson.apply)
+// 
+//   val empty = ComputationResultJson(null, None, None, None)
+// 
+//   def fromResult(status: ComputationResult): ComputationResultJson = status match {
+//     case ComputationScheduled =>
+//       empty.copy(status="scheduled")
+//     case ComputationRunning(stats) =>
+//       empty.copy(status="running", stats=stats)
+//     case ComputationDone(cwt, stats) =>
+//       empty.copy(status="finished_success", finalResult = cwt, stats=stats)
+//     case ComputationFailed(e) =>
+//       empty.copy(status="finished_failure", finalError = Some(e.getLocalizedMessage))
+//   }
+// }
 
 
 // object UntypedNodeJson2 {

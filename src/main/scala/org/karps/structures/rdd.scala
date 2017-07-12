@@ -36,4 +36,13 @@ object RDDInfo {
       rdd.toString(),
       parents)
   }
+  
+  def toProto(r: RDDInfo): C.RDDInfo = {
+    C.RDDInfo(
+      rddId = r.id.repr,
+      className = r.className,
+      repr = r.repr,
+      parents = r.parents.map(_.repr.toLong)
+    )
+  }
 }

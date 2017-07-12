@@ -2,8 +2,6 @@ package org.karps.row
 
 import scala.util.{Failure, Success, Try}
 
-// import spray.json.{JsArray, JsBoolean, JsNull, JsNumber, JsObject, JsString, JsValue, RootJsonFormat, RootJsonWriter}
-
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.types._
 
@@ -23,22 +21,13 @@ case class RowCell(r: AlgebraicRow) extends Cell
 
 
 object Cell {
-//   import org.karps.structures.JsonSparkConversions.{sequence, get}
   import org.karps.structures.ProtoUtils.sequence
 
-//   def fromJson(js: JsValue, adt: AugmentedDataType): Try[Cell] = {
-//     if (adt.nullability == IsNullable) {
-//       deserializeCompactOption(adt.dataType, js)
-//     } else {
-//       deserializeCompact0(adt.dataType, js)
-//     }
-//   }
   
   def fromProto(c: R.Cell): Cell = c.element match {
     case R.Cell.Element.Empty => Empty
     case R.Cell.Element.IntValue(i) => IntElement(i.toInt)
     case R.Cell.Element.StringValue(i) => StringElement(i)
-    case R.Cell.Element.FloatValue(i) => ???
     case R.Cell.Element.DoubleValue(i) => DoubleElement(i)
     case R.Cell.Element.BoolValue(i) => BoolElement(i)
     case R.Cell.Element.ArrayValue(R.ArrayCell(i)) =>
@@ -64,23 +53,6 @@ object Cell {
   object CellOrdering extends Ordering[Cell] {
     override def compare(x: Cell, y: Cell): Int = compareCells(x, y)
   }
-
-//   implicit object CellJsonFormat extends RootJsonWriter[Cell] {
-//     override def write(c: Cell) = toJson(c)
-//   }
-// 
-//   def toJson(c: Cell): JsValue = c match {
-//     case Empty => JsNull
-//     case IntElement(i) => JsNumber(i)
-//     case DoubleElement(i) => JsNumber(i)
-//     case StringElement(s) => JsString(s)
-//     case RowArray(s) => JsArray(s.map(toJson):_*)
-//     // The structure maximizes the compactness, at the expense of requiring a
-//     // schema to read the output.
-//     // This is a tradeoff made to support protobuf in the future.
-//     case RowCell(AlgebraicRow(s)) => JsArray(s.map(toJson):_*)
-//     case BoolElement(b) => JsBoolean(b)
-//   }
 
 
   private def cellsOrdering = Ordering.Iterable[Cell](CellOrdering)
@@ -113,62 +85,6 @@ object Cell {
     case (Empty, Empty) => 0
   }
 
-//   private def deserializeCompactOption(
-//       dt: DataType,
-//       data: JsValue): Try[Cell] = {
-//     if (data == JsNull) {
-//       Success(Empty)
-//     } else {
-//       deserializeCompact0(dt, data)
-//     }
-//   }
-// 
-//   private def deserializeCompact0(dt: DataType, data: JsValue): Try[Cell] = {
-//     (dt, data) match {
-//       case (_: IntegerType, JsNumber(n)) => Success(IntElement(n.toInt))
-//       case (_: DoubleType, JsNumber(n)) => Success(DoubleElement(n.toDouble))
-//       case (_: StringType, JsString(s)) => Success(StringElement(s))
-//       case (at: ArrayType, JsArray(arr)) =>
-//         if (at.containsNull) {
-//           val s = arr.map(e => deserializeCompactOption(at.elementType, e))
-//           sequence(s).map(RowArray.apply)
-//         } else {
-//           sequence(arr.map(e => deserializeCompact0(at.elementType, e)))
-//             .map(RowArray.apply)
-//         }
-// 
-//       case (st: StructType, JsArray(arr)) =>
-//         if (st.fields.size != arr.size) {
-//           Failure(new Exception(s"Different sizes: $st, $arr"))
-//         } else {
-//           val fields = st.fields.zip(arr).map { case (f, e) =>
-//             if (f.nullable) {
-//               deserializeCompactOption(f.dataType, e)
-//             } else {
-//               deserializeCompact0(f.dataType, e)
-//             }
-//           }
-//           sequence(fields).map(seq => RowCell(AlgebraicRow(seq)))
-//         }
-// 
-//       case (st: StructType, obj: JsObject) => deserializeObject(st, obj)
-// 
-//       case _ => Failure(new Exception(s"Cannot interpret data type $dt with $data"))
-//     }
-//   }
-// 
-//   // Some special case to allow more flexible input.
-//   private def deserializeObject(st: StructType, js: JsObject): Try[Cell] = {
-//     sequence(st.fields.map { f =>
-//       val fun = if (f.nullable) {deserializeCompactOption _ } else { deserializeCompact0 _ }
-//       for {
-//         x <- get(js.fields, f.name)
-//         y <- fun(f.dataType, x)
-//       } yield {
-//         y
-//       }
-//     }).map(s => RowCell(AlgebraicRow(s)))
-//   }
 
   def toAny(c: Cell): Any = c match {
     case Empty => null

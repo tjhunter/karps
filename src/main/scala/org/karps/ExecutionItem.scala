@@ -3,7 +3,6 @@ package org.karps
 import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success}
 
-import spray.json.{JsArray, JsNumber, JsObject, JsString, JsValue, RootJsonFormat}
 import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
 
 import org.apache.spark.rdd.RDD
@@ -131,6 +130,4 @@ object ExecutionItem extends Logging {
     }
     m
   }
-
-
 }

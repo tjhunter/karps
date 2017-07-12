@@ -1,18 +1,20 @@
 package org.karps.ops
 
 
+import scala.util.{Failure, Success, Try}
+
 import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
+
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.{Column, DataFrame, KarpsStubs}
 import org.apache.spark.sql.catalyst.analysis.FunctionRegistry
+
 import org.karps.{ColumnWithType, DataFrameWithType, KarpsException$}
 import org.karps.ops.Extraction.{FieldName, FieldPath}
 import org.karps.structures._
 import karps.core.{structured_transform => ST}
-// import spray.json.{JsArray, JsObject, JsValue}
 
-import scala.util.{Failure, Success, Try}
 
 
 // TODO: refactor to use ColumnWithType, it will simplify things.
@@ -43,36 +45,6 @@ object ColumnTransforms extends Logging {
     }
     
   }
-
-//   import org.karps.structures.JsonSparkConversions.{getString, get, sequence}
-
-//   /**
-//    * Starts from an unrectified dataframe represented as a column, and
-//    * recursively extracts the requested fields.
-//    * @return
-//    */
-//   def select(adf: DataFrameWithType, js: JsValue): Try[(Seq[Column], AugmentedDataType)] = {
-//     def convert(cwt: ColumnWithType): (Seq[Column], AugmentedDataType) = {
-//       cwt.rectifiedSchema.topLevelStruct match {
-//         case Some(st) =>
-//           // Unroll the computations at the top.
-//           val cols = st.fieldNames.map(fname => cwt.col.getField(fname).as(fname)).toSeq
-//           cols -> cwt.rectifiedSchema
-//         case None =>
-//           Seq(cwt.col) -> cwt.rectifiedSchema
-//       }
-//     }
-//     val cwt = DataFrameWithType.asTypedColumn(adf)
-//     logger.debug(s"select: cwt=$cwt")
-//     for {
-//         trans <- parseTrans(js)
-//         res <- select0(cwt, trans)
-//     } yield {
-//       logger.debug(s"select: trans = $trans")
-//       logger.debug(s"select: res = $res")
-//       convert(res)
-//     }
-//   }
 
   private sealed trait ColOp
   private case class ColExtraction(path: FieldPath) extends ColOp
@@ -129,67 +101,6 @@ object ColumnTransforms extends Logging {
         Success(ColExtraction(fp))
     }
   }
-  
-
-//   private def parseTrans(js: JsValue): Try[StructuredTransform] = js match {
-//     case JsArray(arr) =>
-//       sequence(arr.map(parseField)).map(arr2 => InnerStruct(arr2))
-//     case obj: JsObject =>
-//       parseOp(obj).map(op => InnerOp(op))
-//     case x => Failure(new Exception(s"Expected array or object, got $x"))
-//   }
-// 
-//   private def parseOp(js: JsObject): Try[ColOp] = {
-//     def opSelect(s: String) = s match {
-//       case "extraction" =>
-//         for {
-//           p <- JsonSparkConversions.getFlatten(js.fields, "field")(Extraction.getFieldPath)
-//         } yield {
-//           ColExtraction(p)
-//         }
-//       case "fun" =>
-//         // It is a function
-//         for {
-//           fname <- JsonSparkConversions.getString(js.fields, "function")
-//           p <- JsonSparkConversions.getFlatten(js.fields, "args")(parseFunArgs)
-//         } yield {
-//           ColFunction(fname, p)
-//         }
-//       case s: String =>
-//         Failure(new Exception(s"Cannot understand op '$s' in $js"))
-//     }
-// 
-//     for {
-//       op <- getString(js.fields, "colOp")
-//       z <- opSelect(op)
-//     } yield z
-//   }
-// 
-//   private def parseOp(js: JsValue): Try[ColOp] = js match {
-//     case o: JsObject => parseOp(o)
-//     case _ =>
-//       Failure(new Exception(s"Expected object, got $js"))
-//   }
-// 
-//   private def parseFunArgs(js: JsValue): Try[Seq[ColOp]] = js match {
-//     case JsArray(arr) =>
-//       JsonSparkConversions.sequence(arr.map(parseOp))
-//     case _ =>
-//       Failure(new Exception(s"expected array, got $js"))
-//   }
-// 
-//   private def parseField(js: JsValue): Try[Field] = js match {
-//     case JsObject(m) =>
-//       for {
-//         fName <- getString(m, "name")
-//         op <- get(m, "op")
-//         trans <- parseTrans(op)
-//       } yield {
-//         Field(FieldName(fName), trans)
-//       }
-//     case _ =>
-//       Failure(new Exception(s"expected object, got $js"))
-//   }
 
   private def selectOp(op: ColOp, cwt: ColumnWithType): Try[ColumnWithType] = {
     op match {

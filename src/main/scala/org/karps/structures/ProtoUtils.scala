@@ -38,4 +38,9 @@ object ProtoUtils {
 implicit cmp: GeneratedMessageCompanion[A]): Try[A] = {
     Try(JsonFormat.fromJsonString[A](extra.content))
   }
+  
+   def fromString[A <: GeneratedMessage with Message[A]](extra: String)(
+implicit cmp: GeneratedMessageCompanion[A]): Try[A] = {
+    Try(JsonFormat.fromJsonString[A](extra))
+  }
 }

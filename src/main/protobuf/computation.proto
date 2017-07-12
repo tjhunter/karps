@@ -35,7 +35,7 @@ message PointerPath {
 // ---------- Spark statistics ----------
 
 message SparkStats {
-  RDDInfo rdd_info = 1;
+  repeated RDDInfo rdd_info = 1;
 };
 
 message RDDInfo {

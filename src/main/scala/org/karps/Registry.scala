@@ -4,7 +4,6 @@ import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
 
 import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
-// import spray.json.{JsObject, JsValue}
 import com.trueaccord.scalapb.json.JsonFormat
 
 import org.apache.spark.sql.functions._
@@ -280,18 +279,6 @@ class Registry extends Logging {
 }
 
 object Registry {
-//   import JsonSparkConversions._
-
-//   def extractPointerPath(sid: SessionId, js: OpExtra): Try[GlobalPath] = js match {
-//     case JsObject(m) =>
-//       for {
-//         p <- getStringList(m, "path")
-//         comp <- getString(m, "computation")
-//       } yield {
-//         GlobalPath.from(sid, ComputationId(comp), Path.create(p))
-//       }
-//     case _ => Failure(new Exception(s"Expected object, got $js"))
-//   }
   
   def extractPointerPath(sid: SessionId, js: OpExtra): Try[GlobalPath] = {
     // TODO: could be more robust here

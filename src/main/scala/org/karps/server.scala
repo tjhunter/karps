@@ -16,7 +16,7 @@ import spray.routing._
 
 import org.karps.structures._
 import org.karps.ops.{HdfsPath, HdfsResourceResult}
-
+import karps.core.{interface => I}
 
 object Boot extends App {
 
@@ -60,15 +60,6 @@ class MyServiceActor extends Actor with MyService {
 
 case class Person(name: String, favoriteNumber: Int)
 
-// object KarpsServerImplicits extends DefaultJsonProtocol with SprayJsonSupport {
-//   implicit val PortofolioFormats = jsonFormat2(Person)
-//   implicit val UntypedNodeJsonF = jsonFormat7(UntypedNodeJson)
-//   implicit val HdfsResourceResultF = jsonFormat3(HdfsResourceResult)
-// }
-
-// import KarpsServerImplicits._
-
-
 
 // this trait defines our service behavior independently from the service actor
 trait MyService extends HttpService with Logging {
@@ -100,13 +91,17 @@ trait MyService extends HttpService with Logging {
       val sessionId = SessionId(sessionIdTxt)
 
       post {
-        entity(as[String]) { paths =>
-          val ps = ??? //paths.map(HdfsPath.apply)
-          logger.debug(s"Requesting status for paths $ps")
+        entity(as[String]) { req =>
+          val proto = ProtoUtils.fromString[I.ResourceStatusRequest](req).get
+          logger.debug(s"Requesting status for paths $proto")
+          val ps = proto.resources.map(_.uri).map(HdfsPath.apply)
+          val sessionId = SessionId.fromProto(proto.session.get).get
+          
           val s = manager.resourceStatus(sessionId, ps)
           s.foreach(st => logger.debug(s"Status received: $st"))
-          val x = ???
-          complete(x)
+          val res = I.ResourceStatusResponse(hdfs=s.map(HdfsResourceResult.toProto))
+          val json = JsonFormat.toJsonString(res)
+          complete(json)
         }
       }
     } ~
@@ -115,9 +110,19 @@ trait MyService extends HttpService with Logging {
       val computationId = ComputationId(computationIdTxt)
 
       post {
-        entity(as[String]) { nodes =>
-          manager.execute(sessionId, computationId, ???)
-          complete(???)
+        entity(as[String]) { jsonIn =>
+          val protoIn = ProtoUtils.fromString[I.CreateComputationRequest](jsonIn).get
+          val sessionId = SessionId.fromProto(protoIn.session.get).get
+          val computationId =
+            ComputationId.fromProto(protoIn.requestedComputation.get)
+          val nodes =
+            protoIn.graph.get.nodes
+              .map(UntypedNode.fromProto).map(_.get)
+          
+          manager.execute(sessionId, computationId, nodes)
+          val protoOut = I.CreateComputationResponse()
+          val jsonOut = JsonFormat.toJsonString(protoOut)
+          complete(jsonOut)
         }
       }
     } ~

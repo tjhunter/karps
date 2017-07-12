@@ -3,7 +3,6 @@ package org.karps.ops
 import scala.util.{Failure, Try, Success}
 
 import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
-// import spray.json.{JsArray, JsObject, JsValue}
 import com.trueaccord.scalapb.json.JsonFormat
 
 import org.apache.spark.sql.types._
@@ -17,7 +16,6 @@ import karps.core.{structured_transform => ST}
 
 object GroupedReduction extends Logging {
   import org.karps.structures.ProtoUtils.sequence
-//   import org.karps.structures.JsonSparkConversions.{getString, get, sequence}
 
   def groupReduceOrThrow(adf: DataFrameWithType, js: OpExtra): DataFrameWithType =
     groupReduce(adf, js).get
@@ -114,44 +112,6 @@ object GroupedReduction extends Logging {
         
     }
   }
-  
-//   private def parseTrans(js: JsValue): Try[AggOp] = {
-//     js match {
-//       case JsArray(arr) =>
-//         sequence(arr.map(parseField)).map(AggStruct.apply)
-//       case JsObject(m) => parseOp(m)
-//       case x => Failure(new Exception(s"parseTrans: unexpected object $x"))
-//     }
-//   }
-// 
-//   private def parseOp(m: Map[String, JsValue]): Try[AggOp] = {
-//     def opSelect(s: String) = s match {
-//       case "function" =>
-//         for {
-//           l <- JsonSparkConversions.getFlattenSeq(m, "fields")(Extraction.getFieldPath)
-//           n <- getString(m, "functionName")
-//         } yield AggFunction(n, l)
-//       case n =>
-//         Failure(new Exception(s"Operation $s not understood"))
-//     }
-//     for {
-//       op <- getString(m, "aggOp")
-//       z <- opSelect(op)
-//     } yield z
-//   }
-// 
-//   private def parseField(js: JsValue): Try[Field] = js match {
-//     case JsObject(m) =>
-//       for {
-//         fName <- getString(m, "name")
-//         op <- get(m, "op")
-//         trans <- parseTrans(op)
-//       } yield {
-//         Field(FieldName(fName), trans)
-//       }
-//     case _ =>
-//       Failure(new Exception(s"expected object, got $js"))
-//   }
 
   private def performTrans(
       valCol: ColumnWithType,

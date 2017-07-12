@@ -1,7 +1,8 @@
 package org.karps.structures
 
+import scala.util.{Failure, Success, Try}
+
 import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
-// import spray.json.DefaultJsonProtocol._
 
 import karps.core.{graph => G}
 import karps.core.{computation => C}
@@ -38,5 +39,22 @@ case class UntypedNode(
 
 object UntypedNode {
   def pprint(s: Seq[UntypedNode]): String = s.map(_.ppString).mkString("\n")
+  
+  def fromProto(n: G.Node): Try[UntypedNode] = {
+    import ProtoUtils._
+    val extra = checkField(n.opExtra, "op_extra").flatMap(x=>checkField(x.opExtra, "op_extra")).map(OpExtra.apply)
+    val parents = n.parents.map(Path.fromProto)
+    val deps = n.logicalDependencies.map(Path.fromProto)
+    val adtt = checkField(n.inferedType, "type").flatMap(AugmentedDataType.fromProto)
+    for {
+      loc <- Locality.fromProto(n.locality)
+      p <- checkField(n.path, "path").map(Path.fromProto)
+      n <- checkField(n.opName, "op_name")
+      x <- extra
+      adt <- adtt
+    } yield {
+      UntypedNode(loc, p, n, parents, deps, x, adt) 
+    }
+  }
 }
 

@@ -1,7 +1,6 @@
 package org.karps.structures
 
 import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
-// import spray.json.DefaultJsonProtocol._
 
 import karps.core.{graph => G}
 import karps.core.{computation => C}
@@ -10,7 +9,9 @@ case class SparkComputationStats(
     rddInfo: Seq[RDDInfo])
 
 object SparkComputationStats {
-//   implicit val formatter = jsonFormat1(SparkComputationStats.apply)
+  def toProto(scs: SparkComputationStats): C.SparkStats = {
+    C.SparkStats(scs.rddInfo.map(RDDInfo.toProto))
+  }
 }
 
 /**
@@ -81,8 +82,8 @@ object ComputationResult {
       case ComputationDone(cwt, stats) =>
         C.ComputationResult(
           status=FINISHED_SUCCESS,
-          finalResult = cwt.map(CellWithType.toProto))
-          .withSparkStats(???)
+          finalResult = cwt.map(CellWithType.toProto),
+          sparkStats = stats.map(SparkComputationStats.toProto))
       case ComputationFailed(e) =>
         C.ComputationResult(status=FINISHED_FAILURE)
           .withFinalError(e.getLocalizedMessage)

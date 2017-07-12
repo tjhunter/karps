@@ -8,7 +8,7 @@ message Cell {
   oneof element {
     int64 int_value = 2;
     string string_value = 3;
-    float float_value = 4;
+    //float float_value = 4;
     double double_value = 5;
     bool bool_value = 6;
     ArrayCell array_value = 10;
