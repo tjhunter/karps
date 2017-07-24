@@ -46,7 +46,7 @@ lazy val nonShadedDependencies = Seq(
   "io.grpc" % "grpc-protobuf" % grpcJavaVersion,
   "io.grpc" % "grpc-stub" % grpcJavaVersion,
   "io.grpc" % "grpc-netty" % grpcJavaVersion,
-  "com.trueaccord.scalapb" %% "scalapb-runtime" % scalapbVersion % "protobuf",
+  //"com.trueaccord.scalapb" %% "scalapb-runtime" % scalapbVersion % "protobuf",
   "com.trueaccord.scalapb" %% "scalapb-runtime-grpc" % scalapbVersion,
   "com.trueaccord.scalapb" %% "scalapb-json4s" % "0.3.2"
 )
@@ -55,7 +55,7 @@ lazy val shadedDependencies = Seq(
   "com.chuusai" %% "shapeless" % "1.2.4"
 )
 
-lazy val shaded = Project("shaded", file(".")).settings(
+lazy val shaded = project.settings(
   target := target.value / "shaded",
   libraryDependencies ++= nonShadedDependencies.map(_ % "provided"),
   libraryDependencies ++= sparkDependencies.map(_ % "provided"),
@@ -63,13 +63,14 @@ lazy val shaded = Project("shaded", file(".")).settings(
   // assembly
   assemblyShadeRules in assembly := Seq(
     ShadeRule.rename("com.google.protobuf.**" -> "org.karps.shaded.protobuf3.@1").inAll,
+    ShadeRule.rename("org.json4s.**" -> "org.karps.shaded.json4s.@1").inAll,
     ShadeRule.rename("shapeless.**" -> "org.karps.shaded.shapeless.@1").inAll
   ),
   assemblyOption in assembly := (assemblyOption in assembly).value.copy(includeScala = false)
 ).settings(commonSettings: _*)
 
 
-val distribute = Project("ks_distribution", file(".")).settings(
+lazy val ks_distribution = (project).settings(
   target := target.value / "distribution",
   spName := "karps/karps-server",
   credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
@@ -86,10 +87,16 @@ val distribute = Project("ks_distribution", file(".")).settings(
   libraryDependencies := nonShadedDependencies,
   libraryDependencies ++= sparkDependencies.map(_ % "provided"),
   spShade := true,
+  assemblyMergeStrategy in assembly := {
+    case PathList("META-INF", "io.netty.versions.properties") => MergeStrategy.first
+    case x =>
+        val oldStrategy = (assemblyMergeStrategy in assembly).value
+        oldStrategy(x)
+  },
   assembly in spPackage := (assembly in shaded).value
 ).settings(commonSettings: _*)
 
-val testing = Project("ks_testing", file(".")).settings(
+lazy val testing = Project("ks_testing", file(".")).settings(
   target := target.value / "testing",
   libraryDependencies ++= sparkDependencies.map(_ % "provided"),
   libraryDependencies ++= nonShadedDependencies,
@@ -100,6 +107,7 @@ val testing = Project("ks_testing", file(".")).settings(
   // Our own dep needs to be shaded.
   assemblyShadeRules in assembly := Seq(
     ShadeRule.rename("com.google.protobuf.**" -> "org.tensorframes.protobuf3shade.@1").inAll,
+    ShadeRule.rename("org.json4s.**" -> "org.karps.shaded.json4s.@1").inAll,
     ShadeRule.rename("shapeless.**" -> "org.karps.shaded.shapeless.@1").inAll
   ),
   assemblyMergeStrategy in assembly := {

@@ -112,6 +112,7 @@ trait MyService extends HttpService with Logging {
       post {
         entity(as[String]) { jsonIn =>
           val protoIn = ProtoUtils.fromString[I.CreateComputationRequest](jsonIn).get
+          logger.info(s"Proto request from http: $protoIn")
           val sessionId = SessionId.fromProto(protoIn.session.get).get
           val computationId =
             ComputationId.fromProto(protoIn.requestedComputation.get)

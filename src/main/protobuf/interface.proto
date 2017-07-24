@@ -6,11 +6,11 @@ import "graph.proto";
 import "computation.proto";
 
 service KarpsMain {
-  rpc CreateSession (CreateSessionRequest) returns (CreatesSessionResponse);
+  rpc CreateSession (CreateSessionRequest) returns (CreateSessionResponse);
   
   rpc CreateComputation (CreateComputationRequest) returns (CreateComputationResponse);
   
-  rpc ComputationStatus (ComputationStatusRequest) returns (ComputationStatusResponse);
+  rpc ComputationStatus (ComputationStatusRequest) returns (BatchComputationResult);
   
   rpc ResourceStatus (ResourceStatusRequest) returns (ResourceStatusResponse);
   
@@ -21,7 +21,7 @@ message CreateSessionRequest {
   SessionId requested_session = 1;
 };
 
-message CreatesSessionResponse {};
+message CreateSessionResponse {};
 
 message CreateComputationRequest {
   SessionId session = 1;
@@ -36,10 +36,6 @@ message ComputationStatusRequest {
   ComputationId computation = 2;
   repeated Path requested_paths = 3;
   
-};
-
-message ComputationStatusResponse {
-  repeated ComputationResult all_status = 1;
 };
 
 message ResourceStatusRequest {
