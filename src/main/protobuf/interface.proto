@@ -25,8 +25,9 @@ message CreateSessionResponse {};
 
 message CreateComputationRequest {
   SessionId session = 1;
-  ComputationId requested_computation = 2;
+  ComputationId computation = 2;
   Graph graph = 3;
+  ComputationId requested_computation = 4;
 };
 
 message CreateComputationResponse {};

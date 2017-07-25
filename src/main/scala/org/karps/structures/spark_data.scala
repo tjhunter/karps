@@ -120,7 +120,8 @@ object AugmentedDataType {
   def toProto(adt: AugmentedDataType): T.SQLType = {
     import T.SQLType.StrictType
     import T.SQLType.BasicType._
-    
+
+
     val strict: StrictType = adt.dataType match {
       case _: IntegerType => StrictType.BasicType(INT)
       case _: DoubleType => StrictType.BasicType(DOUBLE)
@@ -149,11 +150,12 @@ object AugmentedDataType {
       case T.SQLType.StrictType.BasicType(bt) =>
         import T.SQLType.BasicType._
         bt match {
+          case UNUSED => unrecognized("basic_type", 0)
           case INT => Success(IntegerType)
           case DOUBLE => Success(DoubleType)
           case STRING => Success(StringType)
           case BOOL => Success(BooleanType)
-          case Unrecognized(x) => unrecognized("basic_type",x)
+          case Unrecognized(x) => unrecognized("basic_type", x)
         }
       case T.SQLType.StrictType.StructType(T.StructType(fs)) =>
         val fs2 = fs.map {
@@ -463,23 +465,6 @@ object CellWithType {
 // }
 
 object LocalSparkConversion {
-
-//   import JsonSparkConversions.get
-
-//   // In every case, it wraps the content in an object.
-//   def deserializeLocal(js: JsValue): Try[CellWithType] = js match {
-//     case JsObject(m) =>
-//       for {
-//         tp <- get(m, "type")
-//         ct <- get(m, "content")
-//         adt <- JsonSparkConversions.deserializeDataType(tp)
-//         value <- Cell.fromJson(ct, adt)
-//       } yield {
-//         CellWithType(value, adt)
-//       }
-//     case x: Any =>
-//       Failure(new Exception(s"not an object: $x"))
-//   }
 
   /**
    * Takes an augmented data type and attempts to convert it to a top-level struct that is

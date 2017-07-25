@@ -30,6 +30,5 @@ message Path {
 };
 
 message OpExtra {
-  string op_name = 1;
-  string op_extra = 2; // TODO: should by bytestring?
+  string content = 1; // TODO: should by bytestring?
 };

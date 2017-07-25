@@ -6,10 +6,11 @@ import "graph.proto";
 import "row.proto";
 
 enum ResultStatus {
-  SCHEDULED = 0;
+  UNUSED = 0;
   RUNNING = 1;
   FINISHED_SUCCESS = 2;
   FINISHED_FAILURE = 3;
+  SCHEDULED = 4;
 };
 
 message ComputationResult {

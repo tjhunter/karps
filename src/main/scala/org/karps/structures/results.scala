@@ -76,7 +76,7 @@ object ComputationResult {
     import C.ResultStatus._
     val x = c match {
       case ComputationScheduled =>
-        C.ComputationResult(status=SCHEDULED)
+        C.ComputationResult().withStatus(SCHEDULED)
       case ComputationRunning(stats) =>
         C.ComputationResult(status=RUNNING)
       case ComputationDone(cwt, stats) =>

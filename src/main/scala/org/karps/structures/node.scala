@@ -42,7 +42,11 @@ object UntypedNode {
   
   def fromProto(n: G.Node): Try[UntypedNode] = {
     import ProtoUtils._
-    val extra = checkField(n.opExtra, "op_extra").flatMap(x=>checkField(x.opExtra, "op_extra")).map(OpExtra.apply)
+    val extra = n.opExtra match {
+      case Some(x) =>
+        checkField(x.content, "content").map(OpExtra.apply)
+      case None => Success(OpExtra(""))
+    }
     val parents = n.parents.map(Path.fromProto)
     val deps = n.logicalDependencies.map(Path.fromProto)
     val adtt = checkField(n.inferedType, "type").flatMap(AugmentedDataType.fromProto)
@@ -53,7 +57,7 @@ object UntypedNode {
       x <- extra
       adt <- adtt
     } yield {
-      UntypedNode(loc, p, n, parents, deps, x, adt) 
+      UntypedNode(loc, p, n, parents, deps, x, adt)
     }
   }
 }

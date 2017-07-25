@@ -6,7 +6,7 @@ import "types.proto";
 
 message Cell {
   oneof element {
-    int64 int_value = 2;
+    int32 int_value = 2;
     string string_value = 3;
     //float float_value = 4;
     double double_value = 5;

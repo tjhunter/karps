@@ -43,4 +43,8 @@ implicit cmp: GeneratedMessageCompanion[A]): Try[A] = {
 implicit cmp: GeneratedMessageCompanion[A]): Try[A] = {
     Try(JsonFormat.fromJsonString[A](extra))
   }
+
+  def toJsonString[A <: GeneratedMessage](m: A): String = printer.print(m)
+
+  private val printer = new Printer(includingDefaultValueFields = false)
 }

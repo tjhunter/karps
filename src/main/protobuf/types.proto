@@ -6,7 +6,11 @@ package karps.core;
 message SQLType {
   // The primitive types.
   enum BasicType {
-    INT = 0; DOUBLE = 1; STRING = 2; BOOL = 3;
+    UNUSED = 0;
+    INT = 1;
+    DOUBLE = 2;
+    STRING = 3;
+    BOOL = 4;
   };
   oneof strict_type {
     BasicType basic_type = 1;

@@ -40,7 +40,7 @@ object Cell {
     import R.Cell.{Element => E}
     R.Cell(c match {
       case Empty => E.Empty
-      case IntElement(i) => E.IntValue(i.toLong)
+      case IntElement(i) => E.IntValue(i)
       case StringElement(s) => E.StringValue(s)
       case DoubleElement(d) => E.DoubleValue(d)
       case BoolElement(b) => E.BoolValue(b)
