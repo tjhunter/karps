@@ -16,9 +16,7 @@ import karps.core.{row => R}
 case class AlgebraicRow(cells: Seq[Cell])
 
 
-object AlgebraicRow
-// extends DefaultJsonProtocol
-{
+object AlgebraicRow {
 
   import org.karps.structures.ProtoUtils.sequence
   import Cell.CellOrdering
@@ -35,6 +33,10 @@ object AlgebraicRow
   
   def fromProto(r: R.Row): AlgebraicRow = {
     AlgebraicRow(r.values.map(Cell.fromProto))
+  }
+
+  def toProto(ar: AlgebraicRow): R.Row = {
+    R.Row(ar.cells.map(Cell.toProto))
   }
 
   /**

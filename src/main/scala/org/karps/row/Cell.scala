@@ -32,8 +32,8 @@ object Cell {
     case R.Cell.Element.BoolValue(i) => BoolElement(i)
     case R.Cell.Element.ArrayValue(R.ArrayCell(i)) =>
       RowArray(i.map(fromProto _))
-    case R.Cell.Element.StructValue(R.StructCell(i)) =>   
-      RowCell(AlgebraicRow(i.map(fromProto _)))  
+    case R.Cell.Element.StructValue(arp) =>
+      RowCell(AlgebraicRow.fromProto(arp))
   }
   
   def toProto(c: Cell): R.Cell = {
@@ -45,8 +45,7 @@ object Cell {
       case DoubleElement(d) => E.DoubleValue(d)
       case BoolElement(b) => E.BoolValue(b)
       case RowArray(cells) => E.ArrayValue(R.ArrayCell(cells.map(toProto)))
-      case RowCell(AlgebraicRow(cells)) =>
-        E.StructValue(R.StructCell(cells.map(toProto)))
+      case RowCell(ar) => E.StructValue(AlgebraicRow.toProto(ar))
     })
   }
 

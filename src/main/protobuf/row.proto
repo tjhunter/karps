@@ -12,15 +12,11 @@ message Cell {
     double double_value = 5;
     bool bool_value = 6;
     ArrayCell array_value = 10;
-    StructCell struct_value = 11;
+    Row struct_value = 11;
   };
 };
 
 message ArrayCell {
-  repeated Cell values = 1;
-};
-
-message StructCell {
   repeated Cell values = 1;
 };
 

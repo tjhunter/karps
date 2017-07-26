@@ -11,12 +11,11 @@ package org.karps.structures
 
 import scala.util.{Failure, Success, Try}
 
-// import spray.json.{JsArray, JsBoolean, JsObject, JsString, JsValue, RootJsonFormat}
-// import spray.json._
-
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
 import org.apache.spark.sql.types._
+
+import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
 
 import karps.core.{types => T}
 import karps.core.{row => R}
@@ -285,7 +284,6 @@ case class CellWithType(cellData: Cell, cellType: AugmentedDataType) {
 }
 
 object CellWithType {
-//   import JsonSparkConversions.get
 
   def makeTuple(field1: CellWithType, fields: Seq[CellWithType]): CellWithType = {
     val cellswt = field1 +: fields
@@ -332,137 +330,7 @@ object CellWithType {
       cellType = Some(AugmentedDataType.toProto(p.cellType))
     )
   }
-
-
-
-//   implicit object CellJsonFormat extends RootJsonFormat[CellWithType] {
-//     override def write(c: CellWithType) = JsObject(Map(
-//       "type" -> JsonSparkConversions.serializeDataType(c.cellType),
-//       "content" -> Cell.toJson(c.cellData)
-//     ))
-// 
-//     override def read(json: JsValue): CellWithType =
-//       throw new Exception()
-//   }
-// 
-// 
-//   // In every case, it wraps the content in an object.
-//   def deserializeLocal(js: JsValue): Try[CellWithType] = js match {
-//     case JsObject(m) =>
-//       for {
-//         tp <- get(m, "type")
-//         ct <- get(m, "content")
-//         adt <- JsonSparkConversions.deserializeDataType(tp)
-//         value <- Cell.fromJson(ct, adt)
-//       } yield {
-//         CellWithType(value, adt)
-//       }
-//     case x: Any =>
-//       Failure(new Exception(s"not an object: $x"))
-//   }
 }
-
-
-// object JsonSparkConversions {
-// 
-//   def deserializeDataType(js: JsValue): Try[AugmentedDataType] = js match {
-//     case JsObject(m) =>
-//       def f(j: JsValue) = j match {
-//         case JsBoolean(true) => Success(IsNullable)
-//         case JsBoolean(false) => Success(IsStrict)
-//         case _ => Failure(new Exception(s"Not a boolean: $j"))
-//       }
-//       for {
-//         v <- get(m, "nullable")
-//         t <- get(m, "dt")
-//         b <- f(v)
-//         dt <- Try { DataType.fromJson(t.compactPrint) }
-//       } yield {
-//         AugmentedDataType(dt, b)
-//       }
-//     case x => Failure(new Exception(s"expected object, got $x"))
-//   }
-// 
-//   def serializeDataType(adt: AugmentedDataType): JsValue = {
-//     // First compute the type to JSON and then parse it again.
-//     // This is not pretty, but it should work in any case:
-//     val js = adt.dataType.json.parseJson
-//     JsObject(Map(
-//       "nullable" -> JsBoolean(adt.isNullable),
-//       "dt" -> js
-//     ))
-//   }
-// 
-//   def sequence[T](xs : Seq[Try[T]]) : Try[Seq[T]] = (Try(Seq[T]()) /: xs) {
-//     (a, b) => a flatMap (c => b map (d => c :+ d))
-//   }
-// 
-//   def get(
-//       m: Map[String, JsValue],
-//       key: String): Try[JsValue] = m.get(key) match {
-//     case None => Failure(new Exception(s"Missing key $key in $m"))
-//     case Some(v) => Success(v)
-//   }
-// 
-//   def getBool(
-//       m: Map[String, JsValue],
-//       key: String): Try[Boolean] = m.get(key) match {
-//     case None => Failure(new Exception(s"Missing key $key in $m"))
-//     case Some(JsBoolean(b)) => Success(b)
-//     case Some(x) => Failure(new Exception(s"Wrong value $x for key $key in $m"))
-//   }
-// 
-//   def getObject(m: Map[String, JsValue], key: String): Try[JsObject] = {
-//     getFlatten(m, key) {
-//       case x: JsObject => Success(x)
-//       case x => Failure(new Exception(s"Expected object, got $x"))
-//     }
-//   }
-// 
-//   def getFlatten[X](m: Map[String, JsValue], key: String)(f: JsValue => Try[X]): Try[X] = {
-//     m.get(key) match {
-//       case None => Failure(new Exception(s"Missing key $key in $m"))
-//       case Some(x) => f(x)
-//     }
-//   }
-// 
-//   def getFlattenSeq[X](m: Map[String, JsValue], key: String)(f: JsValue => Try[X]): Try[Seq[X]] = {
-//     def f2(jsValue: JsValue) = jsValue match {
-//       case JsArray(arr) => sequence(arr.map(f))
-//       case x => Failure(new Exception(s"Expected array, got $x"))
-//     }
-//     getFlatten(m, key)(f2)
-//   }
-// 
-//   def getString(
-//       m: Map[String, JsValue],
-//       key: String): Try[String] = m.get(key) match {
-//     case None => Failure(new Exception(s"Missing key $key in $m"))
-//     case Some(JsString(s)) => Success(s)
-//     case Some(x) => Failure(new Exception(s"Wrong value $x for key $key in $m"))
-//   }
-// 
-//   def getStringList(
-//       m: Map[String, JsValue],
-//       key: String): Try[List[String]] = m.get(key) match {
-//     case None => Failure(new Exception(s"Missing key $key in $m"))
-//     case Some(JsArray(arr)) => sequence(arr.map {
-//       case JsString(s) => Success(s)
-//       case x => Failure(new Exception(s"Expected string, got $x"))
-//     }).map(_.toList)
-//     case Some(x) => Failure(new Exception(s"Wrong value $x for key $key in $m"))
-//   }
-// 
-//   def getStringListList(
-//       m: Map[String, JsValue],
-//       key: String): Try[Seq[Seq[String]]] = m.get(key) match {
-//     case None => Failure(new Exception(s"Missing key $key in $m"))
-//     case Some(JsArray(arr)) => sequence(arr.map(arr2 =>
-//       getStringList(Map("k"->JsArray(arr2)), "k")))
-//     case Some(x) => Failure(new Exception(s"Wrong value $x for key $key in $m"))
-//   }
-// 
-// }
 
 object LocalSparkConversion {
 
@@ -501,56 +369,24 @@ object LocalSparkConversion {
  * non-nullable field called _1. This allows a representation that handles both
  * primitive and non-primitive types in a uniform manner.
  */
-object DistributedSparkConversion {
+object DistributedSparkConversion extends Logging {
 
 //   import JsonSparkConversions.{get, sequence}
-  import LocalSparkConversion.normalizeDataType
+//  import LocalSparkConversion.normalizeDataType
   
   // Takes a cell with a type and attempts to convert it to a cell collection.
   def deserializeDistributed(cwt: CellWithType): Try[CellCollection] = {
+    logger.info(s"deserializeDistributed: cwt=$cwt")
     (cwt.cellData, cwt.cellType) match {
       case (RowArray(seq), AugmentedDataType(ArrayType(inner, nl2), nl)) if nl == IsStrict =>
         val rows = seq.map(normalizeCell)
         val adt = AugmentedDataType(inner, Nullable.fromNullability(nl2))
         val st = LocalSparkConversion.normalizeDataTypeIfNeeded(adt)
+        logger.info(s"deserializeDistributed: adt=$adt st=$st rows=$rows")
         Success(CellCollection(adt, st, rows))
-//         val normed = seq.map
       case x => Failure(new Exception(s"Expected array, got $x"))
     }
   }
-
-//   /**
-//    * Deserializes, with a normalization process to try to
-//    * keep data structures while allowing primitive types.
-//    * @param js a pair of cell data types and some cells.
-//    */
-//   def deserializeDistributed(js: JsValue): Try[CellCollection] = js match {
-//     case JsObject(m) =>
-//       for {
-//         tp <- get(m, "cellType")
-//         ct <- get(m, "content")
-//         celldt <- JsonSparkConversions.deserializeDataType(tp)
-//         value <- deserializeSequenceCompact(celldt, ct)
-//       } yield {
-//         val rows = value.map(normalizeCell)
-//         val st = LocalSparkConversion.normalizeDataTypeIfNeeded(celldt)
-//         CellCollection(celldt, st, rows)
-//       }
-//     case x: Any =>
-//       Failure(new Exception(s"not an object: $x"))
-//   }
-// 
-//   /**
-//    * Deserializes the content of a sequence (which should be a sequence of cells)
-//    */
-//   private def deserializeSequenceCompact(
-//       celldt: AugmentedDataType,
-//       cells: JsValue): Try[Seq[Cell]] = cells match {
-//     case JsArray(arr) =>
-//       sequence(arr.map(e => Cell.fromJson(e, celldt)))
-//     case x =>
-//       Failure(new Exception(s"Not an array: $x"))
-//   }
 
   /**
    * Takes a cell data and build a normalized representation of it: top-level rows go through,

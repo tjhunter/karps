@@ -46,23 +46,35 @@ object ColumnTransforms extends Logging {
     
   }
 
-  private sealed trait ColOp
-  private case class ColExtraction(path: FieldPath) extends ColOp
-  private case class ColFunction(name: String, inputs: Seq[ColOp]) extends ColOp
-
   private case class Field(fieldName: FieldName, fieldTrans: StructuredTransform)
 
   private sealed trait StructuredTransform {
     def name: Option[String]
   }
-  private case class InnerOp(op: ColOp, name: Option[String]) extends StructuredTransform
-  private case class InnerStruct(fields: Seq[Field], name: Option[String]) extends StructuredTransform
-  
+  private case class ColStructure(
+      fields: Seq[Field],
+      name: Option[String]) extends StructuredTransform
+  private case class ColExtraction(
+      path: FieldPath,
+      name: Option[String]) extends StructuredTransform
+  private case class ColFunction(
+      functionName: String,
+      inputs: Seq[StructuredTransform],
+      name: Option[String]) extends StructuredTransform
+
   private def fromProto(t: ST.Column): Try[StructuredTransform] = {
     val fname = Option(t.fieldName)
     t.content match {
-      case ST.Column.Content.Op(op) =>
-        fromProto(op).map(co => InnerOp(co, fname))
+      case ST.Column.Content.Function(ST.ColumnFunction(fnam, cf)) =>
+        val ops = sequence(cf.map(fromProto))
+        if (fnam == null) {
+          Failure(new Exception(s"Missing name"))
+        } else {
+          ops.map(ops2 => ColFunction(fnam, ops2, fname))
+        }
+      case ST.Column.Content.Extraction(ST.ColumnExtraction(path)) =>
+        val fp = FieldPath(path.map(FieldName.apply).toList)
+        Success(ColExtraction(fp, fname))
       case ST.Column.Content.Struct(ST.ColumnStructure(fields)) =>
         val fst = sequence(fields.map(fromProto))
         for {
@@ -70,10 +82,10 @@ object ColumnTransforms extends Logging {
           fieldNames <- checkFieldNames(fs.map(_.name))
         } yield {
           val fs2 = fs.zip(fieldNames).map { case (f, fn) => Field(fn, f) }
-          InnerStruct(fs2, fname)
+          ColStructure(fs2, fname)
         }
       case ST.Column.Content.Empty =>
-        Failure(new Exception(s"Missing content"))
+        Failure(new Exception(s"Missing content: ${t.fieldName}"))
     }
   }
   
@@ -82,34 +94,6 @@ object ColumnTransforms extends Logging {
       case None => Failure(new Exception("Missing name"))
       case Some(s) => Success(FieldName(s))
     })
-  }
-  
-  private def fromProto(t: ST.ColumnOperation): Try[ColOp] = {
-    import ST.ColumnOperation.ColOp
-    t.colOp match {
-      case ColOp.Empty =>
-        Failure(new Exception("missing col_op"))
-      case ColOp.Function(ST.ColumnFunction(fnam, cf)) =>
-        val ops = sequence(cf.map(fromProto))
-        if (fnam == null) {
-          Failure(new Exception(s"Missing name"))
-        } else {
-          ops.map(ops2 => ColFunction(fnam, ops2))
-        }
-      case ColOp.Extraction(ST.ColumnExtraction(path)) =>
-        val fp = FieldPath(path.map(FieldName.apply).toList)
-        Success(ColExtraction(fp))
-    }
-  }
-
-  private def selectOp(op: ColOp, cwt: ColumnWithType): Try[ColumnWithType] = {
-    op match {
-      case ColExtraction(fieldPath) => extractPath(cwt, fieldPath)
-      case ColFunction(funName, inputs) =>
-        val inputst = sequence(inputs.map(selectOp(_, cwt)))
-        inputst.flatMap(inputs =>
-          SQLFunctionsExtraction.buildFunction(funName, inputs, cwt.ref))
-    }
   }
 
   private def extractPath(cwt: ColumnWithType, fieldPath: FieldPath): Try[ColumnWithType] = {
@@ -127,10 +111,13 @@ object ColumnTransforms extends Logging {
   private def select0(
       cwt: ColumnWithType,
       trans: StructuredTransform): Try[ColumnWithType] = trans match {
-    case InnerOp(colOp, _) =>
-      selectOp(colOp, cwt)
+    case ColExtraction(fieldPath, _) => extractPath(cwt, fieldPath)
+    case ColFunction(funName, inputs, _) =>
+      val inputst = sequence(inputs.map(select0(cwt, _)))
+      inputst.flatMap(inputs =>
+        SQLFunctionsExtraction.buildFunction(funName, inputs, cwt.ref))
 
-    case InnerStruct(fields, _) =>
+    case ColStructure(fields, _) =>
       val fst = sequence(fields.map { f =>
         select0(cwt, f.fieldTrans).map { cwt2 =>
           val c2 = cwt2.col.as(f.fieldName.name)
