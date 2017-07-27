@@ -70,7 +70,7 @@ object Readers {
         Success(r.option(k, i))
       case Value.DoubleValue(i) =>
         Success(r.option(k, i))
-      case Value.StrValue(i) =>
+      case Value.StringValue(i) =>
         Success(r.option(k, i))
       case Value.BoolValue(i) =>
         Success(r.option(k, i))

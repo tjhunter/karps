@@ -19,7 +19,7 @@ message InputOption {
   oneof value {
     int32 int_value = 2;
     double double_value = 3;
-    string str_value = 4;
+    string string_value = 4;
     bool bool_value = 5;
   };
 }
