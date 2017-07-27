@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package karps.core;
+
+import "graph.proto";
+import "row.proto";
+
+enum ResultStatus {
+  UNUSED = 0;
+  RUNNING = 1;
+  FINISHED_SUCCESS = 2;
+  FINISHED_FAILURE = 3;
+  SCHEDULED = 4;
+};
+
+message ComputationResult {
+  Path local_path = 1;
+  ResultStatus status = 2;
+  string final_error = 3;
+  CellWithType final_result = 4;
+  SparkStats spark_stats = 5;
+  repeated Path dependencies = 6;
+};
+
+
+message BatchComputationResult {
+  Path target_path = 1;
+  repeated ComputationResult results = 2;
+}
+
+message PointerPath {
+  ComputationId computation = 1;
+  Path local_path = 2;
+}
+
+// ---------- Spark statistics ----------
+
+message SparkStats {
+  repeated RDDInfo rdd_info = 1;
+};
+
+message RDDInfo {
+  int64 rdd_id = 1;
+  string class_name = 2;
+  string repr = 3;
+  repeated int64 parents = 4;
+};
+
+// ----------- Common structures ------------
+
+message ResourcePath {
+  string uri = 1;
+};
+
+message ComputationId {
+  string id = 1;
+};
+
+message SessionId {
+  string id = 1;
+};

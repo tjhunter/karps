@@ -2,66 +2,18 @@ package org.karps
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success}
+
 import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
+
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql._
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
+
 import org.karps.row.Cell
-import org.karps.structures.{CellWithType, UntypedNodeJson}
-import spray.json.{JsArray, JsNumber, JsObject, JsString, JsValue, RootJsonFormat}
+import org.karps.structures._
 
 
-case class RDDId private (repr: Int) extends AnyVal
-
-object RDDId {
-  def fromRDD(rdd: RDD[_]): RDDId = new RDDId(rdd.id)
-
-  implicit object MyOrdering extends Ordering[RDDId] {
-    override def compare(x: RDDId, y: RDDId): Int = x.repr.compare(y.repr)
-  }
-
-  implicit object ThisFormat extends RootJsonFormat[RDDId] {
-    override def write(c: RDDId) = JsNumber(c.repr)
-
-    override def read(json: JsValue): RDDId =
-      throw new Exception()
-  }
-}
-
-/**
- * Some basic information about RDDs that is exposed and sent to clients.
- */
-case class RDDInfo private (
-  id: RDDId,
-  className: String,
-  repr: String, // A human-readable representation of the RDD
-  parents: Seq[RDDId])
-
-object RDDInfo {
-  def fromRDD(rdd: RDD[_]): RDDInfo = {
-    val parents = rdd.dependencies.map(_.rdd).map(RDDId.fromRDD)
-    new RDDInfo(
-      RDDId.fromRDD(rdd),
-      rdd.getClass.getSimpleName,
-      rdd.toString(),
-      parents)
-  }
-
-
-  implicit object ThisFormat extends RootJsonFormat[RDDInfo] {
-    override def write(c: RDDInfo) = JsObject(Map(
-      "id" -> RDDId.ThisFormat.write(c.id),
-      "className" -> JsString(c.className),
-      "repr" -> JsString(c.repr),
-      "parents" -> JsArray(c.parents.map(RDDId.ThisFormat.write).toVector)
-    ))
-
-    override def read(json: JsValue): RDDInfo =
-      throw new Exception()
-  }
-
-}
 
 /**
  * The elements that are going to be executed by the graph.
@@ -73,7 +25,7 @@ class ExecutionItem(
     val path: GlobalPath,
     cache: () => ResultCache,
     builder: OpBuilder,
-    raw: UntypedNodeJson,
+    raw: UntypedNode,
     session: SparkSession) extends Logging {
 
   /**
@@ -178,6 +130,4 @@ object ExecutionItem extends Logging {
     }
     m
   }
-
-
 }

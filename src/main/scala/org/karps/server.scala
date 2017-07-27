@@ -9,13 +9,11 @@ import akka.util.Timeout
 import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
 import spray.can.Http
 import spray.http.MediaTypes._
-import spray.httpx.SprayJsonSupport
-import spray.json.DefaultJsonProtocol
 import spray.routing._
 
-import org.karps.structures.{BatchComputationResultJson, ComputationResultJson, UntypedNodeJson}
+import org.karps.structures._
 import org.karps.ops.{HdfsPath, HdfsResourceResult}
-
+import karps.core.{interface => I}
 
 object Boot extends App {
 
@@ -59,15 +57,6 @@ class MyServiceActor extends Actor with MyService {
 
 case class Person(name: String, favoriteNumber: Int)
 
-object KarpsServerImplicits extends DefaultJsonProtocol with SprayJsonSupport {
-  implicit val PortofolioFormats = jsonFormat2(Person)
-  implicit val UntypedNodeJsonF = jsonFormat7(UntypedNodeJson)
-  implicit val HdfsResourceResultF = jsonFormat3(HdfsResourceResult)
-}
-
-import KarpsServerImplicits._
-
-
 
 // this trait defines our service behavior independently from the service actor
 trait MyService extends HttpService with Logging {
@@ -99,21 +88,17 @@ trait MyService extends HttpService with Logging {
       val sessionId = SessionId(sessionIdTxt)
 
       post {
-        entity(as[Seq[String]]) { paths =>
-          val ps = paths.map(HdfsPath.apply)
-          logger.debug(s"Requesting status for paths $ps")
+        entity(as[String]) { req =>
+          val proto = ProtoUtils.fromString[I.ResourceStatusRequest](req).get
+          logger.debug(s"Requesting status for paths $proto")
+          val ps = proto.resources.map(_.uri).map(HdfsPath.apply)
+          val sessionId = SessionId.fromProto(proto.session.get).get
+          
           val s = manager.resourceStatus(sessionId, ps)
           s.foreach(st => logger.debug(s"Status received: $st"))
-          complete(s)
-        }
-      }
-    } ~
-    path("sessions" / Segment ) { sessionIdTxt => // TOOD: that one is useless
-      val sessionId = SessionId(sessionIdTxt)
-
-      get {
-        complete {
-          Person(sessionIdTxt, 32)
+          val res = I.ResourceStatusResponse(hdfs=s.map(HdfsResourceResult.toProto))
+          val json = ProtoUtils.toJsonString(res)
+          complete(json)
         }
       }
     } ~
@@ -122,9 +107,21 @@ trait MyService extends HttpService with Logging {
       val computationId = ComputationId(computationIdTxt)
 
       post {
-        entity(as[Seq[UntypedNodeJson]]) { nodes =>
+        entity(as[String]) { jsonIn =>
+          logger.info(s"JSON request from http: $jsonIn")
+          val protoIn = ProtoUtils.fromString[I.CreateComputationRequest](jsonIn).get
+          logger.info(s"Proto request from http: $protoIn")
+          val sessionId = SessionId.fromProto(protoIn.session.get).get
+          val computationId =
+            ComputationId.fromProto(protoIn.computation.get)
+          val nodes =
+            protoIn.graph.get.nodes
+              .map(UntypedNode.fromProto).map(_.get)
+          
           manager.execute(sessionId, computationId, nodes)
-          complete(nodes.size.toString)
+          val protoOut = I.CreateComputationResponse()
+          val jsonOut = ProtoUtils.toJsonString(protoOut)
+          complete(jsonOut)
         }
       }
     } ~
@@ -135,11 +132,16 @@ trait MyService extends HttpService with Logging {
       if (rest.isEmpty) {
         // We are being asked for the computation
         get {
-          complete {
-            val s = manager.statusComputation(sessionId, computationId).getOrElse(
-              throw new Exception(s"$sessionId $computationId"))
-            import ComputationResultJson._
-            BatchComputationResultJson.fromResult(s)
+          respondWithMediaType(`application/json`) {
+            complete {
+              val s = manager.statusComputation(sessionId, computationId).getOrElse(
+                throw new Exception(s"$sessionId $computationId"))
+              val proto = BatchComputationResult.toProto(s)
+              val js = ProtoUtils.toJsonString(proto)
+              logger.info(s"status request: session=$sessionId comp=$computationId s=$s " +
+                s"proto=$proto js=$js")
+              js
+            }
           }
         }
       } else {
@@ -148,9 +150,15 @@ trait MyService extends HttpService with Logging {
         val gp = GlobalPath.from(sessionId, computationId, p)
 
         get {
-          complete {
-            val s = manager.status(gp).getOrElse(throw new Exception(gp.toString))
-            ComputationResultJson.fromResult(s)
+          respondWithMediaType(`application/json`) {
+            complete {
+              val s = manager.status(gp).getOrElse(throw new Exception(gp.toString))
+              val proto = ComputationResult.toProto(s, gp, Nil)
+              val js = ProtoUtils.toJsonString(proto)
+              logger.info(s"status request: session=$sessionId comp=$computationId s=$s " +
+                s"proto=$proto js=$js")
+              js
+            }
           }
         }
       }

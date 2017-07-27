@@ -1,30 +1,27 @@
 package org.karps.ops
 
 
+import scala.util.{Failure, Success, Try}
+
 import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
+
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.{Column, DataFrame, KarpsStubs}
 import org.apache.spark.sql.catalyst.analysis.FunctionRegistry
+
 import org.karps.{ColumnWithType, DataFrameWithType, KarpsException$}
 import org.karps.ops.Extraction.{FieldName, FieldPath}
 import org.karps.structures._
-import spray.json.{JsArray, JsObject, JsValue}
+import karps.core.{structured_transform => ST}
 
-import scala.util.{Failure, Success, Try}
 
 
 // TODO: refactor to use ColumnWithType, it will simplify things.
 object ColumnTransforms extends Logging {
-
-  import org.karps.structures.JsonSparkConversions.{getString, get, sequence}
-
-  /**
-   * Starts from an unrectified dataframe represented as a column, and
-   * recursively extracts the requested fields.
-   * @return
-   */
-  def select(adf: DataFrameWithType, js: JsValue): Try[(Seq[Column], AugmentedDataType)] = {
+  import org.karps.structures.ProtoUtils.sequence
+  
+  def select(adf: DataFrameWithType, ex: OpExtra): Try[(Seq[Column], AugmentedDataType)] = {
     def convert(cwt: ColumnWithType): (Seq[Column], AugmentedDataType) = {
       cwt.rectifiedSchema.topLevelStruct match {
         case Some(st) =>
@@ -38,93 +35,65 @@ object ColumnTransforms extends Logging {
     val cwt = DataFrameWithType.asTypedColumn(adf)
     logger.debug(s"select: cwt=$cwt")
     for {
-        trans <- parseTrans(js)
+        p <- ProtoUtils.fromExtra[ST.Column](ex)
+        trans <- fromProto(p)
         res <- select0(cwt, trans)
     } yield {
       logger.debug(s"select: trans = $trans")
       logger.debug(s"select: res = $res")
       convert(res)
     }
+    
   }
-
-  private sealed trait ColOp
-  private case class ColExtraction(path: FieldPath) extends ColOp
-  private case class ColFunction(name: String, inputs: Seq[ColOp]) extends ColOp
 
   private case class Field(fieldName: FieldName, fieldTrans: StructuredTransform)
 
-  private sealed trait StructuredTransform
-  private case class InnerOp(op: ColOp) extends StructuredTransform
-  private case class InnerStruct(fields: Seq[Field]) extends StructuredTransform
-
-  private def parseTrans(js: JsValue): Try[StructuredTransform] = js match {
-    case JsArray(arr) =>
-      sequence(arr.map(parseField)).map(arr2 => InnerStruct(arr2))
-    case obj: JsObject =>
-      parseOp(obj).map(op => InnerOp(op))
-    case x => Failure(new Exception(s"Expected array or object, got $x"))
+  private sealed trait StructuredTransform {
+    def name: Option[String]
   }
+  private case class ColStructure(
+      fields: Seq[Field],
+      name: Option[String]) extends StructuredTransform
+  private case class ColExtraction(
+      path: FieldPath,
+      name: Option[String]) extends StructuredTransform
+  private case class ColFunction(
+      functionName: String,
+      inputs: Seq[StructuredTransform],
+      name: Option[String]) extends StructuredTransform
 
-  private def parseOp(js: JsObject): Try[ColOp] = {
-    def opSelect(s: String) = s match {
-      case "extraction" =>
-        for {
-          p <- JsonSparkConversions.getFlatten(js.fields, "field")(Extraction.getFieldPath)
-        } yield {
-          ColExtraction(p)
+  private def fromProto(t: ST.Column): Try[StructuredTransform] = {
+    val fname = Option(t.fieldName)
+    t.content match {
+      case ST.Column.Content.Function(ST.ColumnFunction(fnam, cf)) =>
+        val ops = sequence(cf.map(fromProto))
+        if (fnam == null) {
+          Failure(new Exception(s"Missing name"))
+        } else {
+          ops.map(ops2 => ColFunction(fnam, ops2, fname))
         }
-      case "fun" =>
-        // It is a function
+      case ST.Column.Content.Extraction(ST.ColumnExtraction(path)) =>
+        val fp = FieldPath(path.map(FieldName.apply).toList)
+        Success(ColExtraction(fp, fname))
+      case ST.Column.Content.Struct(ST.ColumnStructure(fields)) =>
+        val fst = sequence(fields.map(fromProto))
         for {
-          fname <- JsonSparkConversions.getString(js.fields, "function")
-          p <- JsonSparkConversions.getFlatten(js.fields, "args")(parseFunArgs)
+          fs <- fst
+          fieldNames <- checkFieldNames(fs.map(_.name))
         } yield {
-          ColFunction(fname, p)
+          val fs2 = fs.zip(fieldNames).map { case (f, fn) => Field(fn, f) }
+          ColStructure(fs2, fname)
         }
-      case s: String =>
-        Failure(new Exception(s"Cannot understand op '$s' in $js"))
+      case ST.Column.Content.Empty =>
+        Failure(new Exception(s"Missing content: ${t.fieldName}"))
     }
-
-    for {
-      op <- getString(js.fields, "colOp")
-      z <- opSelect(op)
-    } yield z
   }
-
-  private def parseOp(js: JsValue): Try[ColOp] = js match {
-    case o: JsObject => parseOp(o)
-    case _ =>
-      Failure(new Exception(s"Expected object, got $js"))
-  }
-
-  private def parseFunArgs(js: JsValue): Try[Seq[ColOp]] = js match {
-    case JsArray(arr) =>
-      JsonSparkConversions.sequence(arr.map(parseOp))
-    case _ =>
-      Failure(new Exception(s"expected array, got $js"))
-  }
-
-  private def parseField(js: JsValue): Try[Field] = js match {
-    case JsObject(m) =>
-      for {
-        fName <- getString(m, "name")
-        op <- get(m, "op")
-        trans <- parseTrans(op)
-      } yield {
-        Field(FieldName(fName), trans)
-      }
-    case _ =>
-      Failure(new Exception(s"expected object, got $js"))
-  }
-
-  private def selectOp(op: ColOp, cwt: ColumnWithType): Try[ColumnWithType] = {
-    op match {
-      case ColExtraction(fieldPath) => extractPath(cwt, fieldPath)
-      case ColFunction(funName, inputs) =>
-        val inputst = sequence(inputs.map(selectOp(_, cwt)))
-        inputst.flatMap(inputs =>
-          SQLFunctionsExtraction.buildFunction(funName, inputs, cwt.ref))
-    }
+  
+  def checkFieldNames(s: Seq[Option[String]]): Try[Seq[FieldName]] = {
+    sequence(s.map {
+      case None => Failure(new Exception("Missing name"))
+      case Some(s) => Success(FieldName(s))
+    })
   }
 
   private def extractPath(cwt: ColumnWithType, fieldPath: FieldPath): Try[ColumnWithType] = {
@@ -142,10 +111,13 @@ object ColumnTransforms extends Logging {
   private def select0(
       cwt: ColumnWithType,
       trans: StructuredTransform): Try[ColumnWithType] = trans match {
-    case InnerOp(colOp) =>
-      selectOp(colOp, cwt)
+    case ColExtraction(fieldPath, _) => extractPath(cwt, fieldPath)
+    case ColFunction(funName, inputs, _) =>
+      val inputst = sequence(inputs.map(select0(cwt, _)))
+      inputst.flatMap(inputs =>
+        SQLFunctionsExtraction.buildFunction(funName, inputs, cwt.ref))
 
-    case InnerStruct(fields) =>
+    case ColStructure(fields, _) =>
       val fst = sequence(fields.map { f =>
         select0(cwt, f.fieldTrans).map { cwt2 =>
           val c2 = cwt2.col.as(f.fieldName.name)

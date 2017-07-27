@@ -4,9 +4,10 @@ import org.apache.spark.sql.{DataFrame, DataFrameReader}
 import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
 import org.apache.spark.sql.types._
 import org.karps.row._
-import spray.json.{JsArray, JsBoolean, JsNull, JsNumber, JsObject, JsString, JsValue}
 
 import scala.util.{Failure, Success, Try}
+import karps.core.{io => IO}
+import karps.core.{types => T}
 import org.karps.structures._
 
 /**
@@ -14,66 +15,68 @@ import org.karps.structures._
  */
 object Readers {
 
-  import JsonSparkConversions._
-
-  def buildDF(reader: DataFrameReader, opts: JsValue): Try[DataFrame] = {
-    opts match {
-      case JsObject(m) =>
-        for {
-          o <- getObject(m, "options")
-          inputPath <- getString(m, "inputPath")
-          inputSource <- getString(m, "inputSource")
-          reader2 <- addOptions(reader, o)
-          reader3 <- addSchema(reader2, m)
-          // This can blow up badly if the file does not exist
-          res <- Try(reader3.format(inputSource).load(inputPath))
-        } yield {
-          res
-        }
-      case x => Failure(new Exception(s"Expected dictionary, got $x"))
+  import org.karps.structures.ProtoUtils._
+  
+  def buildDF(reader: DataFrameReader, ex: OpExtra): Try[DataFrame] = {
+    ProtoUtils.fromExtra[IO.SourceDescription](ex).flatMap(buildDF(reader, _))
+  }
+  
+  private def buildDF(reader: DataFrameReader, opts: IO.SourceDescription): Try[DataFrame] = {
+    for {
+      inputPath <- checkField(opts.path, "path")
+      inputSource <- checkField(opts.source, "source")
+      reader2 <- addOptions(reader, opts.options)
+      reader3 <- addSchema(reader2, opts.schema)
+      // This can blow up badly if the file does not exist
+      res <- Try(reader3.format(inputSource).load(inputPath))      
+    } yield { res }
+  }
+  
+  private def addSchema(
+      reader: DataFrameReader,
+      schema: Option[T.SQLType]): Try[DataFrameReader] = schema match {
+    case Some(sqlt) =>
+      AugmentedDataType.fromProto(sqlt).map(_.topLevelStruct).flatMap {
+        case Some(st) => Success(reader.schema(st))
+        case None => Failure(new Exception(s"Expected a structure at the top level"))
+      }      
+    case _ => Success(reader)
+  }
+  
+  private def addOptions(
+      reader: DataFrameReader,
+      opts: Seq[IO.InputOption]): Try[DataFrameReader] = {
+    if (opts.isEmpty) {
+      Success(reader)
+    } else {
+      val o = opts.head
+      for {
+        k <- checkField(o.key, "key")
+        r2 <- addOption(reader, k, o.value)
+        r2 <- addOptions(r2, opts.tail)
+      } yield { r2 }
     }
   }
-
-  private def addSchema(reader: DataFrameReader,
-                        m: Map[String, JsValue]): Try[DataFrameReader] = {
-    getFlatten(m, "inputSchema") {
-      case JsNull => Success(reader)
-      case JsString("infer_schema") => Success(reader)
-      case x => (for {
-        adt <- deserializeDataType(x)
-      } yield {
-        adt.topLevelStruct match {
-          case Some(str) => Success(reader.schema(str))
-          case x => Failure(new Exception(s"Expected a structure at the top level"))
-        }
-      }).flatten
-    }
-  }
-
-  private def addOptions(reader: DataFrameReader, opts: JsObject): Try[DataFrameReader] = {
-    def f(m: Map[String, JsValue]): Try[DataFrameReader] = {
-      if (m.isEmpty) Success(reader) else {
-        val (k, v) = m.head
-        for {
-          reader2 <- f(m.tail)
-          reader3 <- addOption(reader2, k, v)
-        } yield reader3
+  
+  private def addOption(
+      r: DataFrameReader,
+      k: String,
+      v: IO.InputOption.Value): Try[DataFrameReader] = {
+    import IO.InputOption.Value
+    v match {
+      case Value.Empty =>
+        Failure(new Exception("Missing value"))
+      case Value.IntValue(i) =>
+        Success(r.option(k, i))
+      case Value.DoubleValue(i) =>
+        Success(r.option(k, i))
+      case Value.StringValue(i) =>
+        Success(r.option(k, i))
+      case Value.BoolValue(i) =>
+        Success(r.option(k, i))
       }
-    }
-    f(opts.fields)
   }
 
-  private def addOption(reader: DataFrameReader, key: String, o: JsValue): Try[DataFrameReader] = {
-    o match {
-      case JsBoolean(b) =>
-        Success(reader.option(key, b))
-      case JsString(s) =>
-        Success(reader.option(key, s))
-      case JsNumber(x) => // TODO: ambiguous here
-        Success(reader.option(key, x.toLong))
-      case x => Failure(new Exception(s"Not understood as value: $x"))
-    }
-  }
 }
 
 object TypeConversions {

@@ -2,44 +2,19 @@ package org.karps
 
 import scala.collection.JavaConversions._
 import scala.util.{Failure, Success}
+
 import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
+
 import org.apache.spark.SparkContext
-import spray.json.{JsString, JsValue}
 import org.apache.spark.sql._
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
+
 import org.karps.row.{AlgebraicRow, Cell, RowArray, RowCell}
 import org.karps.ops.{ColumnTransforms, GroupedReduction, Readers, TypeConversions}
 import org.karps.structures._
+import karps.core.{row => R}
 
-object UDF {
-  /**
-   * A wrapper for functions that manipulate algebraic rows.
-   *
-   * TODO: this is unfinished business.
-   * @param startType
-   * @param endType
-   * @param fun
-   * @return
-   */
-  def wrapFun(
-      startType: AugmentedDataType,
-      endType: AugmentedDataType)(fun: Cell => Cell): Column => Column = {
-    def fun2(r: Row, st: StructType): Any = {
-      val c2 = AlgebraicRow.fromRow(r, st) match {
-        case Success(AlgebraicRow(Seq(c))) =>
-          fun(c)
-        case e =>
-          throw new Exception(s"Could not convert $r of type $st: $e")
-      }
-      Cell.toAny(c2)
-    }
-    // Output type may be wrong here.
-
-    val localUdf = org.apache.spark.sql.functions.udf(???, endType.dataType)
-    ???
-  }
-}
 
 object SparkRegistry extends Logging {
   import GlobalRegistry._
@@ -140,7 +115,8 @@ object SparkRegistry extends Logging {
   }
 
   val locLiteral = createTypedBuilder0("org.spark.LocalLiteral") { z =>
-    val typedCell = LocalSparkConversion.deserializeLocal(z) match {
+    val typedCell = ProtoUtils.fromExtra[R.CellWithType](z)
+        .flatMap(CellWithType.fromProto) match {
       case Success(ct) => ct
       case Failure(e) =>
         throw new Exception(s"Deserialization failed", e)
@@ -151,7 +127,10 @@ object SparkRegistry extends Logging {
   }
 
   val dLiteral = createTypedBuilder0("org.spark.DistributedLiteral") { z =>
-    val cellCol = DistributedSparkConversion.deserializeDistributed(z) match {
+    val cell = ProtoUtils.fromExtra[R.CellWithType](z)
+        .flatMap(CellWithType.fromProto)
+        .flatMap(DistributedSparkConversion.deserializeDistributed)
+    val cellCol = cell match {
       case Success(cc) => cc
       case Failure(e) =>
         throw new Exception(s"Deserialization failed", e)
@@ -212,7 +191,7 @@ object SparkRegistry extends Logging {
 
     override def build(
         parents: Seq[ExecutionOutput],
-        extra: JsValue,
+        extra: OpExtra,
         session: SparkSession): DataFrameWithType = {
       val (dfwt, cellwt) = parents match {
         case Seq(DisExecutionOutput(x), LocalExecOutput(y)) => x -> y
@@ -257,7 +236,7 @@ object SparkRegistry extends Logging {
 
     override def build(
         parents: Seq[ExecutionOutput],
-        extra: JsValue,
+        extra: OpExtra,
         session: SparkSession): DataFrameWithType = {
       require(parents.nonEmpty)
       val cellswt = parents.map {
@@ -274,7 +253,7 @@ object SparkRegistry extends Logging {
     override def op = "org.spark.PlaceholderCache"
     override def build(
         p: Seq[ExecutionOutput],
-        ex: JsValue,
+        ex: OpExtra,
         session: SparkSession): DataFrameWithType = {
       val df = session.createDataFrame(Seq(typedCell.row), typedCell.rowType)
       DataFrameWithType.create(df, typedCell.cellType).get
@@ -286,7 +265,7 @@ object SparkRegistry extends Logging {
     override def op = "org.spark.InferSchema"
     override def build(
         p: Seq[ExecutionOutput],
-        ex: JsValue,
+        ex: OpExtra,
         session: SparkSession): DataFrameWithType = {
       require(p.isEmpty, (ex, p))
       val reader = session.read
@@ -304,7 +283,7 @@ object SparkRegistry extends Logging {
     override def op = "org.spark.GenericDatasource"
     override def build(
         p: Seq[ExecutionOutput],
-        ex: JsValue,
+        ex: OpExtra,
         session: SparkSession): DataFrameWithType = {
       require(p.isEmpty, (ex, p))
       val reader = session.read
@@ -362,7 +341,7 @@ object SparkRegistry extends Logging {
 
     override def build(
         parents: Seq[ExecutionOutput],
-        extra: JsValue, session: SparkSession): DataFrameWithType = {
+        extra: OpExtra, session: SparkSession): DataFrameWithType = {
       logger.debug(s"select: parents=$parents js=$extra")
       // Get the dataframe input:
       val adf = parents match {
@@ -402,12 +381,8 @@ object SparkRegistry extends Logging {
     }
     require(key1f == key2f,
       s"The two dataframe keys are not compatible: $key1f in $df1 ... $key2f in $df2")
-    val joinType = js match {
-      case JsString(s) =>
-        require(List("inner").contains(s), s"Unknown join type: $s")
-        s
-      case _ => throw new Exception(s"Unknown join data type: $js")
-    }
+    val joinType = js.content
+    require(joinType == "inner", s"Unknown join type: $joinType")
 
     val res = df1.join(df2, usingColumns = Seq(key1f.name), joinType = joinType)
     res
