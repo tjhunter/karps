@@ -1,9 +1,9 @@
 package org.karps.ops
 
-import scala.util.{Failure, Try}
+import scala.util.{Failure, Try, Success}
 
 import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
-import spray.json.{JsArray, JsObject, JsValue}
+import com.trueaccord.scalapb.json.JsonFormat
 
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.RelationalGroupedDataset
@@ -11,17 +11,16 @@ import org.apache.spark.sql.RelationalGroupedDataset
 import org.karps.{ColumnWithType, DataFrameWithType}
 import org.karps.ops.Extraction.{FieldName, FieldPath}
 import org.karps.ops.SQLFunctionsExtraction.SQLFunctionName
-import org.karps.structures.{AugmentedDataType, IsStrict, JsonSparkConversions}
-
+import org.karps.structures.{AugmentedDataType, IsStrict, OpExtra}
+import karps.core.{structured_transform => ST}
 
 object GroupedReduction extends Logging {
+  import org.karps.structures.ProtoUtils.sequence
 
-  import org.karps.structures.JsonSparkConversions.{getString, get, sequence}
-
-  def groupReduceOrThrow(adf: DataFrameWithType, js: JsValue): DataFrameWithType =
+  def groupReduceOrThrow(adf: DataFrameWithType, js: OpExtra): DataFrameWithType =
     groupReduce(adf, js).get
 
-  def groupReduce(adf: DataFrameWithType, js: JsValue): Try[DataFrameWithType] = {
+  def groupReduce(adf: DataFrameWithType, js: OpExtra): Try[DataFrameWithType] = {
     for {
       op <- parseTrans(js)
       (g, valCol) <- makeGroup(adf)
@@ -32,10 +31,10 @@ object GroupedReduction extends Logging {
     }
   }
 
-  def reduceOrThrow(adf: DataFrameWithType, js: JsValue): DataFrameWithType =
+  def reduceOrThrow(adf: DataFrameWithType, js: OpExtra): DataFrameWithType =
     reduce(adf, js).get
 
-  def reduce(adf: DataFrameWithType, js: JsValue): Try[DataFrameWithType] = {
+  def reduce(adf: DataFrameWithType, js: OpExtra): Try[DataFrameWithType] = {
     val c = DataFrameWithType.asTypedColumn(adf)
     logger.info(s"reduce: c=$c adf=$adf")
     for {
@@ -49,9 +48,18 @@ object GroupedReduction extends Logging {
   }
 
 
-  private sealed trait AggOp
-  private case class AggFunction(function: SQLFunctionName, inputs: Seq[FieldPath]) extends AggOp
-  private case class AggStruct(struct: Seq[Field]) extends AggOp
+  private sealed trait AggOp {
+    def name: Option[String]
+  }
+  
+  private case class AggFunction(
+    function: SQLFunctionName,
+    inputs: Seq[FieldPath],
+    name: Option[String]) extends AggOp
+    
+  private case class AggStruct(
+    struct: Seq[Field],
+    name: Option[String]) extends AggOp
 
   private case class Field(fieldName: FieldName, op: AggOp)
 
@@ -70,56 +78,52 @@ object GroupedReduction extends Logging {
       case x => Failure(new Exception(s"Expected a struct with two fields, got $x"))
     }
   }
-
-  private def parseTrans(js: JsValue): Try[AggOp] = {
-    js match {
-      case JsArray(arr) =>
-        sequence(arr.map(parseField)).map(AggStruct.apply)
-      case JsObject(m) => parseOp(m)
-      case x => Failure(new Exception(s"parseTrans: unexpected object $x"))
-    }
+  
+  private def parseTrans(extra: OpExtra): Try[AggOp] = {
+    val proto = Try(JsonFormat.fromJsonString[ST.Aggregation](extra.content))
+    proto.flatMap(fromProto)
   }
 
-  private def parseOp(m: Map[String, JsValue]): Try[AggOp] = {
-    def opSelect(s: String) = s match {
-      case "function" =>
+  private def fromProto(agg: ST.Aggregation): Try[AggOp] = {
+    val fname = Option(agg.fieldName)
+    import ST.Aggregation.AggOp
+    agg.aggOp match {
+      case AggOp.Empty =>
+        Failure(new Exception(s"Missing content"))
+
+      case AggOp.Op(ST.AggregationFunction(name, inputs)) =>
+        if (name == null) {
+          return Failure(new Exception(s"Missing name"))
+        }
+        val paths = inputs.map { input =>
+          FieldPath(input.path.map(FieldName.apply).toList)
+        }
+        Success(AggFunction(name, paths, fname))
+
+      case AggOp.Struct(ST.AggregationStructure(fields)) =>
+        val fst = sequence(fields.map(fromProto))
         for {
-          l <- JsonSparkConversions.getFlattenSeq(m, "fields")(Extraction.getFieldPath)
-          n <- getString(m, "functionName")
-        } yield AggFunction(n, l)
-      case n =>
-        Failure(new Exception(s"Operation $s not understood"))
+          fs <- fst
+          fieldNames <- ColumnTransforms.checkFieldNames(fs.map(_.name))
+        } yield {
+          val fs2 = fs.zip(fieldNames).map { case (f, fn) => Field(fn, f) }
+          AggStruct(fs2, fname)
+        }
+        
     }
-    for {
-      op <- getString(m, "aggOp")
-      z <- opSelect(op)
-    } yield z
-  }
-
-  private def parseField(js: JsValue): Try[Field] = js match {
-    case JsObject(m) =>
-      for {
-        fName <- getString(m, "name")
-        op <- get(m, "op")
-        trans <- parseTrans(op)
-      } yield {
-        Field(FieldName(fName), trans)
-      }
-    case _ =>
-      Failure(new Exception(s"expected object, got $js"))
   }
 
   private def performTrans(
       valCol: ColumnWithType,
       agg: AggOp): Try[ColumnWithType] = agg match {
-    case AggFunction(n, inputs) =>
+    case AggFunction(n, inputs, _) =>
       for {
         cols <- sequence(inputs.map(Extraction.extractCol(valCol, _)))
         c <- SQLFunctionsExtraction.buildFunction(n, cols, valCol.ref)
       } yield {
         c
       }
-    case AggStruct(fields) =>
+    case AggStruct(fields, _) =>
       sequence(fields.map { f =>
         performTrans(valCol, f.op).map(_.alias(f.fieldName))
       }).flatMap(ColumnWithType.struct(_ : _*))

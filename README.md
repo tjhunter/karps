@@ -15,6 +15,6 @@ in Spark 2.0, using Spark 2.1 is strongly recommended.
 
 ```
 ./build/sbt assembly && $SPARK_HOME/bin/spark-submit \
-    ./target/scala-2.11/karps-server-assembly-0.2.0.jar --name karps-server\
+    ./target/testing/scala-2.11/ks_testing-assembly-0.2.0.jar --name karps-server\
      --class org.karps.Boot --master "local[1]" -v
 ```

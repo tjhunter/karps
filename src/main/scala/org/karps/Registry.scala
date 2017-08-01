@@ -4,7 +4,7 @@ import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
 
 import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
-import spray.json.{JsObject, JsValue}
+import com.trueaccord.scalapb.json.JsonFormat
 
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.functions.{struct => sqlStruct}
@@ -14,6 +14,7 @@ import org.apache.spark.sql._
 import org.karps.ops.Extraction
 import org.karps.row.Cell
 import org.karps.structures._
+import karps.core.{computation => C}
 
 
 /**
@@ -185,13 +186,11 @@ sealed trait ExecutionOutput
 case class LocalExecOutput(row: CellWithType) extends ExecutionOutput
 case class DisExecutionOutput(df: DataFrameWithType) extends ExecutionOutput
 
-
 trait OpBuilder {
   def op: String
   def build(
       parents: Seq[ExecutionOutput],
-      extra: JsValue,
-      session: SparkSession): DataFrameWithType
+      extra: OpExtra, session: SparkSession): DataFrameWithType
 }
 
 class Registry extends Logging {
@@ -211,19 +210,19 @@ class Registry extends Logging {
   }
 
   private class SessionBuilder(
-      raw: Seq[UntypedNodeJson],
+      raw: Seq[UntypedNode],
       sessionId: SessionId,
       computationId: ComputationId,
       cache: () => ResultCache) extends Logging {
 
     def getItem(
-        raw: UntypedNodeJson,
+        raw: UntypedNode,
         done: Map[Path, ExecutionItem]): ExecutionItem = {
       val parents = raw.parents.map { path =>
-        done.getOrElse(Path.create(path), throw new Exception(s"Missing $path"))
+        done.getOrElse(path, throw new Exception(s"Missing $path"))
       }
       val logicalDependencies = raw.logicalDependencies.map { path =>
-        done.getOrElse(Path.create(path), throw new Exception(s"Missing $path"))
+        done.getOrElse(path, throw new Exception(s"Missing $path"))
       }
       // Special case here for the pointer constants.
       val builder = if (raw.op == "org.spark.PlaceholderCache") {
@@ -241,17 +240,13 @@ class Registry extends Logging {
       } else {
         ops.getOrElse(raw.op, throw new Exception(s"Operation ${raw.op} not registered"))
       }
-      val locality = raw.locality match {
-        case "local" => Local
-        case "distributed" => Distributed
-      }
-      val path = GlobalPath.from(sessionId, computationId, Path.create(raw.path))
-      new ExecutionItem(parents, logicalDependencies, locality,
+      val path = GlobalPath.from(sessionId, computationId, raw.path)
+      new ExecutionItem(parents, logicalDependencies, raw.locality,
         path, cache, builder, raw, sparkSession)
     }
 
     def getItems(
-        todo: Seq[UntypedNodeJson],
+        todo: Seq[UntypedNode],
         done: Map[Path, ExecutionItem],
         doneInOrder: Seq[ExecutionItem]): Seq[ExecutionItem] = {
       if (todo.isEmpty) {
@@ -259,10 +254,10 @@ class Registry extends Logging {
       }
       // Find all the elements for which all the dependencies have been resolved:
       val (now, later) = todo.partition { raw =>
-        (raw.parents ++ raw.logicalDependencies).map(Path.create).forall(done.contains)
+        (raw.parents ++ raw.logicalDependencies).forall(done.contains)
       }
       require(now.nonEmpty, (todo, done))
-      val processed = now.map(raw => Path.create(raw.path) -> getItem(raw, done))
+      val processed = now.map(raw => raw.path -> getItem(raw, done))
       val done2 = done ++ processed
       getItems(later, done2, doneInOrder ++ processed.map(_._2))
     }
@@ -274,7 +269,7 @@ class Registry extends Logging {
    * This is not required for the raw elements.
    */
   def getItems(
-      raw: Seq[UntypedNodeJson],
+      raw: Seq[UntypedNode],
       sessionId: SessionId,
       computationId: ComputationId,
       cache: () => ResultCache): Seq[ExecutionItem] = {
@@ -284,17 +279,13 @@ class Registry extends Logging {
 }
 
 object Registry {
-  import JsonSparkConversions._
-
-  def extractPointerPath(sid: SessionId, js: JsValue): Try[GlobalPath] = js match {
-    case JsObject(m) =>
-      for {
-        p <- getStringList(m, "path")
-        comp <- getString(m, "computation")
-      } yield {
-        GlobalPath.from(sid, ComputationId(comp), Path.create(p))
-      }
-    case _ => Failure(new Exception(s"Expected object, got $js"))
+  
+  def extractPointerPath(sid: SessionId, js: OpExtra): Try[GlobalPath] = {
+    // TODO: could be more robust here
+    val proto = JsonFormat.fromJsonString[C.PointerPath](js.content)
+    Success(GlobalPath.from(sid,
+      ComputationId.fromProto(proto.computation.get),
+      Path.fromProto(proto.localPath.get)))
   }
 }
 
@@ -302,12 +293,12 @@ object GlobalRegistry extends Logging {
   val registry: Registry = new Registry()
 
   def createBuilder(opName: String)(
-      fun:(Seq[ExecutionOutput], JsValue) => DataFrameWithType): OpBuilder = {
+      fun:(Seq[ExecutionOutput], OpExtra) => DataFrameWithType): OpBuilder = {
     new OpBuilder {
       override def op = opName
       override def build(
           p: Seq[ExecutionOutput],
-          ex: JsValue,
+          ex: OpExtra,
           session: SparkSession): DataFrameWithType = {
         fun(p, ex)
       }
@@ -315,12 +306,12 @@ object GlobalRegistry extends Logging {
   }
 
   def createBuilderSession(opName: String)(
-    fun:(Seq[ExecutionOutput], JsValue, SparkSession) => DataFrameWithType): OpBuilder = {
+    fun:(Seq[ExecutionOutput], OpExtra, SparkSession) => DataFrameWithType): OpBuilder = {
     new OpBuilder {
       override def op = opName
       override def build(
           p: Seq[ExecutionOutput],
-          ex: JsValue,
+          ex: OpExtra,
           session: SparkSession): DataFrameWithType = {
         fun(p, ex, session)
       }
@@ -328,8 +319,8 @@ object GlobalRegistry extends Logging {
   }
 
   // A builder that takes no argument other than some extra JSON input.
-  def createTypedBuilder0(opName: String)(fun: JsValue => DataFrameWithType): OpBuilder = {
-    def fun1(items: Seq[ExecutionOutput], jsValue: JsValue): DataFrameWithType = {
+  def createTypedBuilder0(opName: String)(fun: OpExtra => DataFrameWithType): OpBuilder = {
+    def fun1(items: Seq[ExecutionOutput], jsValue: OpExtra): DataFrameWithType = {
       require(items.isEmpty, items)
       fun(jsValue)
     }
@@ -338,8 +329,8 @@ object GlobalRegistry extends Logging {
 
   // Builder that takes a single dataframe at the input.
   def createBuilderD(opName: String)
-                    (fun: (DataFrameWithType, JsValue) => DataFrameWithType): OpBuilder = {
-    def fun1(items: Seq[ExecutionOutput], jsValue: JsValue): DataFrameWithType = {
+                    (fun: (DataFrameWithType, OpExtra) => DataFrameWithType): OpBuilder = {
+    def fun1(items: Seq[ExecutionOutput], jsValue: OpExtra): DataFrameWithType = {
       items match {
         case Seq(DisExecutionOutput(adf)) => fun(adf, jsValue)
         case _ => throw new Exception(s"Unexpected input for op $opName: $items")
@@ -349,8 +340,8 @@ object GlobalRegistry extends Logging {
   }
 
   def createBuilderDD(opName: String)
-                     (fun: (DataFrame, DataFrame, JsValue) => DataFrame): OpBuilder = {
-    def fun1(items: Seq[ExecutionOutput], jsValue: JsValue): DataFrameWithType = {
+                     (fun: (DataFrame, DataFrame, OpExtra) => DataFrame): OpBuilder = {
+    def fun1(items: Seq[ExecutionOutput], jsValue: OpExtra): DataFrameWithType = {
       items match {
         case Seq(DisExecutionOutput(adf1), DisExecutionOutput(adf2)) =>
           // Result is distributed, no need to force denormalization?
@@ -362,8 +353,8 @@ object GlobalRegistry extends Logging {
   }
 
   def createTypedBuilderD(opName: String)(
-        fun: (DataFrameWithType, JsValue) => DataFrameWithType): OpBuilder = {
-    def fun1(items: Seq[ExecutionOutput], jsValue: JsValue): DataFrameWithType = {
+        fun: (DataFrameWithType, OpExtra) => DataFrameWithType): OpBuilder = {
+    def fun1(items: Seq[ExecutionOutput], jsValue: OpExtra): DataFrameWithType = {
       items match {
         case Seq(DisExecutionOutput(adf)) => fun(adf, jsValue)
         case _ => throw new Exception(s"Unexpected input for op $opName: $items")
@@ -376,7 +367,7 @@ object GlobalRegistry extends Logging {
   // is as strict as the strictness of the inputs. This is only done for the top-level operations.
   // For the types themselves, Spark is trusted.
   def createLocalBuilder2(opName: String)(fun: (Column, Column) => Column): OpBuilder = {
-    def fun1(items: Seq[ExecutionOutput], js: JsValue, session: SparkSession): DataFrameWithType = {
+    def fun1(items: Seq[ExecutionOutput], js: OpExtra, session: SparkSession): DataFrameWithType = {
       val df = buildLocalDF(items, 2, session)
       val c1 = df.col("_1")
       val c2 = df.col("_2")
@@ -386,7 +377,7 @@ object GlobalRegistry extends Logging {
   }
 
   def createLocalBuilder1(opName: String)(fun: Column => Column): OpBuilder = {
-    def fun1(items: Seq[ExecutionOutput], js: JsValue, session: SparkSession): DataFrameWithType = {
+    def fun1(items: Seq[ExecutionOutput], js: OpExtra, session: SparkSession): DataFrameWithType = {
       val df = buildLocalDF(items, 1, session)
       val c1 = df.col("_1")
       buildLocalDF2(df, fun(c1), nullability(items))
