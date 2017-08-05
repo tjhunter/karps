@@ -12,10 +12,22 @@ import org.karps.row.AlgebraicRow
 import org.karps.structures._
 
 
-
+trait ComputationListener {
+  def computationId: ComputationId
+  def onComputation(comp: Computation): Unit
+  def onAnalyzed(
+      path: GlobalPath,
+      stats: SparkComputationStats,
+      locality: Locality): Unit
+  def onFinished(path: GlobalPath, result: Try[CellWithType]): Unit
+  def isFinished: Boolean
+}
 
 /**
  * The execution of a sequence of Spark operations.
+ *
+ * This class only deals with pinned graphs: all the functional elements
+ * must have been resolved by then.
  *
  * @param id
  */
@@ -28,15 +40,35 @@ class KSession(val id: SessionId) extends Logging {
   @volatile
   private[this] var state = State(new ResultCache, Map.empty)
 
+  @volatile
+  private[this] var listeners: Map[ComputationId, ComputationListener] = Map.empty
+
   def compute(
       compId: ComputationId,
-      raw: Seq[UntypedNode]): Unit = synchronized {
+      raw: Seq[UntypedNode],
+      listener: Option[ComputationListener] = None): Unit = synchronized {
     logger.debug(s"Getting computation info (raw):\n" + UntypedNode.pprint(raw))
     def currentResults() = { state.results }
     val items = GlobalRegistry.registry.getItems(raw, id, compId, currentResults)
     logger.debug(s"Getting computation info (parsed and sorted):\n" + items.map(_.path))
     val computation = Computation.create(compId, items)
     state = state.add(compId, computation)
+    listener.foreach { l =>
+      listeners += compId -> l
+      l.onComputation(computation)
+      // Send all the results that have already been computed before (because we are
+      // retrying the computation for example)
+      statusComputation(compId).foreach { bcr =>
+        for ((gpath, _, res) <- bcr.results) {
+          res match {
+            case ComputationDone(Some(cwt), _) =>
+              l.onFinished(gpath, Success(cwt))
+            case _ =>
+          }
+        }
+      }
+    }
+    logger.debug(s"compute: listeners: $listener")
     update()
   }
 
@@ -56,7 +88,7 @@ class KSession(val id: SessionId) extends Logging {
   private def notifyFinished(path: GlobalPath, result: Try[CellWithType]): Unit = synchronized {
     result match {
       case Success(cwt) =>
-        logger.debug(s"Item $path finished with a success]")
+        logger.debug(s"Item $path finished with a success")
         // Extract the current stats to add them to the result.
         val stats = state.results.status(path) match {
           case Some(ComputationRunning(st)) => st
@@ -70,6 +102,14 @@ class KSession(val id: SessionId) extends Logging {
         logger.error(s"Item $path finished with a failure: $e", e)
         state = state.updateResult(path, ComputationFailed(e))
     }
+    logger.debug(s"notifyFinished: listeners: $listeners path: $path ${path.computation}")
+    listeners.get(path.computation).foreach { l =>
+      l.onFinished(path, result)
+      if (l.isFinished) {
+        logger.debug(s"notifyFinished: $l finished, dropping ${path.computation}")
+        listeners -= path.computation
+      }
+    }
     update()
   }
 
@@ -79,12 +119,22 @@ class KSession(val id: SessionId) extends Logging {
    */
   private def notifyFinishedAnalyzed(
       path: GlobalPath,
-      stats: SparkComputationStats): Unit = synchronized {
+      stats: SparkComputationStats,
+      locality: Locality): Unit = synchronized {
+    listeners.get(path.computation).foreach { l =>
+      l.onAnalyzed(path, stats, locality)
+    }
     state = state.updateResult(path, ComputationDone(None, Some(stats)))
     update()
   }
 
-  private def notifyExecutingInSpark(path: GlobalPath, stats: SparkComputationStats): Unit = synchronized {
+  private def notifyExecutingInSpark(
+      path: GlobalPath,
+      stats: SparkComputationStats,
+      locality: Locality): Unit = synchronized {
+    listeners.get(path.computation).foreach { l =>
+      l.onAnalyzed(path, stats, locality)
+    }
     state = state.updateResult(path, ComputationRunning(Some(stats)))
   }
 
@@ -190,7 +240,7 @@ object KSession extends Logging {
         item.dataframe.explain(true)
         logger.info(s"Spark info for $this: rdd=${item.rddId} dependencies=${item.RDDDependencies}")
         val stats = SparkComputationStats(item.RDDDependencies)
-        session.notifyExecutingInSpark(item.path, stats)
+        session.notifyExecutingInSpark(item.path, stats, item.locality)
         if (item.locality == Local) {
           logger.info(s"Getting internal rows: ${item.collectedInternal}")
           logger.info(s"$this: output schema is:")
@@ -209,7 +259,7 @@ object KSession extends Logging {
           session.notifyFinished(item.path, cwt)
         } else {
           // It is just a dataframe that we analyzed
-          session.notifyFinishedAnalyzed(item.path, stats)
+          session.notifyFinishedAnalyzed(item.path, stats, item.locality)
         }
       } catch {
         case NonFatal(e) =>
@@ -257,11 +307,6 @@ object KSession extends Logging {
 
     // Return all the computations that are free to run, and for which the results have
     // finished to compute.
-//    comp.trackedItems.filter(isAvailable).filter { item =>
-//      comp.trackedItemDependencies(item.path)
-//        .map(cache.status)
-//        .forall(isFinished)
-//    }
     comp.items.filter(isAvailable).filter { item =>
       comp.itemDependencies(item.path)
         .map(cache.status)

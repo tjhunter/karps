@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package karps.core;
 
-import "types.proto";
+import "karps/proto/types.proto";
 
 // The I/O related data structures.
 

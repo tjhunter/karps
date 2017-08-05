@@ -2,8 +2,8 @@ syntax = "proto3";
 
 package karps.core;
 
-import "graph.proto";
-import "row.proto";
+import "karps/proto/graph.proto";
+import "karps/proto/row.proto";
 
 enum ResultStatus {
   UNUSED = 0;

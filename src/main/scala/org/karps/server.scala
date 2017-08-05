@@ -1,6 +1,9 @@
 package org.karps
 
+import java.util.concurrent.Executors
+
 import scala.concurrent.duration._
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 import akka.actor.{Actor, ActorSystem, Props}
 import akka.io.IO
@@ -10,39 +13,65 @@ import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
 import spray.can.Http
 import spray.http.MediaTypes._
 import spray.routing._
+import io.grpc.{Server, ServerBuilder}
 
+
+import karps.core.{interface => I}
+import karps.core.{computation => C}
+import karps.core.interface.KarpsMainGrpc
 import org.karps.structures._
 import org.karps.ops.{HdfsPath, HdfsResourceResult}
-import karps.core.{interface => I}
 
 object Boot extends App {
 
   val karpsPort = 8081
   val interface = "localhost"
+  val karpsGrpcPort = 8082
 
   SparkRegistry.setup()
 
   // we need an ActorSystem to host our application in
   implicit val system = ActorSystem("karps-on-spray-can")
 
-  // create and start our service actor
-  val service = system.actorOf(Props[MyServiceActor], "demo-service")
-
-  implicit val timeout = Timeout(5.seconds)
-  // start a new HTTP server on port 8080 with our service actor as the handler
-  IO(Http) ? Http.Bind(service, interface = interface, port = karpsPort)
-}
-
-// we don't implement our route structure directly in the service actor because
-// we want to be able to test it independently, without having to spin up an actor
-class MyServiceActor extends Actor with MyService {
-
-  // TODO: move outside an actor.
-  val manager = {
+  lazy val manager = {
     val m = new Manager()
     m.init()
     m
   }
+
+  val executorService = Executors.newFixedThreadPool(10)
+  implicit val executionContext = ExecutionContext.fromExecutorService(executorService)
+
+  lazy val grpcManager = new GrpcManager(Some(manager))
+
+  // create and start our service actor
+  val service = system.actorOf(Props[KarpsRestActor], "demo-service")
+
+  lazy val grpcService = new KarpsGrpcServer(executionContext, grpcManager)
+
+  implicit val timeout = Timeout(5.seconds)
+  // start a new HTTP server on port 8080 with our service actor as the handler
+  val rest = Future {
+    IO(Http) ? Http.Bind(service, interface = interface, port = karpsPort)
+  }
+
+  val grpc = Future {
+    grpcService.start()
+    grpcService.blockUntilShutdown()
+  }
+
+  Await.result(for {
+    _ <- rest
+    _ <- grpc
+  } yield  {}, 100000.hours)
+}
+
+// we don't implement our route structure directly in the service actor because
+// we want to be able to test it independently, without having to spin up an actor
+class KarpsRestActor extends Actor with KarpsRestService {
+
+  // TODO: move outside an actor.
+  val manager = Boot.manager
 
   // the HttpService trait defines only one abstract member, which
   // connects the services environment to the enclosing actor or test
@@ -55,11 +84,37 @@ class MyServiceActor extends Actor with MyService {
 }
 
 
-case class Person(name: String, favoriteNumber: Int)
+class KarpsGrpcServer(executionContext: ExecutionContext, manager: GrpcManager) extends Logging {
+  private var server: Server = null
+
+  def start(): Unit = {
+    server = ServerBuilder.forPort(Boot.karpsGrpcPort)
+      .addService(KarpsMainGrpc.bindService(manager, executionContext))
+        .build.start()
+    logger.info(s"GRPC server started, listening on port ${Boot.karpsGrpcPort}")
+    sys.addShutdownHook {
+      logger.info(s"Exit hook called: Stopping GRPC server")
+      stop()
+      logger.info(s"Exit hook called: GRPC server has been stopped")
+    }
+  }
+
+  private def stop(): Unit = {
+    if (server != null) {
+      server.shutdown()
+    }
+  }
+
+  def blockUntilShutdown(): Unit = {
+    if (server != null) {
+      server.awaitTermination()
+    }
+  }
+}
 
 
 // this trait defines our service behavior independently from the service actor
-trait MyService extends HttpService with Logging {
+trait KarpsRestService extends HttpService with Logging {
 
   val manager: Manager
 
@@ -113,12 +168,12 @@ trait MyService extends HttpService with Logging {
           logger.info(s"Proto request from http: $protoIn")
           val sessionId = SessionId.fromProto(protoIn.session.get).get
           val computationId =
-            ComputationId.fromProto(protoIn.computation.get)
+            ComputationId.fromProto(protoIn.requestedComputation.get)
           val nodes =
             protoIn.graph.get.nodes
               .map(UntypedNode.fromProto).map(_.get)
           
-          manager.execute(sessionId, computationId, nodes)
+          manager.execute(sessionId, computationId, nodes, None)
           val protoOut = I.CreateComputationResponse()
           val jsonOut = ProtoUtils.toJsonString(protoOut)
           complete(jsonOut)

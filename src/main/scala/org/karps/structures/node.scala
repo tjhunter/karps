@@ -60,5 +60,24 @@ object UntypedNode {
       UntypedNode(loc, p, n, parents, deps, x, adt)
     }
   }
+
+  /**
+   * Returns a sequence of nodes sorted in topological order.
+   */
+  def sortTopo(seq: Seq[UntypedNode]): Seq[UntypedNode] = {
+    sortTopo0(seq.map { n => n -> (n.logicalDependencies ++ n.parents).toSet })
+  }
+
+  private def sortTopo0(seq: Seq[(UntypedNode, Set[Path])]): Seq[UntypedNode] = {
+    if (seq.isEmpty) {
+      return Nil
+    }
+    // Find all the nodes that have no parents.
+    val (ready0, todo) = seq.partition(_._2.isEmpty)
+    val ready = ready0.map(_._1)
+    val readyPaths = ready.map(_.path).toSet
+    val seq2 = todo.map { case (n, ps) => n -> (ps -- readyPaths)}
+    ready ++ sortTopo0(seq2)
+  }
 }
 

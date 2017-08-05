@@ -2,15 +2,19 @@ syntax = "proto3";
 
 package karps.core;
 
-import "graph.proto";
-import "computation.proto";
+import "karps/proto/graph.proto";
+import "karps/proto/computation.proto";
 
 service KarpsMain {
   rpc CreateSession (CreateSessionRequest) returns (CreateSessionResponse);
-  
+
+  // TODO: this is not necessary with the stream
   rpc CreateComputation (CreateComputationRequest) returns (CreateComputationResponse);
-  
+
+  // TODO: return a stream response too.
   rpc ComputationStatus (ComputationStatusRequest) returns (BatchComputationResult);
+
+  rpc StreamCreateComputation (CreateComputationRequest) returns (stream ComputationStreamResponse);
   
   rpc ResourceStatus (ResourceStatusRequest) returns (ResourceStatusResponse);
   
@@ -25,7 +29,6 @@ message CreateSessionResponse {};
 
 message CreateComputationRequest {
   SessionId session = 1;
-  ComputationId computation = 2;
   Graph graph = 3;
   ComputationId requested_computation = 4;
 };
@@ -52,4 +55,16 @@ message HdfsResourceStatus {
 
 message ResourceStatusResponse {
   repeated HdfsResourceStatus hdfs = 1;
+};
+
+message ComputationStreamResponse {
+  SessionId session = 1;
+  ComputationId computation = 2;
+  oneof updates {
+    Graph start_graph = 3;
+    Graph pinned_graph = 4;
+    // Returns all the most recent info on a node if anything changes for this node.
+    // Not super efficient as the spark stats will be repeatedly sent over.
+    BatchComputationResult results = 5;
+  }
 };

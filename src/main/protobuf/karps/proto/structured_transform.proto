@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+import "karps/proto/graph.proto";
+
 package karps.core;
 
 message Column {
@@ -7,6 +9,9 @@ message Column {
     ColumnStructure struct = 1;
     ColumnFunction function = 2;
     ColumnExtraction extraction = 3;
+    // This is only allowed in the functional graph.
+    // It will need to be translated into a broadcast.
+    // Path obs_broadcast = 4;
   };
   // The name assigned by the user (only required with structs)
   string field_name = 10;
