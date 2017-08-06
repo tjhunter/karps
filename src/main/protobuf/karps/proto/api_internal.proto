@@ -1,0 +1,68 @@
+// Internal API to talk to the brain.
+// This is not relevant for users and developers.
+
+syntax = "proto3";
+
+package karps.core;
+
+import "karps/proto/graph.proto";
+import "karps/proto/computation.proto";
+
+message PerformGraphTransform {
+    SessionId session = 1;
+    ComputationId computation = 2;
+    // The graph, with potentially some functional elements.
+    Graph functional_graph = 3;
+    // Nodes that have completed and are available for substitution.
+    repeated NodeMapItem available_nodes = 4;
+    // The targets:
+    repeated Path requested_paths = 5;
+    // The tags of all the sources that have been identified.
+
+}
+
+message GraphTransformResponse {
+    // The graph, pinned to a device (if a success).
+    Graph pinned_graph = 1;
+    // Update of all the nodes that we know about.
+    repeated NodeMapItem node_map = 2;
+    // Some information about the analysis
+    repeated AnalysisMessage messages = 3;
+
+    // TODO: make some other info available such as the graphs between
+    // the different stages.
+}
+
+// An association between a global path and an internal id.
+// This information could be kept strictly inside the brain, but this is the
+// only piece of state there, and transfering it to the server makes the
+// brain stateless (everything else is deterministic).
+message NodeMapItem {
+    NodeId node = 1;
+    Path path = 2;
+    ComputationId computation = 3;
+    SessionId session = 4;
+}
+
+
+// Internal node id. Should not be used by the user (only paths for them).
+message NodeId {
+    string value = 1;
+}
+
+// ******** logging **********
+
+enum MessageSeverity {
+    INFO = 0;
+    WARNING = 1;
+    FATAL = 2;
+}
+
+message AnalysisMessage {
+    ComputationId computation = 1;
+    SessionId session = 2;
+    NodeId relevant_id = 3;
+    Path path = 4;
+    string content = 5;
+    MessageSeverity level = 6;
+}

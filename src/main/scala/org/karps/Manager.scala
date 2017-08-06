@@ -7,12 +7,15 @@ import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
 import io.grpc.stub.StreamObserver
 import org.apache.spark.scheduler.{SparkListener, SparkListenerStageCompleted, SparkListenerStageSubmitted}
 import org.apache.spark.sql.SparkSession
+
 import org.karps.ops.{HdfsPath, HdfsResourceResult, SourceStamps}
 import org.karps.structures.{ComputationId, _}
+import org.karps.brain.{Brain, CacheStatus, BrainTransformSuccess}
 
 import scala.util.Try
 import karps.core.{interface => I}
 import karps.core.{computation => C}
+import karps.core.{graph => G}
 import karps.core.interface.KarpsMainGrpc.KarpsMain
 
 
@@ -31,9 +34,10 @@ class KarpsListener(manager: Manager) extends SparkListener with Logging {
  *
  * A manager may not be available immediately.
  */
-class GrpcManager(manager: Option[Manager]) extends KarpsMain with Logging {
+class GrpcManager(
+    manager: Option[Manager], brain: Option[Brain]) extends KarpsMain with Logging {
 
-  def this() = this(None)
+  def this() = this(None, None)
 
   override def createSession(proto: I.CreateSessionRequest): Future[I.CreateSessionResponse] = {
     val sessionId = SessionId.fromProto(proto.requestedSession.get).get
@@ -88,16 +92,35 @@ class GrpcManager(manager: Option[Manager]) extends KarpsMain with Logging {
     logger.debug(s"createComputation: sessionId=$sessionId")
     val computationId = ComputationId.fromProto(protoIn.requestedComputation.get)
     logger.debug(s"createComputation: computationId=$computationId")
-    val nodes = protoIn.graph.get.nodes
+    // Conversion from functional graph to pinned graph.
+    val functionalGraph = protoIn.graph.get
+    val pinnedGraph: G.Graph = brain match {
+      case Some(b) => b.transform(sessionId, computationId, functionalGraph) match {
+        case BrainTransformSuccess(g2, msgs) =>
+          logger.info(s"Used brain to optimize the graph, messages:")
+          for (msg <- msgs) {
+            logger.info(s"- $msg")
+          }
+          g2
+        case x =>
+          logger.info(s"Brain failed to optimized graph, messages: $x")
+          val e = new Exception(x.toString)
+          for (obs <- responseObserver) {
+            obs.onError(e)
+          }
+          throw new Exception(e)
+      }
+      case None => // Just assume the current graph is good enough
+        functionalGraph
+    }
+    val nodes = pinnedGraph.nodes
         .map(UntypedNode.fromProto)
         .map(_.get)
     logger.debug(s"createComputation: nodes=$nodes")
     val sortedNodes = UntypedNode.sortTopo(nodes)
     logger.debug(s"createComputation: sorted nodes=$nodes")
-
     val l = responseObserver.map(obs =>
-      new GrpcListener(sessionId, computationId, obs, sortedNodes))
-    // TODO: insert here the brain.
+      new GrpcListener(sessionId, computationId, obs, sortedNodes, brain))
     logger.debug(s"createComputation: observers: $l")
     current.execute(sessionId, computationId, sortedNodes, l)
   }
@@ -108,7 +131,8 @@ class GrpcListener(
     sessionId: SessionId,
     override val computationId: ComputationId,
     obs: StreamObserver[I.ComputationStreamResponse],
-    startNodes: Seq[UntypedNode]) extends ComputationListener with Logging {
+    startNodes: Seq[UntypedNode],
+    brain: Option[Brain]) extends ComputationListener with Logging {
 
   private var current: Map[Path, C.ComputationResult] = startNodes.map { n =>
     val p = GlobalPath.from(sessionId, computationId, n.path)
@@ -153,6 +177,9 @@ class GrpcListener(
         cr.copy(status=FINISHED_SUCCESS, finalResult=Some(CellWithType.toProto(cwt)))
       case Failure(e) =>
         cr.copy(status=FINISHED_FAILURE, finalError=e.getLocalizedMessage)
+    }
+    if (result.isSuccess) {
+      brain.foreach(_.updateStatus(path, CacheStatus.NodeComputedSuccess))
     }
     current += path.local -> cr2
     finished += path.local

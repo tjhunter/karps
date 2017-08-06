@@ -14,6 +14,7 @@ import spray.can.Http
 import spray.http.MediaTypes._
 import spray.routing._
 import io.grpc.{Server, ServerBuilder}
+import org.karps.brain.HaskellBrain
 
 
 import karps.core.{interface => I}
@@ -42,7 +43,7 @@ object Boot extends App {
   val executorService = Executors.newFixedThreadPool(10)
   implicit val executionContext = ExecutionContext.fromExecutorService(executorService)
 
-  lazy val grpcManager = new GrpcManager(Some(manager))
+  lazy val grpcManager = new GrpcManager(Some(manager), Some(HaskellBrain.launch()))
 
   // create and start our service actor
   val service = system.actorOf(Props[KarpsRestActor], "demo-service")

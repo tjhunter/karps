@@ -31,6 +31,7 @@ message CreateComputationRequest {
   SessionId session = 1;
   Graph graph = 3;
   ComputationId requested_computation = 4;
+  repeated Path requested_paths = 5;
 };
 
 message CreateComputationResponse {};

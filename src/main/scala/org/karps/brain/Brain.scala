@@ -1,9 +1,7 @@
-package org.karps
+package org.karps.brain
 
-import scala.util.Try
-
-import org.karps.CacheStatus.NodeStatus
 import org.karps.structures.{ComputationId, GlobalPath, SessionId}
+
 import karps.core.{graph => G}
 
 /**
@@ -21,14 +19,17 @@ trait Brain {
    * Sends an update to the brain about the completion of a
    * calculation.
    */
-  def updateStatus(g: GlobalPath, status: NodeStatus): Unit
+  def updateStatus(g: GlobalPath, status: CacheStatus.NodeStatus): Unit
 
   def transform(
       session: SessionId,
       computationId: ComputationId,
-      graph: G.Graph): Try[G.Graph] // TODO: change: multiple graphs, warnings, etc.
+      graph: G.Graph): BrainResult
 }
 
+sealed trait BrainResult
+case class BrainTransformSuccess(g: G.Graph, messages: Seq[String]) extends BrainResult
+case class BrainTransformFailure(message: String) extends BrainResult
 
 object CacheStatus {
   sealed trait NodeStatus
