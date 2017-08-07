@@ -1,6 +1,6 @@
 package org.karps.brain
 
-import org.karps.structures.{ComputationId, GlobalPath, SessionId}
+import org.karps.structures.{ComputationId, GlobalPath, Path, SessionId}
 
 import karps.core.{graph => G}
 
@@ -24,7 +24,8 @@ trait Brain {
   def transform(
       session: SessionId,
       computationId: ComputationId,
-      graph: G.Graph): BrainResult
+      graph: G.Graph,
+      requestedPaths: Seq[Path]): BrainResult
 }
 
 sealed trait BrainResult

@@ -14,14 +14,15 @@ import spray.can.Http
 import spray.http.MediaTypes._
 import spray.routing._
 import io.grpc.{Server, ServerBuilder}
-import org.karps.brain.HaskellBrain
 
+import org.karps.brain.HaskellBrain
+import org.karps.grpc.GrpcManager
+import org.karps.structures._
+import org.karps.ops.{HdfsPath, HdfsResourceResult}
 
 import karps.core.{interface => I}
 import karps.core.{computation => C}
 import karps.core.interface.KarpsMainGrpc
-import org.karps.structures._
-import org.karps.ops.{HdfsPath, HdfsResourceResult}
 
 object Boot extends App {
 

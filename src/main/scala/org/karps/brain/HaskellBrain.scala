@@ -48,9 +48,10 @@ class HaskellBrain(address: String, port: Int) extends Brain with Logging {
   override def transform(
       session: SessionId,
       computationId: ComputationId,
-      graph: G.Graph): BrainResult = {
+      graph: G.Graph,
+      requestedPaths: Seq[Path]): BrainResult = {
     try {
-      transform0(session, computationId, graph)
+      transform0(session, computationId, graph, requestedPaths)
     } catch {
       case NonFatal(e) =>
         logger.warn("brain failure", e)
@@ -61,19 +62,28 @@ class HaskellBrain(address: String, port: Int) extends Brain with Logging {
   def transform0(
       session: SessionId,
       computationId: ComputationId,
-      graph: G.Graph): BrainResult = {
+      graph: G.Graph,
+      requestedPaths: Seq[Path]): BrainResult = {
     val success_nodes = successes.toSeq
-      .flatMap(knownNodes.get)
-      .map(NodeId.toProto)
+      .flatMap(gp => knownNodes.get(gp).map { nid =>
+        AI.NodeMapItem(
+          node=Some(NodeId.toProto(nid)),
+          path=Some(Path.toProto(gp.local)),
+          computation=Some(ComputationId.toProto(gp.computation)),
+          session=Some(SessionId.toProto(gp.session))
+        )
+      })
+    val ps = requestedPaths.map(Path.toProto)
     val request = AI.PerformGraphTransform(
       session=Some(SessionId.toProto(session)),
       computation=Some(ComputationId.toProto(computationId)),
       functionalGraph=Some(graph),
-      availableNodes=success_nodes
+      availableNodes=success_nodes,
+      requestedPaths=ps
     )
     val msg = ProtoUtils.toJsonString(request)
     val url = new URL(s"http://$address:$port/perform_transform")
-    logger.debug(s"Sending ${msg.length} bytes to $url")
+    logger.debug(s"Sending ${msg.length} bytes to $url: \n$msg")
     val con = url.openConnection().asInstanceOf[HttpURLConnection]
     con.setRequestMethod("POST")
     con.setRequestProperty("User-Agent", "karps")

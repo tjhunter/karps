@@ -18,7 +18,6 @@ message PerformGraphTransform {
     // The targets:
     repeated Path requested_paths = 5;
     // The tags of all the sources that have been identified.
-
 }
 
 message GraphTransformResponse {
