@@ -14,6 +14,7 @@ import karps.core.{interface => I}
 import karps.core.{computation => C}
 import karps.core.{graph => G}
 import karps.core.interface.KarpsMainGrpc.KarpsMain
+import karps.core.api_internal.KarpsRestGrpc.KarpsRest
 
 /**
  * Wrapper for all the GRPC calls.
@@ -22,7 +23,7 @@ import karps.core.interface.KarpsMainGrpc.KarpsMain
  */
 class GrpcManager(
     manager: Option[Manager],
-    brain: Option[Brain]) extends KarpsMain with Logging {
+    brain: Option[Brain]) extends KarpsMain with KarpsRest with Logging {
 
   def this() = this(None, None)
 

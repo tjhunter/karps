@@ -3,21 +3,13 @@ syntax = "proto3";
 package karps.core;
 
 import "karps/proto/graph.proto";
+import "karps/proto/io.proto";
 import "karps/proto/computation.proto";
 
 service KarpsMain {
   rpc CreateSession (CreateSessionRequest) returns (CreateSessionResponse);
 
-  // TODO: this is not necessary with the stream
-  rpc CreateComputation (CreateComputationRequest) returns (CreateComputationResponse);
-
-  // TODO: return a stream response too.
-  rpc ComputationStatus (ComputationStatusRequest) returns (BatchComputationResult);
-
   rpc StreamCreateComputation (CreateComputationRequest) returns (stream ComputationStreamResponse);
-  
-  rpc ResourceStatus (ResourceStatusRequest) returns (ResourceStatusResponse);
-  
 };
 
 
@@ -43,21 +35,6 @@ message ComputationStatusRequest {
   
 };
 
-message ResourceStatusRequest {
-  SessionId session = 1;
-  repeated ResourcePath resources = 2;
-};
-
-message HdfsResourceStatus {
-  ResourcePath path = 1;
-  string error = 2;
-  string return = 3;
-}
-
-message ResourceStatusResponse {
-  repeated HdfsResourceStatus hdfs = 1;
-};
-
 message ComputationStreamResponse {
   SessionId session = 1;
   ComputationId computation = 2;
@@ -67,5 +44,15 @@ message ComputationStreamResponse {
     // Returns all the most recent info on a node if anything changes for this node.
     // Not super efficient as the spark stats will be repeatedly sent over.
     BatchComputationResult results = 5;
+    CompilationResult compilation_result = 6;
   }
 };
+
+message CompilationResult {
+  // Some error message if something went wrong.
+  string error = 1;
+  // There may be multiple graphs, each corresponding to a
+  // different compilation phase.
+  // They are in order, until nothing is available.
+  repeated CompilationPhaseGraph compilation_graph = 2;
+}

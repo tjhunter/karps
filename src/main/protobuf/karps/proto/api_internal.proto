@@ -1,12 +1,72 @@
 // Internal API to talk to the brain.
-// This is not relevant for users and developers.
+// This is not relevant for users. Some structures are exposed
+// to the developers.
 
 syntax = "proto3";
 
 package karps.core;
 
-import "karps/proto/graph.proto";
 import "karps/proto/computation.proto";
+import "karps/proto/graph.proto";
+import "karps/proto/interface.proto";
+import "karps/proto/io.proto";
+import "tensorflow/core/framework/graph.proto";
+
+// This service is not implemented in GRPC.
+// It is implemented as a collection of RPC calls that accepts proto byte strings.
+// This is useful for languages that do not have GRPC support.
+service KarpsRest {
+    rpc CreateComputation (CreateComputationRequest) returns (CreateComputationResponse);
+
+    rpc ComputationStatus (ComputationStatusRequest) returns (BatchComputationResult);
+
+    rpc ResourceStatus (AnalyzeResourcesRequest) returns (AnalyzeResourceResponse);
+}
+
+
+// The names of the different compiling phases, in order of action.
+// Note that the numbering itself is not relevant, just the order of
+// the description here.
+enum CompilingPhase {
+    // Here is the most detailed explanation of what is happening inside the
+    // Karps compiler.
+
+    // The initial graph, as received and parsed.
+    // A number of checks have happened already at that point.
+    INITIAL = 0;
+
+    // Nodes that are not reachable from the target outputs are removed.
+    REMOVE_UNREACHABLE = 1;
+
+    // Information about data sources (time stamps) is inserted into the relevant graph
+    // nodes.
+    DATA_SOURCE_INSERTION = 2;
+
+    // Observables that have been computed already are replaced by pointers
+    // to existing paths.
+    POINTER_SWAP_1 = 3;
+
+    // Parallel aggregations are merged into single aggregations.
+    MERGE_AGGREGATIONS = 7;
+
+    // Parallel transforms are merged into single transforms.
+    MERGE_TRANSFORMS = 8;
+
+    // Maybe?
+    MERGE_AGGREGATIONS_2 = 9;
+
+    // The functional nodes are flattened by their equivalents.
+    FUNCTIONAL_FLATTENING = 4;
+
+    // Autocache requests are fullfilled.
+    AUTOCACHE_FULLFILL = 5;
+
+    // All the caching and uncaching requests are checked.
+    CACHE_CHECK = 6;
+
+    // If the compilation succeeds, this is corresponds to the final result.
+    FINAL = 1000;
+};
 
 message PerformGraphTransform {
     SessionId session = 1;
@@ -17,7 +77,10 @@ message PerformGraphTransform {
     repeated NodeMapItem available_nodes = 4;
     // The targets:
     repeated Path requested_paths = 5;
-    // The tags of all the sources that have been identified.
+    // Some potentially known status for some resources.
+    // If these values are set, then they will not be recomputed by
+    // the backend. Any missing value will be recomputed.
+    repeated ResourceStatus known_resources = 6;
 }
 
 message GraphTransformResponse {
@@ -27,9 +90,37 @@ message GraphTransformResponse {
     repeated NodeMapItem node_map = 2;
     // Some information about the analysis
     repeated AnalysisMessage messages = 3;
+    // The steps of the compiling transform.
+    // They are returned in order.
+    repeated CompilerStep steps = 4;
+    // TODO: add the resources that are queried?
+}
 
-    // TODO: make some other info available such as the graphs between
-    // the different stages.
+// ******* Resource checks *******
+//
+// This is only relevant to the Haskell client, because it embeds
+// the compiler and needs to call the resource status itself.
+
+// The status of a resource.
+// TODO: should it be moved to io? Some other modules may use it too.
+message ResourceStatus {
+    ResourcePath resource = 1;
+    ResourceStamp stamp = 2;
+}
+
+// Requests a backend for the status of some resources.
+message AnalyzeResourcesRequest {
+    repeated ResourcePath resources = 1;
+}
+
+// All the requests are fullfilled, either with error or success.
+message AnalyzeResourceResponse {
+    message FailedStatus {
+        ResourcePath resource = 1;
+        string error = 2;
+    }
+    repeated ResourceStatus successes = 1;
+    repeated FailedStatus failures = 2;
 }
 
 // An association between a global path and an internal id.
@@ -41,6 +132,15 @@ message NodeMapItem {
     Path path = 2;
     ComputationId computation = 3;
     SessionId session = 4;
+}
+
+// A step in the compile transform.
+message CompilerStep {
+    CompilingPhase phase = 1;
+    Graph graph = 2;
+    // A representation of the graph that can be displayed with
+    // TensorBoard.
+    tensorflow.GraphDef graph_def = 3;
 }
 
 

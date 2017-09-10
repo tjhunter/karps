@@ -5,6 +5,24 @@ package karps.core;
 import "karps/proto/types.proto";
 
 // The I/O related data structures.
+//  - description of source readers in Spark.
+//  - description of a data resource, and some ways to check them.
+
+// A path to a data resource.
+// This is usually a file path, an HDFS path, etc.
+// It is meant to uniquely identify a data resource.
+message ResourcePath {
+  string uri = 1;
+}
+
+// A stamp that defines the state of a data resource at some point in time.
+// The general contract is that if a resource changes (new data, removed data),
+// etc.), then the stamp should change.
+// It is expected to be a small value, but otherwise no assumption is made
+// on the structure of the value inside.
+message ResourceStamp {
+  string data = 1;
+}
 
 message SourceDescription {
   string path = 1;

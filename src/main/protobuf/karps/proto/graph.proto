@@ -30,5 +30,15 @@ message Path {
 };
 
 message OpExtra {
-  string content = 1; // TODO: should by bytestring?
+  bytes content = 1;
 };
+
+
+
+message CompilationPhaseGraph {
+  string phase_name = 1;
+  // Eiter (graph, graph_tb) or (error_message) are defined.
+  Graph graph = 2;
+  string graph_tensorboard_repr = 3;
+  string error_message = 4;
+}

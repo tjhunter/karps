@@ -1,7 +1,5 @@
 syntax = "proto3";
 
-import "karps/proto/graph.proto";
-
 package karps.core;
 
 message Column {
