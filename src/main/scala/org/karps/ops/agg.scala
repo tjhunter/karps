@@ -3,7 +3,6 @@ package org.karps.ops
 import scala.util.{Failure, Try, Success}
 
 import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
-import com.trueaccord.scalapb.json.JsonFormat
 
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.RelationalGroupedDataset
@@ -11,7 +10,7 @@ import org.apache.spark.sql.RelationalGroupedDataset
 import org.karps.{ColumnWithType, DataFrameWithType}
 import org.karps.ops.Extraction.{FieldName, FieldPath}
 import org.karps.ops.SQLFunctionsExtraction.SQLFunctionName
-import org.karps.structures.{AugmentedDataType, IsStrict, OpExtra}
+import org.karps.structures.{AugmentedDataType, IsStrict, OpExtra, ProtoUtils}
 import karps.core.{structured_transform => ST}
 
 object GroupedReduction extends Logging {
@@ -80,8 +79,11 @@ object GroupedReduction extends Logging {
   }
   
   private def parseTrans(extra: OpExtra): Try[AggOp] = {
-    val proto = Try(JsonFormat.fromJsonString[ST.Aggregation](extra.content))
-    proto.flatMap(fromProto)
+    val proto = ProtoUtils.fromExtra[ST.Aggregation](extra)
+    logger.debug(s"parseTrans: proto=$proto")
+    val res = proto.flatMap(fromProto)
+    logger.debug(s"parseTrans: res=$res")
+    res
   }
 
   private def fromProto(agg: ST.Aggregation): Try[AggOp] = {
@@ -98,7 +100,13 @@ object GroupedReduction extends Logging {
         val paths = inputs.map { input =>
           FieldPath(input.path.map(FieldName.apply).toList)
         }
-        Success(AggFunction(name, paths, fname))
+        // Because protobuf does not make the difference between an empty
+        // list and missing data, we are going to assume that if the path
+        // is empty, it meant that the root was accessed.
+        val paths2 = if (paths.isEmpty) {
+          Seq(FieldPath(Nil))
+        } else paths
+        Success(AggFunction(name, paths2, fname))
 
       case AggOp.Struct(ST.AggregationStructure(fields)) =>
         val fst = sequence(fields.map(fromProto))

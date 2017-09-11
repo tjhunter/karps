@@ -76,7 +76,6 @@ class Manager extends Logging {
       ks.statusComputation(computation)
     }
   }
-  
 
   def resourceStatus(session: SessionId, paths: Seq[HdfsPath]): Seq[HdfsResourceResult] = {
     sessions.get(session)

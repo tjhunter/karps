@@ -31,6 +31,10 @@ message Path {
 
 message OpExtra {
   bytes content = 1;
+  // The content, in the text representation of a protobuf, for visual debugging.
+  string content_debug = 2;
+  // The binary content, encoded in base64.
+  string content_base64 = 3;
 };
 
 

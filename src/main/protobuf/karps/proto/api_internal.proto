@@ -111,6 +111,7 @@ message ResourceStatus {
 // Requests a backend for the status of some resources.
 message AnalyzeResourcesRequest {
     repeated ResourcePath resources = 1;
+    SessionId session = 2;
 }
 
 // All the requests are fullfilled, either with error or success.

@@ -1,6 +1,7 @@
 package org.karps.structures
 
 import scala.util.{Failure, Success, Try}
+import org.apache.commons.codec.binary.Base64;
 
 import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
 
@@ -10,7 +11,7 @@ import karps.core.{computation => C}
 
 // The extra information provided to an operation.
 // It is a JSON string that usually maps to a protobuf structure.
-case class OpExtra(content: String)
+case class OpExtra(content: Array[Byte], content64: Array[Byte])
 
 case class UntypedNode(
     locality: Locality,
@@ -44,8 +45,13 @@ object UntypedNode {
     import ProtoUtils._
     val extra = n.opExtra match {
       case Some(x) =>
-        checkField(x.content, "content").map(OpExtra.apply)
-      case None => Success(OpExtra(""))
+        val f64 = checkField(x.contentBase64, "content_base64")
+        var o = OpExtra(Array.empty, Array.empty)
+        for (s <- f64) {
+          o = o.copy(content64 = Base64.decodeBase64(s))
+        }
+        checkField(x.content, "content").map(bs => o.copy(content=bs.toByteArray))
+      case None => Success(OpExtra(Array.empty, Array.empty))
     }
     val parents = n.parents.map(Path.fromProto)
     val deps = n.logicalDependencies.map(Path.fromProto)

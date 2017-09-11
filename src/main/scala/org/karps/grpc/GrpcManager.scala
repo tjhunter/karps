@@ -13,6 +13,7 @@ import org.karps.brain.{Brain, BrainTransformSuccess}
 import karps.core.{interface => I}
 import karps.core.{computation => C}
 import karps.core.{graph => G}
+import karps.core.{api_internal => AI}
 import karps.core.interface.KarpsMainGrpc.KarpsMain
 import karps.core.api_internal.KarpsRestGrpc.KarpsRest
 
@@ -23,7 +24,7 @@ import karps.core.api_internal.KarpsRestGrpc.KarpsRest
  */
 class GrpcManager(
     manager: Option[Manager],
-    brain: Option[Brain]) extends KarpsMain with KarpsRest with Logging {
+    brain: Option[Brain]) extends KarpsMain with Logging {
 
   def this() = this(None, None)
 
@@ -33,33 +34,34 @@ class GrpcManager(
     Future.successful(I.CreateSessionResponse())
   }
 
-  override def createComputation(protoIn: I.CreateComputationRequest): Future[I.CreateComputationResponse] = {
-    createComputation(protoIn, None)
-    val protoOut = I.CreateComputationResponse()
-    Future.successful(protoOut)
-  }
+//  override def createComputation(protoIn: I.CreateComputationRequest): Future[I.CreateComputationResponse] = {
+//    createComputation(protoIn, None)
+//    val protoOut = I.CreateComputationResponse()
+//    Future.successful(protoOut)
+//  }
 
-  override def computationStatus(protoIn: I.ComputationStatusRequest): Future[C.BatchComputationResult] = {
-    val sessionId = SessionId.fromProto(protoIn.session.get).get
-    val computationId =
-      ComputationId.fromProto(protoIn.computation.get)
-    val paths = protoIn.requestedPaths.map(Path.fromProto)
-    if (paths.isEmpty) {
-      val s = current.statusComputation(sessionId, computationId).getOrElse(
-        throw new Exception(s"$sessionId $computationId"))
-      val proto = BatchComputationResult.toProto(s)
-      Future.successful(proto)
-    } else {
-      val p = paths.head
-      val gp = GlobalPath.from(sessionId, computationId, p)
-      val s = current.status(gp).getOrElse(throw new Exception(gp.toString))
-      val pr1 = ComputationResult.toProto(s, gp, Nil)
-      val proto = C.BatchComputationResult(Option(Path.toProto(p)), Seq(pr1))
-      Future.successful(proto)
-    }
-  }
+//  override def computationStatus(protoIn: I.ComputationStatusRequest): Future[C.BatchComputationResult] = {
+//    val sessionId = SessionId.fromProto(protoIn.session.get).get
+//    val computationId =
+//      ComputationId.fromProto(protoIn.computation.get)
+//    val paths = protoIn.requestedPaths.map(Path.fromProto)
+//    if (paths.isEmpty) {
+//      val s = current.statusComputation(sessionId, computationId).getOrElse(
+//        throw new Exception(s"$sessionId $computationId"))
+//      val proto = BatchComputationResult.toProto(s)
+//      Future.successful(proto)
+//    } else {
+//      val p = paths.head
+//      val gp = GlobalPath.from(sessionId, computationId, p)
+//      val s = current.status(gp).getOrElse(throw new Exception(gp.toString))
+//      val pr1 = ComputationResult.toProto(s, gp, Nil)
+//      val proto = C.BatchComputationResult(Option(Path.toProto(p)), Seq(pr1))
+//      Future.successful(proto)
+//    }
+//  }
 
-  override def resourceStatus(req: I.ResourceStatusRequest): Future[I.ResourceStatusResponse] = ???
+//  override def resourceStatus(req: AI.AnalyzeResourcesRequest): Future[AI.AnalyzeResourceResponse] =
+//    ???
 
   override def streamCreateComputation(
       request: I.CreateComputationRequest,
@@ -76,6 +78,18 @@ class GrpcManager(
   private def createComputation(
       protoIn: I.CreateComputationRequest,
       responseObserver: Option[StreamObserver[I.ComputationStreamResponse]]): Unit = {
+    GrpcManager.createComputation(current, brain, protoIn, responseObserver)
+  }
+}
+
+object GrpcManager extends Logging {
+  @volatile var currentManager: Option[Manager] = None
+
+  def createComputation(
+      current: Manager,
+      brain: Option[Brain],
+      protoIn: I.CreateComputationRequest,
+      responseObserver: Option[StreamObserver[I.ComputationStreamResponse]]): I.CreateComputationResponse = {
     val sessionId = SessionId.fromProto(protoIn.session.get).get
     logger.debug(s"createComputation: sessionId=$sessionId")
     val computationId = ComputationId.fromProto(protoIn.requestedComputation.get)
@@ -93,7 +107,7 @@ class GrpcManager(
           }
           g2
         case x =>
-          logger.info(s"Brain failed to optimized graph, messages: $x")
+          logger.info(s"Brain failed to optimize graph, messages: $x")
           val e = new Exception(x.toString)
           for (obs <- responseObserver) {
             obs.onError(e)
@@ -113,9 +127,6 @@ class GrpcManager(
       new GrpcListener(sessionId, computationId, obs, sortedNodes.map(_.path), brain))
     logger.debug(s"createComputation: observers: $l")
     current.execute(sessionId, computationId, sortedNodes, l)
+    I.CreateComputationResponse()
   }
-}
-
-object GrpcManager {
-  @volatile var currentManager: Option[Manager] = None
 }

@@ -19,7 +19,7 @@ object SQLFunctionsExtraction extends Logging {
       funName: String,
       inputs: Seq[ColumnWithType],
       ref: DataFrame): Try[ColumnWithType] = {
-    FunctionRegistry.builtin.lookupFunctionBuilder(funName.toLowerCase) match {
+    FunctionRegistry.builtin.lookupFunctionBuilder(funName.toLowerCase.trim) match {
       case Some(builder) =>
         val exps = inputs.map(_.col).map(KarpsStubs.getExpression)
         val expt = Try {
