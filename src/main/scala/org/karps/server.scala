@@ -21,6 +21,7 @@ import org.karps.structures._
 import org.karps.ops.{HdfsPath, HdfsResourceResult}
 
 import karps.core.{interface => I}
+import karps.core.{api_internal => AI}
 import karps.core.{computation => C}
 import karps.core.interface.KarpsMainGrpc
 import karps.core.interface.KarpsMainGrpc.KarpsMain
@@ -158,17 +159,27 @@ trait KarpsRestService extends HttpService with Logging {
         }
       }
     } ~
-      path("rest_proto" / "ComputationStatus") {
-        post {
-          entity(as[Array[Byte]]) { req =>
-            val proto = ProtoUtils.fromBytes[I.ComputationStatusRequest](req).get
-            logger.debug(s"Requesting ComputationStatus: $proto")
-            val proto2 = Await.result(grpcInternal.computationStatus(proto), 10.hours)
-            complete(ProtoUtils.toBytes(proto2))
-          }
+    path("rest_proto" / "ComputationStatus") {
+      post {
+        entity(as[Array[Byte]]) { req =>
+          val proto = ProtoUtils.fromBytes[I.ComputationStatusRequest](req).get
+          logger.debug(s"Requesting ComputationStatus: $proto")
+          val proto2 = Await.result(grpcInternal.computationStatus(proto), 10.hours)
+          complete(ProtoUtils.toBytes(proto2))
         }
-      } ~
-    path("") {
+      }
+    } ~
+    path("rest_proto" / "ResourceStatus") {
+      post {
+        entity(as[Array[Byte]]) { req =>
+          val proto = ProtoUtils.fromBytes[AI.AnalyzeResourcesRequest](req).get
+          logger.debug(s"Requesting ComputationStatus: $proto")
+          val proto2 = Await.result(grpcInternal.resourceStatus(proto), 10.hours)
+          complete(ProtoUtils.toBytes(proto2))
+        }
+      }
+    } ~
+    path("test") {
       get {
         respondWithMediaType(`text/html`) { // XML is marshalled to `text/xml` by default, so we simply override here
           complete {
