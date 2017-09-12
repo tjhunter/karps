@@ -7,6 +7,7 @@ import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
 import scala.util.control.NonFatal
+import org.apache.commons.io.IOUtils
 
 import org.karps.brain.CacheStatus.NodeComputedSuccess
 import org.karps.structures.{ComputationId, GlobalPath, SessionId, Path}
@@ -81,31 +82,33 @@ class HaskellBrain(address: String, port: Int) extends Brain with Logging {
       availableNodes=success_nodes,
       requestedPaths=ps
     )
-    val msg = ProtoUtils.toJsonString(request)
+    val msg = ProtoUtils.toBytes(request)
     val url = new URL(s"http://$address:$port/perform_transform")
-    logger.debug(s"Sending ${msg.length} bytes to $url: \n$msg")
+    logger.debug(s"Sending ${msg.length} bytes to $url: \n$request")
     val con = url.openConnection().asInstanceOf[HttpURLConnection]
     con.setRequestMethod("POST")
     con.setRequestProperty("User-Agent", "karps")
     con.setDoOutput(true)
     val wr = new DataOutputStream(con.getOutputStream)
-    wr.writeBytes(msg)
+    wr.write(msg)
     wr.flush()
     wr.close()
     val responseCode = con.getResponseCode
     logger.debug(s"transform: Got response code: $responseCode")
     val in = new BufferedReader(new InputStreamReader(con.getInputStream))
-    val response = new StringBuffer()
-    var continue: Boolean = true
-    while (continue) {
-      val inputLine = in.readLine()
-      Option(inputLine).foreach(response.append)
-      continue = inputLine != null
-    }
+    val s = IOUtils.toByteArray(in)
+//    val response = new StringBuffer()
+//    var continue: Boolean = true
+//    while (continue) {
+//      val inputLine = in.readLine()
+//      Option(inputLine).foreach(response.append)
+//      continue = inputLine != null
+//    }
     in.close()
-    val s = response.toString
+//    val s = response.toString
     logger.debug(s"transform: Got response ${s.length} bytes back")
-    val proto = ProtoUtils.fromString[AI.GraphTransformResponse](s).get
+    val proto = ProtoUtils.fromBytes[AI.GraphTransformResponse](s).get
+    logger.debug(s"transform: Got response: $proto")
     val nodeMap = proto.nodeMap.map { nm =>
       GlobalPath.from(
         SessionId.fromProto(nm.session.get).get,
