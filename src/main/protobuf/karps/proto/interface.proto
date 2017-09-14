@@ -38,14 +38,12 @@ message ComputationStatusRequest {
 message ComputationStreamResponse {
   SessionId session = 1;
   ComputationId computation = 2;
-  oneof updates {
-    Graph start_graph = 3;
-    Graph pinned_graph = 4;
-    // Returns all the most recent info on a node if anything changes for this node.
-    // Not super efficient as the spark stats will be repeatedly sent over.
-    BatchComputationResult results = 5;
-    CompilationResult compilation_result = 6;
-  }
+  Graph start_graph = 3;
+  Graph pinned_graph = 4;
+  // Returns all the most recent info on a node if anything changes for this node.
+  // Not super efficient as the spark stats will be repeatedly sent over.
+  BatchComputationResult results = 5;
+  CompilationResult compilation_result = 6;
 };
 
 message CompilationResult {

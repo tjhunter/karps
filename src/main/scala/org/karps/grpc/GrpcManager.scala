@@ -98,24 +98,37 @@ object GrpcManager extends Logging {
     // Conversion from functional graph to pinned graph.
     val functionalGraph = protoIn.graph.get
     val requestedPaths = protoIn.requestedPaths.map(Path.fromProto)
-    val pinnedGraph: G.Graph = brain match {
+    val (pinnedGraph: G.Graph, phases: Seq[G.CompilationPhaseGraph]) = brain match {
       case Some(b) => b.transform(sessionId, computationId, functionalGraph, requestedPaths) match {
-        case BrainTransformSuccess(g2, msgs) =>
+        case BrainTransformSuccess(g2, msgs, steps) =>
           logger.info(s"Used brain to optimize the graph, messages:")
           for (msg <- msgs) {
             logger.info(s"- $msg")
           }
-          g2
+          g2 -> steps
         case x =>
           logger.info(s"Brain failed to optimize graph, messages: $x")
           val e = new Exception(x.toString)
           for (obs <- responseObserver) {
+            // TODO: send the graph and the results back before throwing an error.
             obs.onError(e)
           }
           throw new Exception(e)
       }
-      case None => // Just assume the current graph is good enough
-        functionalGraph
+      case None => // Just assume the current graph is good enough, no compilation is happening
+        functionalGraph -> Nil
+    }
+    // Send to the observer the result of the compilation.
+    for (obs <- responseObserver) {
+      obs.onNext(I.ComputationStreamResponse(
+        session =  Option(SessionId.toProto(sessionId)),
+        computation = Option(ComputationId.toProto(computationId)),
+        startGraph = protoIn.graph,
+        pinnedGraph = Option(pinnedGraph),
+        compilationResult = Option(I.CompilationResult(
+          compilationGraph=phases
+        ))
+      ))
     }
     val nodes = pinnedGraph.nodes
       .map(UntypedNode.fromProto)

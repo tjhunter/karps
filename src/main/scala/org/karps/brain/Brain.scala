@@ -29,7 +29,10 @@ trait Brain {
 }
 
 sealed trait BrainResult
-case class BrainTransformSuccess(g: G.Graph, messages: Seq[String]) extends BrainResult
+case class BrainTransformSuccess(
+    g: G.Graph,
+    messages: Seq[String],
+    compilationGraphs: Seq[G.CompilationPhaseGraph]) extends BrainResult
 case class BrainTransformFailure(message: String) extends BrainResult
 
 object CacheStatus {

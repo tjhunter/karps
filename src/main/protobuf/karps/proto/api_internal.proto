@@ -165,4 +165,5 @@ message AnalysisMessage {
     Path path = 4;
     string content = 5;
     MessageSeverity level = 6;
+    string stack_trace_pretty = 7;
 }

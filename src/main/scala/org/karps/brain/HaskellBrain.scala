@@ -95,20 +95,13 @@ class HaskellBrain(address: String, port: Int) extends Brain with Logging {
     wr.close()
     val responseCode = con.getResponseCode
     logger.debug(s"transform: Got response code: $responseCode")
-    val in = new BufferedReader(new InputStreamReader(con.getInputStream))
+    val in = con.getInputStream
     val s = IOUtils.toByteArray(in)
-//    val response = new StringBuffer()
-//    var continue: Boolean = true
-//    while (continue) {
-//      val inputLine = in.readLine()
-//      Option(inputLine).foreach(response.append)
-//      continue = inputLine != null
-//    }
     in.close()
-//    val s = response.toString
     logger.debug(s"transform: Got response ${s.length} bytes back")
     val proto = ProtoUtils.fromBytes[AI.GraphTransformResponse](s).get
     logger.debug(s"transform: Got response: $proto")
+    val compilerPhases = proto.steps.map(HaskellBrain.convertCompilationPhase)
     val nodeMap = proto.nodeMap.map { nm =>
       GlobalPath.from(
         SessionId.fromProto(nm.session.get).get,
@@ -120,7 +113,7 @@ class HaskellBrain(address: String, port: Int) extends Brain with Logging {
     proto.pinnedGraph match {
       case Some(g) =>
         // The transform was successful
-        BrainTransformSuccess(g, messages)
+        BrainTransformSuccess(g, messages, compilerPhases)
       case None =>
         BrainTransformFailure("") // TODO
     }
@@ -132,5 +125,14 @@ object HaskellBrain {
     // Just return the object for now
     // TODO: find a way to launch a process from here if it does not work yet.
     new HaskellBrain("localhost", 1234)
+  }
+
+  private def convertCompilationPhase(cs: AI.CompilerStep): G.CompilationPhaseGraph = {
+    G.CompilationPhaseGraph(
+      phaseName = cs.phase.toString(),
+      graph = cs.graph,
+      errorMessage = "",
+      graphDef = cs.graphDef
+    )
   }
 }

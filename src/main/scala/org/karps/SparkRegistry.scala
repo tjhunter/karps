@@ -368,7 +368,7 @@ object SparkRegistry extends Logging {
   val groupedReduction = createTypedBuilderD("org.spark.GroupedReduction")(
     GroupedReduction.groupReduceOrThrow)
 
-  val structuredReduction = createTypedBuilderD("org.spark.Reduction")(
+  val structuredReduction = createTypedBuilderD("org.spark.StructuredReduce")(
     GroupedReduction.reduceOrThrow)
 
   val join = createBuilderDD("org.spark.Join") { (df1, df2, js) =>

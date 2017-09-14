@@ -3,6 +3,7 @@ syntax = "proto3";
 package karps.core;
 
 import "karps/proto/types.proto";
+import "tensorflow/core/framework/graph.proto";
 
 enum Locality {
   LOCAL = 0;
@@ -38,11 +39,15 @@ message OpExtra {
 };
 
 
-
+// TODO: rename to CompilationPhase
 message CompilationPhaseGraph {
   string phase_name = 1;
   // Eiter (graph, graph_tb) or (error_message) are defined.
   Graph graph = 2;
+  // TODO: remove
   string graph_tensorboard_repr = 3;
   string error_message = 4;
+  // A representation of the graph that can be displayed with
+  // TensorBoard.
+  tensorflow.GraphDef graph_def = 5;
 }

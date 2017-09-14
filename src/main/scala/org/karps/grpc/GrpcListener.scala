@@ -64,7 +64,7 @@ class GrpcListener(
 
   def onFinished(path: GlobalPath, result: Try[CellWithType]): Unit = {
     import C.ResultStatus._
-    import I.ComputationStreamResponse.Updates._
+//    import I.ComputationStreamResponse.Updates._
     val cr = current(path.local)
     val cr2 = result match {
       case Success(cwt) =>
@@ -79,7 +79,7 @@ class GrpcListener(
     finished += path.local
     logger.debug(s"onFinished: got ${path.local} remaining: $remaining")
     obs.onNext(baseMsg.copy(
-      updates = Results(C.BatchComputationResult(results=Seq(cr2)))
+      results = Option(C.BatchComputationResult(results=Seq(cr2)))
     ))
     if (isFinished) {
       logger.info(s"$this has finished, closing stream")
