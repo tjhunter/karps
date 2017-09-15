@@ -9,11 +9,20 @@ message Column {
     ColumnExtraction extraction = 3;
     // This is only allowed in the functional graph.
     // It will need to be translated into a broadcast.
-    // Path obs_broadcast = 4;
+    // ColumnBroadcast broadcast = 4;
+    // TODO: all literals
   };
   // The name assigned by the user (only required with structs)
   string field_name = 10;
 };
+
+// A broadcast of an existing observable along the axis of that dataframe.
+// This operation gets translated under the hood as a broadcast join and
+// need not be directly supported by the backend.
+message ColumnBroadcast {
+  Path observable_path = 1;
+};
+
 
 message ColumnStructure {
   repeated Column fields = 1;

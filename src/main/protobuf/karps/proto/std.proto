@@ -27,6 +27,11 @@ message StructuredTransform {
   Column col_op = 1;
 };
 
+message LocalStructuredTransform {
+    Column col_op = 1;
+};
+
+
 message StructuredReduce {
   Aggregation agg_op = 1;
 };
