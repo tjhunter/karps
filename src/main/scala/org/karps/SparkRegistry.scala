@@ -14,6 +14,7 @@ import org.karps.row.{AlgebraicRow, Cell, RowArray, RowCell}
 import org.karps.ops.{ColumnTransforms, GroupedReduction, Readers, TypeConversions}
 import org.karps.structures._
 import karps.core.{row => R}
+import karps.core.{std => S}
 
 
 object SparkRegistry extends Logging {
@@ -367,7 +368,7 @@ object SparkRegistry extends Logging {
   val groupedReduction = createTypedBuilderD("org.spark.GroupedReduction")(
     GroupedReduction.groupReduceOrThrow)
 
-  val structuredReduction = createTypedBuilderD("org.spark.StructuredReduction")(
+  val structuredReduction = createTypedBuilderD("org.spark.StructuredReduce")(
     GroupedReduction.reduceOrThrow)
 
   val join = createBuilderDD("org.spark.Join") { (df1, df2, js) =>
@@ -381,7 +382,12 @@ object SparkRegistry extends Logging {
     }
     require(key1f == key2f,
       s"The two dataframe keys are not compatible: $key1f in $df1 ... $key2f in $df2")
-    val joinType = js.content
+    val extra = ProtoUtils.fromExtra[S.Join](js).get
+    val joinType = extra.jointType match {
+      case S.Join.JoinType.INNER => "inner"
+      case x => throw new Exception(extra.toString)
+    }
+
     require(joinType == "inner", s"Unknown join type: $joinType")
 
     val res = df1.join(df2, usingColumns = Seq(key1f.name), joinType = joinType)

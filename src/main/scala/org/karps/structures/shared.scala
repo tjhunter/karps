@@ -22,6 +22,8 @@ object SessionId {
       Failure(new Exception("Empty session id"))
     } else { Success(SessionId(p.id)) }
   }
+
+  def toProto(s: SessionId): C.SessionId = C.SessionId(s.id)
 }
 
 /**
@@ -58,6 +60,10 @@ object ComputationId {
   
   def fromProto(p: C.ComputationId): ComputationId = {
     ComputationId(p.id)
+  }
+
+  def toProto(c: ComputationId): C.ComputationId = {
+    C.ComputationId(c.repr)
   }
 }
 

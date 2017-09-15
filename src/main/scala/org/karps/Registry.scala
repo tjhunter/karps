@@ -15,6 +15,7 @@ import org.karps.ops.Extraction
 import org.karps.row.Cell
 import org.karps.structures._
 import karps.core.{computation => C}
+import karps.core.{std => S}
 
 
 /**
@@ -282,7 +283,7 @@ object Registry {
   
   def extractPointerPath(sid: SessionId, js: OpExtra): Try[GlobalPath] = {
     // TODO: could be more robust here
-    val proto = JsonFormat.fromJsonString[C.PointerPath](js.content)
+    val proto = ProtoUtils.fromBytes[S.LocalPointer](js.content).get
     Success(GlobalPath.from(sid,
       ComputationId.fromProto(proto.computation.get),
       Path.fromProto(proto.localPath.get)))

@@ -2,8 +2,8 @@ syntax = "proto3";
 
 package karps.core;
 
-import "graph.proto";
-import "row.proto";
+import "karps/proto/graph.proto";
+import "karps/proto/row.proto";
 
 enum ResultStatus {
   UNUSED = 0;
@@ -19,6 +19,7 @@ message ComputationResult {
   string final_error = 3;
   CellWithType final_result = 4;
   SparkStats spark_stats = 5;
+  // TODO: remove this field, it is duplicate with compiler output.
   repeated Path dependencies = 6;
 };
 
@@ -28,6 +29,7 @@ message BatchComputationResult {
   repeated ComputationResult results = 2;
 }
 
+// TODO: remove
 message PointerPath {
   ComputationId computation = 1;
   Path local_path = 2;
@@ -48,14 +50,16 @@ message RDDInfo {
 
 // ----------- Common structures ------------
 
-message ResourcePath {
-  string uri = 1;
-};
-
+// A unique identifier for a computation.
+// This is typically an integer that is incremented at each computation,
+// but no assumption is made about its value in the backend.
 message ComputationId {
   string id = 1;
 };
 
+// An identifier for a session.
+// A session encapsulates all the state (registered functions, computed results)
+// that is required to run computations.
 message SessionId {
   string id = 1;
 };

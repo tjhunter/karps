@@ -6,28 +6,45 @@ import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.sql.SparkSession
 
 import karps.core.{interface => I}
+import karps.core.{api_internal => AI}
+import karps.core.{io => IO}
 import karps.core.{computation => C}
 
 case class HdfsPath(s: String)
 
 case class HdfsStamp(s: String)
 
-case class HdfsResourceResult(
-    stampReturnPath: HdfsPath,
-    stampReturnError: Option[String],
-    stampReturn: Option[HdfsStamp])
+
+sealed trait HdfsResourceResult {
+  val path: HdfsPath
+}
+case class HdfsResourceSuccess(path: HdfsPath, stamp: HdfsStamp) extends HdfsResourceResult
+case class HdfsResourceFailure(path: HdfsPath, cause: String) extends HdfsResourceResult
 
 object HdfsResourceResult {
-  def toProto(r: HdfsResourceResult): I.HdfsResourceStatus = {
-    var x = I.HdfsResourceStatus(
-      path = Some(C.ResourcePath(r.stampReturnPath.s)))
-    for (txt <- r.stampReturnError) {
-      x = x.withError(txt)
-    }
-    for (s <- r.stampReturn) {
-      x = x.withReturn(s.s)
-    }
-    x
+
+  def toProto(r: HdfsPath): IO.ResourcePath = IO.ResourcePath(uri=r.s)
+
+  def toProto(r: HdfsStamp): IO.ResourceStamp = IO.ResourceStamp(data=r.s)
+
+  def toProto(r: HdfsResourceSuccess): AI.ResourceStatus = {
+    AI.ResourceStatus(
+      resource = Option(toProto(r.path)),
+      stamp = Option(toProto(r.stamp)))
+  }
+
+  def toProto(r: HdfsResourceFailure): AI.AnalyzeResourceResponse.FailedStatus = {
+    AI.AnalyzeResourceResponse.FailedStatus(
+      resource = Option(toProto(r.path)),
+      error = r.cause
+    )
+  }
+
+  def toProto(r: Seq[HdfsResourceResult]): AI.AnalyzeResourceResponse = {
+    AI.AnalyzeResourceResponse(
+      successes = r.collect { case x: HdfsResourceSuccess => toProto(x) },
+      failures = r.collect { case x: HdfsResourceFailure => toProto(x) }
+    )
   }
 }    
     
@@ -36,9 +53,8 @@ object SourceStamps {
   def getStamps(sess: SparkSession, ps: Seq[HdfsPath]): Seq[HdfsResourceResult] = {
     val fs = FileSystem.get(sess.sparkContext.hadoopConfiguration)
     ps.map(getStamp(fs, _)).zip(ps).map {
-      case (Success(s), p) => HdfsResourceResult(p, None, Option(s))
-      case (Failure(e), p) =>
-        HdfsResourceResult(p, Option(e.getMessage), None)
+      case (Success(s), p) => HdfsResourceSuccess(p, s)
+      case (Failure(e), p) => HdfsResourceFailure(p, e.toString)
     }
   }
 

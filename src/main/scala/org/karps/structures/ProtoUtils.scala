@@ -36,10 +36,25 @@ object ProtoUtils {
   
   def fromExtra[A <: GeneratedMessage with Message[A]](extra: OpExtra)(
 implicit cmp: GeneratedMessageCompanion[A]): Try[A] = {
-    Try(JsonFormat.fromJsonString[A](extra.content))
+    fromBytes(extra.content)
+//    if (extra.content64.length > 0) {
+//      fromBytes(extra.content64)
+//    } else {
+//      fromBytes(extra.content)
+//    }
   }
-  
-   def fromString[A <: GeneratedMessage with Message[A]](extra: String)(
+
+  def fromBytes[A <: GeneratedMessage with Message[A]](extra: Array[Byte])(
+    implicit cmp: GeneratedMessageCompanion[A]): Try[A] = {
+    Try(cmp.parseFrom(extra))
+  }
+
+  def toBytes[A <: GeneratedMessage](m: A): Array[Byte] = {
+    m.toByteArray
+  }
+
+
+  def fromString[A <: GeneratedMessage with Message[A]](extra: String)(
 implicit cmp: GeneratedMessageCompanion[A]): Try[A] = {
     Try(JsonFormat.fromJsonString[A](extra))
   }
