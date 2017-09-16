@@ -296,54 +296,14 @@ object SparkRegistry extends Logging {
 
   val identity = createBuilderD("org.spark.Identity") { (df, _) => df }
 
-  // TODO: remove all these local operators and replace them with DF operations.
-
-  val localIdentity = createLocalBuilder1("org.spark.LocalIdentity") {x => x}
-
-  val localDiv = createLocalBuilder2("org.spark.LocalDiv") (_ / _)
-
-  val localPlus = createLocalBuilder2("org.spark.LocalPlus") (_ + _)
-
-  val localMult = createLocalBuilder2("org.spark.LocalMult") (_ * _)
-
-  val localNegate = createLocalBuilder1("org.spark.LocalNegate") (- _)
-
-  val localMinus = createLocalBuilder2("org.spark.LocalMinus") (_ - _)
-
-  val localAbs = createLocalBuilder1("org.spark.LocalAbs") (abs)
-
-  val localMax = createLocalBuilder2("org.spark.LocalMax") { (c1, c2) =>
-    val c = c1.when(c1 <= c2, 0).otherwise(1)
-    c * c1 + (- c + 1) * c2
-  }
-
-  val localMin = createLocalBuilder2("org.spark.LocalMin") { (c1, c2) =>
-    val c = c1.when(c1 <= c2, 0).otherwise(1)
-    c * c2 + (- c + 1) * c1
-  }
-
-  val select = createTypedBuilderD("org.spark.SelectDistributed") { (adf, js) =>
-    logger.debug(s"select: adf=$adf js=$js")
-    val (cols, adt) = ColumnTransforms.select(adf, js) match {
-      case Success(z) => z
-      case Failure(e) => throw new Exception(s"Failure when calling select", e)
-    }
-    logger.debug(s"select: cols = $cols")
-    cols.foreach(_.explain(true))
-    val df = adf.df.select(cols: _*)
-    logger.debug(s"select: df=$df, adt=$adt")
-    df.printSchema()
-    DataFrameWithType.create(df, adt).get
-  }
-
   val select2 = new OpBuilder {
 
-    override def op: String = "org.spark.Select"
+    override def op: String = "org.spark.StructuredTransform"
 
     override def build(
         parents: Seq[ExecutionOutput],
         extra: OpExtra, session: SparkSession): DataFrameWithType = {
-      logger.debug(s"select: parents=$parents js=$extra")
+      logger.debug(s"StructuredTransform: parents=$parents js=$extra")
       // Get the dataframe input:
       val adf = parents match {
         case Seq(DisExecutionOutput(dfwt)) => dfwt
@@ -354,10 +314,10 @@ object SparkRegistry extends Logging {
         case Success(z) => z
         case Failure(e) => throw new Exception(s"Failure when calling select", e)
       }
-      logger.debug(s"select: cols = $cols")
+      logger.debug(s"StructuredTransform: cols = $cols")
       cols.foreach(_.explain(true))
       val df = adf.df.select(cols: _*)
-      logger.debug(s"select: df=$df, adt=$adt")
+      logger.debug(s"StructuredTransform: df=$df, adt=$adt")
       df.printSchema()
       DataFrameWithType.create(df, adt).get
     }
@@ -405,17 +365,8 @@ object SparkRegistry extends Logging {
     identity,
     inferSchema,
     join,
-    localAbs,
     locLiteral,
-    localDiv,
-    localIdentity,
-    localMax,
-    localMin,
-    localMinus,
-    localMult,
-    localNegate,
     localPackBuilder,
-    localPlus,
     persist,
     select2,
     structuredReduction,

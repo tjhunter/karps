@@ -370,9 +370,6 @@ object LocalSparkConversion {
  * primitive and non-primitive types in a uniform manner.
  */
 object DistributedSparkConversion extends Logging {
-
-//   import JsonSparkConversions.{get, sequence}
-//  import LocalSparkConversion.normalizeDataType
   
   // Takes a cell with a type and attempts to convert it to a cell collection.
   def deserializeDistributed(cwt: CellWithType): Try[CellCollection] = {

@@ -54,6 +54,7 @@ object GroupedReduction extends Logging {
   private case class AggFunction(
     function: SQLFunctionName,
     inputs: Seq[FieldPath],
+    expectedType: Option[AugmentedDataType],
     name: Option[String]) extends AggOp
     
   private case class AggStruct(
@@ -93,9 +94,13 @@ object GroupedReduction extends Logging {
       case AggOp.Empty =>
         Failure(new Exception(s"Missing content"))
 
-      case AggOp.Op(ST.AggregationFunction(name, inputs)) =>
+      case AggOp.Op(ST.AggregationFunction(name, inputs, et)) =>
         if (name == null) {
           return Failure(new Exception(s"Missing name"))
+        }
+        val adtt = et match {
+          case Some(x) => AugmentedDataType.fromProto(x).map(Option.apply)
+          case None => Success(None)
         }
         val paths = inputs.map { input =>
           FieldPath(input.path.map(FieldName.apply).toList)
@@ -106,13 +111,13 @@ object GroupedReduction extends Logging {
         val paths2 = if (paths.isEmpty) {
           Seq(FieldPath(Nil))
         } else paths
-        Success(AggFunction(name, paths2, fname))
+        adtt.map(adt => AggFunction(name, paths2, adt, fname))
 
       case AggOp.Struct(ST.AggregationStructure(fields)) =>
         val fst = sequence(fields.map(fromProto))
         for {
           fs <- fst
-          fieldNames <- ColumnTransforms.checkFieldNames(fs.map(_.name))
+          fieldNames <- StructuredTransformParsing.checkFieldNames(fs.map(_.name))
         } yield {
           val fs2 = fs.zip(fieldNames).map { case (f, fn) => Field(fn, f) }
           AggStruct(fs2, fname)
@@ -124,10 +129,10 @@ object GroupedReduction extends Logging {
   private def performTrans(
       valCol: ColumnWithType,
       agg: AggOp): Try[ColumnWithType] = agg match {
-    case AggFunction(n, inputs, _) =>
+    case AggFunction(n, inputs, et, _) =>
       for {
         cols <- sequence(inputs.map(Extraction.extractCol(valCol, _)))
-        c <- SQLFunctionsExtraction.buildFunction(n, cols, valCol.ref)
+        c <- SQLFunctionsExtraction.buildFunction(n, cols, valCol.ref, et)
       } yield {
         c
       }
