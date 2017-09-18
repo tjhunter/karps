@@ -24,35 +24,19 @@ object ColumnTransforms extends Logging {
   import StructuredTransformParsing._
 
   def select(
-      c: ColumnWithType,
+      cwt: ColumnWithType,
       ex: OpExtra): Try[ColumnWithType] = {
-    ???
-  }
-  
-  def select(adf: DataFrameWithType, ex: OpExtra): Try[(Seq[Column], AugmentedDataType)] = {
-    def convert(cwt: ColumnWithType): (Seq[Column], AugmentedDataType) = {
-      cwt.rectifiedSchema.topLevelStruct match {
-        case Some(st) =>
-          // Unroll the computations at the top.
-          val cols = st.fieldNames.map(fname => cwt.col.getField(fname).as(fname)).toSeq
-          cols -> cwt.rectifiedSchema
-        case None =>
-          Seq(cwt.col) -> cwt.rectifiedSchema
-      }
-    }
-    val cwt = DataFrameWithType.asTypedColumn(adf)
-    logger.debug(s"select: cwt=$cwt")
     for {
-        p <- ProtoUtils.fromExtra[STD.StructuredTransform](ex)
-        col = p.colOp.get
-        trans <- fromProto(col)
-        res <- select0(cwt, trans)
+      p <- ProtoUtils.fromExtra[STD.StructuredTransform](ex)
+      col = p.colOp.get
+      trans <- fromProto(col)
+      res <- select0(cwt, trans)
     } yield {
       logger.debug(s"select: p = $p")
       logger.debug(s"select: col = $col")
       logger.debug(s"select: trans = $trans")
       logger.debug(s"select: res = $res")
-      convert(res)
+      res
     }
   }
 

@@ -89,6 +89,7 @@ object SparkRegistry extends Logging {
     res
   }
 
+  // TODO: remove
   val collect = createTypedBuilderD("org.spark.Collect") { (adf, _) =>
     val df2 = if (adf.rectifiedSchema.isNullable && adf.rectifiedSchema.isPrimitive) {
         logger.debug(s"collect: primitive+nullable")
@@ -296,6 +297,30 @@ object SparkRegistry extends Logging {
 
   val identity = createBuilderD("org.spark.Identity") { (df, _) => df }
 
+  val localStructuredTransforrm = new OpBuilder {
+
+    override def op: String = "org.spark.LocalStructuredTransform"
+
+    override def build(
+        parents: Seq[ExecutionOutput],
+        extra: OpExtra,
+        session: SparkSession): DataFrameWithType = {
+      logger.debug(s"LocalStructuredTransform: parents=$parents js=$extra")
+      val adf = parents match {
+        case Seq(DisExecutionOutput(dfwt)) => dfwt
+        case Seq(LocalExecOutput(cwt0)) =>
+          DataFrameWithType.fromCells(Seq(cwt0), session).get
+      }
+      val cwt = DataFrameWithType.asTypedColumn(adf)
+      logger.debug(s"LocalStructuredTransform: cwt = $cwt")
+      val cwt2 = ColumnTransforms.select(cwt, extra)
+      logger.debug(s"LocalStructuredTransform: cwt2 = $cwt2")
+      val adf2 = cwt2.map(ColumnWithType.asDataFrame)
+      logger.debug(s"LocalStructuredTransform: adf2 = $adf2")
+      adf2.get
+    }
+  }
+
   val select2 = new OpBuilder {
 
     override def op: String = "org.spark.StructuredTransform"
@@ -310,19 +335,14 @@ object SparkRegistry extends Logging {
         case Seq(LocalExecOutput(cwt)) =>
           DataFrameWithType.fromCells(Seq(cwt), session).get
       }
-      val (cols, adt) = ColumnTransforms.select(adf, extra) match {
-        case Success(z) => z
-        case Failure(e) => throw new Exception(s"Failure when calling select", e)
-      }
-      logger.debug(s"StructuredTransform: cols = $cols")
-      cols.foreach(_.explain(true))
-      val df = adf.df.select(cols: _*)
-      logger.debug(s"StructuredTransform: df=$df, adt=$adt")
-      df.printSchema()
-      DataFrameWithType.create(df, adt).get
+      val cwt = DataFrameWithType.asTypedColumn(adf)
+      logger.debug(s"StructuredTransform: cwt = $cwt")
+      val cwt2 = ColumnTransforms.select(cwt, extra)
+      logger.debug(s"StructuredTransform: cwt2 = $cwt2")
+      val adf2 = cwt2.map(ColumnWithType.asDataFrame)
+      logger.debug(s"StructuredTransform: adf2 = $adf2")
+      adf2.get
     }
-
-
   }
 
   val groupedReduction = createTypedBuilderD("org.spark.GroupedReduction")(
@@ -367,6 +387,7 @@ object SparkRegistry extends Logging {
     join,
     locLiteral,
     localPackBuilder,
+    localStructuredTransforrm,
     persist,
     select2,
     structuredReduction,

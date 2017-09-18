@@ -123,6 +123,7 @@ object AugmentedDataType {
 
     val strict: StrictType = adt.dataType match {
       case _: IntegerType => StrictType.BasicType(INT)
+      case _: LongType => StrictType.BasicType(INT) // TODO: fix eventually
       case _: DoubleType => StrictType.BasicType(DOUBLE)
       case _: StringType => StrictType.BasicType(STRING)
       case _: BooleanType => StrictType.BasicType(BOOL)
@@ -233,6 +234,8 @@ object AugmentedDataType {
   // The type dt1 is a subset of the type dt2
   private def transfersTo(dt1: DataType, dt2: DataType): Boolean = (dt1, dt2) match {
     case (x, y) if x == y => true
+      // Special case as long as we do not have long implemented.
+    case (IntegerType, LongType) => true
     case (ArrayType(t1, nl1), ArrayType(t2, nl2)) => transfersTo(t1, t2) && transfersTo(nl1, nl2)
     case (st1: StructType, st2: StructType) =>
       if (st1.fields.length != st2.fields.length) {

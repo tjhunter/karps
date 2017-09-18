@@ -19,6 +19,7 @@ object SQLFunctionsExtraction extends Logging {
       inputs: Seq[ColumnWithType],
       ref: DataFrame,
       expectedType: Option[AugmentedDataType]): Try[ColumnWithType] = {
+    logger.debug(s"buildFunction: funName=$funName inputs=$inputs expected=$expectedType")
     for (sparkName <- nameTranslation.get(funName)) {
       return buildFunction(sparkName, inputs, ref, expectedType)
     }
@@ -50,7 +51,10 @@ object SQLFunctionsExtraction extends Logging {
   // Associate the SQL names with the Spark names.
   private val nameTranslation = Map(
     "plus"->"+",
-    "minus"->"-")
+    "minus"->"-",
+    "divide"->"/",
+    "cast_double"->"double"
+  )
 
   private def buildColumn(
       c: Column,

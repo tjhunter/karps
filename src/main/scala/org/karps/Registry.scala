@@ -139,6 +139,7 @@ object DataFrameWithType extends Logging {
  *
  * Unlike Spark's columns, it also stores its refering dataframe.
  */
+// TODO: hide the constructor and add a method to access fields by name.
 case class ColumnWithType(
     col: Column,
     rectifiedSchema: AugmentedDataType,
@@ -162,6 +163,11 @@ object ColumnWithType extends Logging {
       val dt = KarpsStubs.getExpression(s).dataType
       ColumnWithType(s, AugmentedDataType(dt, IsStrict), ref)
     }
+  }
+
+  def asDataFrame(adf: ColumnWithType): DataFrameWithType = {
+    // This should always succeed.
+    DataFrameWithType.create(adf.ref.select(adf.col), adf.rectifiedSchema).get
   }
 
   /**
