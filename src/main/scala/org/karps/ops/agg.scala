@@ -1,12 +1,9 @@
 package org.karps.ops
 
-import scala.util.{Failure, Try, Success}
-
+import scala.util.{Failure, Success, Try}
 import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
-
 import org.apache.spark.sql.types._
-import org.apache.spark.sql.RelationalGroupedDataset
-
+import org.apache.spark.sql.{DataFrame, RelationalGroupedDataset}
 import org.karps.{ColumnWithType, DataFrameWithType}
 import org.karps.ops.Extraction.{FieldName, FieldPath}
 import org.karps.ops.SQLFunctionsExtraction.SQLFunctionName
@@ -43,9 +40,36 @@ object GroupedReduction extends Logging {
       op <- parseReduction(js)
       col <- performTrans(c, op)
       df = adf.df.groupBy().agg(col.col)
-      dfwt <- DataFrameWithType.create(df, col.rectifiedSchema)
+      // In the case of structures, they are wrapped with an extra layer of indirection.
+      // Remove this layer
+      // TODO
+      _ <- { logger.debug(s"reduce:\nop=$op\ncol=$col \ndf=$df"); Success(2) }
+      dfwt <- createDF(df, col.rectifiedSchema)
     } yield {
       dfwt
+    }
+  }
+
+  private def createDF(df: DataFrame, schema: AugmentedDataType): Try[DataFrameWithType] = {
+    (schema.topLevelStruct, df.schema) match {
+      case (Some(st), StructType(Array(f1))) =>
+        // Top-level structure, which needs to be unwrapped.
+        val df2 = f1.dataType match {
+          case StructType(fields) =>
+            val cols = fields.map(f => df.col(f1.name).getField(f.name).alias(f.name))
+            df.select(cols:_*)
+          case _ =>
+            df.select(df.col(f1.name).alias(f1.name))
+        }
+        logger.debug(s"createDF: df2=$df2 schema=$schema")
+        DataFrameWithType.create(df2, schema)
+      case (Some(st), other) =>
+        // This is not what we are expecting here, failure.
+        Failure(new Exception(s"Expected a top-level structure with a single field to go with $st" +
+          s" but got $other instead"))
+      case (None, _) =>
+        // Regular use case, just use the schema.
+        DataFrameWithType.create(df, schema)
     }
   }
 
@@ -67,18 +91,26 @@ object GroupedReduction extends Logging {
 
   private def performTrans(
       valCol: ColumnWithType,
-      agg: AggOp): Try[ColumnWithType] = agg match {
-    case AggFunction(n, inputs, et, _) =>
-      for {
-        cols <- sequence(inputs.map(Extraction.extractCol(valCol, _)))
-        c <- SQLFunctionsExtraction.buildFunction(n, cols, valCol.ref, et)
-      } yield {
-        c
-      }
-    case AggStruct(fields, _) =>
-      sequence(fields.map { f =>
-        performTrans(valCol, f.op).map(_.alias(f.fieldName))
-      }).flatMap(ColumnWithType.struct(_ : _*))
+      agg: AggOp): Try[ColumnWithType] = {
+    val c2 = agg match {
+      case AggFunction(n, inputs, et, _) =>
+        for {
+          cols <- sequence(inputs.map(Extraction.extractCol(valCol, _)))
+          c <- SQLFunctionsExtraction.buildFunction(n, cols, valCol.ref, et)
+        } yield {
+          c
+        }
+      case AggStruct(fields, _) =>
+        sequence(fields.map { f =>
+          performTrans(valCol, f.op).map(_.alias(f.fieldName))
+            .map(cwt => (f.fieldName.name, cwt))
+        }).flatMap(ColumnWithType.struct(_ : _*))
+    }
+    // Apply the name if requested.
+    agg.name match {
+      case Some(n) if n != "" => c2.map(cwt => cwt.copy(col=cwt.col.alias(n)))
+      case None => c2.map(cwt => cwt.copy(col=cwt.col.alias("agg_value")))
+    }
   }
 }
 
@@ -103,7 +135,8 @@ object AggregationParsing extends Logging {
 
   private def fromProto(agg: ST.Aggregation): Try[AggOp] = {
     logger.debug(s"Parsing AGG: $agg")
-    val fname = Option(agg.fieldName)
+    // Remove empty name values too.
+    val fname = Option(agg.fieldName).filterNot(_ == "")
     import ST.Aggregation.AggOp
     agg.aggOp match {
       case AggOp.Empty =>
@@ -147,27 +180,23 @@ object AggregationParsing extends Logging {
 
   def parseShuffle(extra: OpExtra): Try[AggOp] = {
     val proto = ProtoUtils.fromExtra[STD.Shuffle](extra)
-    logger.debug(s"parseTrans: proto=$proto")
     val res = proto
       .flatMap { p => p.aggOp match {
         case None => Failure(new Exception("missing agg_op"))
         case Some(x) => Success(x)
       }}
       .flatMap(fromProto)
-    logger.debug(s"parseTrans: res=$res")
     res
   }
 
   def parseReduction(extra: OpExtra): Try[AggOp] = {
     val proto = ProtoUtils.fromExtra[STD.StructuredReduce](extra)
-    logger.debug(s"parseTrans: proto=$proto")
     val res = proto
         .flatMap { p => p.aggOp match {
           case None => Failure(new Exception("missing agg_op"))
           case Some(x) => Success(x)
         }}
       .flatMap(fromProto)
-    logger.debug(s"parseTrans: res=$res")
     res
   }
 

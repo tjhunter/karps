@@ -19,7 +19,6 @@ object SQLFunctionsExtraction extends Logging {
       inputs: Seq[ColumnWithType],
       ref: DataFrame,
       expectedType: Option[AugmentedDataType]): Try[ColumnWithType] = {
-    logger.debug(s"buildFunction: funName=$funName inputs=$inputs expected=$expectedType")
     for (sparkName <- nameTranslation.get(funName)) {
       return buildFunction(sparkName, inputs, ref, expectedType)
     }
@@ -30,7 +29,6 @@ object SQLFunctionsExtraction extends Logging {
           builder.apply(exps)
         }
         expt.flatMap { exp =>
-          logger.debug(s"buildFunction: exp=$exp")
           val c = exp match {
             case agg: AggregateFunction =>
               KarpsStubs.makeColumn(agg.toAggregateExpression(isDistinct = false))
@@ -39,6 +37,9 @@ object SQLFunctionsExtraction extends Logging {
           }
           val inputNullability = Nullable.intersect(inputs.map(_.rectifiedSchema.nullability))
           val res = buildColumn(c, ref, inputNullability, expectedType)
+          logger.debug(s"buildFunction: c=$c")
+          logger.debug(s"buildFunction: inputNullability=$inputNullability")
+          logger.debug(s"buildFunction: expectedType=$expectedType")
           logger.debug(s"buildFunction: res=$res")
           res
         }
@@ -66,16 +67,18 @@ object SQLFunctionsExtraction extends Logging {
       case Array(f1) => f1.dataType
       case _ => return Failure(KarpsException(s"ref=$ref df2=$df2 c=$c"))
     }
-    for {
-      adt <- expected
-      errors <- AugmentedDataType.isCompatible(adt, df2.schema)
-    } {
-      return Failure(KarpsException(s"Found errors: df2=$df2 adt=$adt error=$errors"))
+    expected match {
+      case Some(adt) =>
+        // Check for errors.
+        for (errors <- AugmentedDataType.isCompatible(adt, df2.schema)) {
+          return Failure(KarpsException(s"Found errors: df2=$df2 adt=$adt error=$errors"))
+        }
+        // Incorporate the nullability of the parents.
+        val adt2 = adt.copy(nullability = adt.nullability.intersect(inputNullability))
+        Success(ColumnWithType(c, adt2, ref))
+      case None =>
+        val adt = AugmentedDataType(dt, inputNullability)
+        Success(ColumnWithType(c, adt, ref))
     }
-    val adt = expected match {
-      case Some(x) => x.copy(nullability = x.nullability.intersect(inputNullability))
-      case None => AugmentedDataType(dt, inputNullability)
-    }
-    Success(ColumnWithType(c, adt, ref))
   }
 }

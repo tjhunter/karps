@@ -8,7 +8,7 @@ import com.trueaccord.scalapb.json.JsonFormat
 
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.functions.{struct => sqlStruct}
-import org.apache.spark.sql.types.StructType
+import org.apache.spark.sql.types.{StructType, StructField}
 import org.apache.spark.sql._
 
 import org.karps.ops.Extraction
@@ -151,16 +151,19 @@ case class ColumnWithType(
 }
 
 object ColumnWithType extends Logging {
-  def struct(cols: ColumnWithType*): Try[ColumnWithType] = {
+  def struct(cols: (String, ColumnWithType)*): Try[ColumnWithType] = {
     val reft = cols.headOption match {
-      case Some(c2) => Success(c2.ref)
+      case Some(c2) => Success(c2._2.ref)
       case None => Failure(new Exception("Structure cannot be empty"))
     }
     for {
       ref <- reft
-      s <- Try(sqlStruct(cols.map(_.col):_*))
+      s <- Try(sqlStruct(cols.map(z => z._2.col.alias(z._1)):_*))
     } yield {
-      val dt = KarpsStubs.getExpression(s).dataType
+      // Do not trust Spark and rebuild the datatype from the ADT.
+      val dt = StructType(cols.map { z =>
+        StructField(z._1, z._2.rectifiedSchema.dataType, nullable = z._2.rectifiedSchema.isNullable)
+      })
       ColumnWithType(s, AugmentedDataType(dt, IsStrict), ref)
     }
   }
