@@ -54,7 +54,8 @@ object SQLFunctionsExtraction extends Logging {
     "plus"->"+",
     "minus"->"-",
     "divide"->"/",
-    "cast_double"->"double"
+    "cast_double"->"double",
+    "greater_equal"->">="
   )
 
   private def buildColumn(

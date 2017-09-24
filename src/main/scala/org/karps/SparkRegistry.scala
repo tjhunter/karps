@@ -297,6 +297,19 @@ object SparkRegistry extends Logging {
 
   val identity = createBuilderD("org.spark.Identity") { (df, _) => df }
 
+  val filter = createBuilderD("org.spark.Filter") { (adf, _) =>
+    adf.rectifiedSchema.topLevelStruct match {
+      case Some(StructType(Array(f1, f2))) =>
+        assert(f1.name == "filter", f1)
+        assert(f1.dataType == BooleanType, f1)
+        assert(f2.name == "value", f2)
+        val filt = adf.df.col("filter")
+        val df2 = adf.df.filter(filt === true).select("value")
+        DataFrameWithType.create(df2, AugmentedDataType.fromField(f2)).get
+      case _ => KarpsException.fail(s"Expected a structure, but got $adf")
+    }
+  }
+
   val localStructuredTransforrm = new OpBuilder {
 
     override def op: String = "org.spark.LocalStructuredTransform"
@@ -381,6 +394,7 @@ object SparkRegistry extends Logging {
     collect,
     dLiteral,
     dataSource,
+    filter,
     groupedReduction,
     identity,
     inferSchema,

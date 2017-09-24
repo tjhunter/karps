@@ -168,9 +168,18 @@ object ColumnWithType extends Logging {
     }
   }
 
-  def asDataFrame(adf: ColumnWithType): DataFrameWithType = {
+  def asDataFrame(cwt: ColumnWithType): DataFrameWithType = {
+    // For structures at the top level, it is necessary to unpack these structures, otherwise Spark
+    // will just create a single data column at the top.
+    val df2 = cwt.rectifiedSchema.topLevelStruct match {
+      case Some(st) =>
+        val cols = st.fieldNames.map(fn => cwt.col.getField(fn).alias(fn))
+        cwt.ref.select(cols :_*)
+      case None =>
+        cwt.ref.select(cwt.col)
+    }
     // This should always succeed.
-    DataFrameWithType.create(adf.ref.select(adf.col), adf.rectifiedSchema).get
+    DataFrameWithType.create(df2, cwt.rectifiedSchema).get
   }
 
   /**

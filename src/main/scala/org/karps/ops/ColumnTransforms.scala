@@ -2,17 +2,16 @@ package org.karps.ops
 
 
 import scala.util.{Failure, Success, Try}
-
 import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
-
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.{Column, DataFrame, KarpsStubs}
 import org.apache.spark.sql.catalyst.analysis.FunctionRegistry
-
-import org.karps.{ColumnWithType, DataFrameWithType, KarpsException$}
+import org.karps.{ColumnWithType, DataFrameWithType, KarpsException}
 import org.karps.ops.Extraction.{FieldName, FieldPath}
+import org.karps.row.{BoolElement, DoubleElement, IntElement, StringElement, Empty}
 import org.karps.structures._
+import karps.core.{row => R}
 import karps.core.{structured_transform => ST}
 import karps.core.{std => STD}
 
@@ -40,8 +39,21 @@ object ColumnTransforms extends Logging {
     }
   }
 
-  // Returns a single column. This column may need to be denormalized after that.
   private def select0(
+      cwt: ColumnWithType,
+      trans: StructuredTransform): Try[ColumnWithType] = {
+    // If a name is provided in the structure, make sure to use it.
+    // It should always be the case.
+    select1(cwt, trans).map { res =>
+      trans.name match {
+        case Some(n) if n.nonEmpty => res.copy(col = res.col.alias(n))
+        case _ => res
+      }
+    }
+  }
+
+  // Returns a single column. This column may need to be denormalized after that.
+  private def select1(
       cwt: ColumnWithType,
       trans: StructuredTransform): Try[ColumnWithType] = trans match {
     case ColExtraction(fieldPath, _) =>
@@ -65,6 +77,23 @@ object ColumnTransforms extends Logging {
         val str = struct(fs.map(_._1): _*)
         ColumnWithType(str, AugmentedDataType(st, IsStrict), cwt.ref)
       }
+    case ColLiteral(cellwt, _) => Success(literalCol(cellwt, cwt.ref))
+
+  }
+
+  private def literalCol(cwt: CellWithType, ref: DataFrame): ColumnWithType = {
+    val c = cwt.cellData match {
+      case IntElement(i) => lit(i)
+      case DoubleElement(d) => lit(d)
+      case StringElement(s) => lit(s)
+      case BoolElement(b) => lit(b)
+      case Empty => lit(null) // TODO not sure if Spark will resist that.
+      case x =>
+        // Do not trust Spark to correctly represent anything else.
+        // TODO: wrap the content in a UDF and a row.
+        KarpsException.fail(s"Literal not implemented yet for type ${cwt.cellType}")
+    }
+    ColumnWithType(c, cwt.cellType, ref)
   }
 }
 
@@ -86,6 +115,9 @@ object StructuredTransformParsing {
       functionName: String,
       inputs: Seq[StructuredTransform],
       expectedType: Option[AugmentedDataType],
+      name: Option[String]) extends StructuredTransform
+  case class ColLiteral(
+      content: CellWithType,
       name: Option[String]) extends StructuredTransform
 
 
@@ -119,6 +151,10 @@ object StructuredTransformParsing {
           val fs2 = fs.zip(fieldNames).map { case (f, fn) => Field(fn, f) }
           ColStructure(fs2, fname)
         }
+      case ST.Column.Content.Literal(ST.ColumnLiteral(content)) =>
+        for {
+          cwt <- CellWithType.fromProto(content.get)
+        } yield ColLiteral(cwt, fname)
       case ST.Column.Content.Empty =>
         Failure(new Exception(s"Missing content: ${t.fieldName}"))
       case x =>

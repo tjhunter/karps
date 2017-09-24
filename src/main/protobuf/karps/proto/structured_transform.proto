@@ -3,6 +3,7 @@ syntax = "proto3";
 package karps.core;
 
 import "karps/proto/types.proto";
+import "karps/proto/row.proto";
 
 message Column {
   oneof content {
@@ -13,7 +14,8 @@ message Column {
     // It will need to be translated into broadcasts (in the case of distributed
     // data).
     ColumnBroadcastObservable broadcast = 4;
-    // TODO: add literals
+    // A constant.
+    ColumnLiteral literal = 5;
   };
   // The name assigned by the user (only required with structs)
   string field_name = 10;
@@ -29,6 +31,12 @@ message ColumnBroadcastObservable {
   int32 observable_index = 1;
 };
 
+// A constant value ("literal") that is fixed along one axis of the column.
+// This value can be any of the types supported by Karps.
+message ColumnLiteral {
+  // The content.
+  CellWithType content = 1;
+}
 
 message ColumnStructure {
   repeated Column fields = 1;
