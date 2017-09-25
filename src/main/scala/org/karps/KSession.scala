@@ -229,6 +229,7 @@ object KSession extends Logging {
         // Force the materialization of the dependencies first.
         for (it <- item.dependencies) {
           it.dataframe
+          it.checkpointedDataframe
           it.logical
         }
         logger.info(s"logical: ${item.logical.hashCode()} \n${item.logical}")
@@ -258,6 +259,12 @@ object KSession extends Logging {
           logger.debug(s"run: cwt=$cwt")
           session.notifyFinished(item.path, cwt)
         } else {
+          // Spark does not like the renaming operations and has a combinatorial
+          // explosion inside catalyst. As a workaroud, we force a checkpoint.
+          // The main problem here is the renaming, which could be handled directly inside
+          // the compiler.
+          // TODO: this should be done less often that every operation.
+          item.checkpointedDataframe
           // It is just a dataframe that we analyzed
           session.notifyFinishedAnalyzed(item.path, stats, item.locality)
         }

@@ -4,7 +4,7 @@ import scala.util.{Failure, Success, Try}
 
 import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
 
-import org.apache.spark.sql.{Column, KarpsStubs, _}
+import org.apache.spark.sql.{functions, Column, KarpsStubs, _}
 import org.apache.spark.sql.catalyst.analysis.FunctionRegistry
 import org.apache.spark.sql.catalyst.expressions.aggregate.AggregateFunction
 
@@ -21,6 +21,14 @@ object SQLFunctionsExtraction extends Logging {
       expectedType: Option[AugmentedDataType]): Try[ColumnWithType] = {
     for (sparkName <- nameTranslation.get(funName)) {
       return buildFunction(sparkName, inputs, ref, expectedType)
+    }
+    // Special case, this should be done as a UDF instead.
+    if (funName.toLowerCase.trim == "inverse") {
+      val c = functions.lit(1.0).divide(inputs.head.col)
+      val inputNullability = Nullable.intersect(inputs.map(_.rectifiedSchema.nullability))
+      val res = buildColumn(c, ref, inputNullability, expectedType)
+      logger.debug(s"buildFunction: inverse: res=$res")
+      return res
     }
     FunctionRegistry.builtin.lookupFunctionBuilder(funName.toLowerCase.trim) match {
       case Some(builder) =>
@@ -52,6 +60,7 @@ object SQLFunctionsExtraction extends Logging {
   // Associate the SQL names with the Spark names.
   private val nameTranslation = Map(
     "plus"->"+",
+    "multiply"->"*",
     "minus"->"-",
     "divide"->"/",
     "cast_double"->"double",

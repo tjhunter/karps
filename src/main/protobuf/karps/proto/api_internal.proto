@@ -31,7 +31,7 @@ enum CompilingPhase {
     // Here is the most detailed explanation of what is happening inside the
     // Karps compiler.
 
-    // Current max: 10
+    // Current max: 11
 
     // The initial graph, as received and parsed.
     // A number of checks have happened already at that point.
@@ -58,6 +58,13 @@ enum CompilingPhase {
 
     // Parallel aggregations are merged into single aggregations.
     MERGE_AGGREGATIONS = 7;
+
+    // Special case for aggregations and transforms that happens to be common:
+    //    agg1      agg2
+    //    trans1    /
+    //         root
+    // This combines all the intermediate transforms into a single one.
+    MERGE_PREAGG_AGGREGATIONS = 11;
 
     // Parallel transforms are merged into single transforms.
     MERGE_TRANSFORMS = 8;

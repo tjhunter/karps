@@ -44,15 +44,25 @@ class ExecutionItem(
 
   lazy val dataframe: DataFrame = dataframeWithType.df
 
+  lazy val checkpointedDataframe: DataFrame = checkpointedDataframeWithType.df
+
+  // Breaks the lineage.
+  // This is a workaround for current plans that explode due to renaming.
+  lazy val checkpointedDataframeWithType: DataFrameWithType = {
+    val df1 = session.createDataFrame(dataframe.javaRDD, dataframe.schema)
+    dataframeWithType.copy(df=df1)
+  }
+
   lazy val dataframeWithType: DataFrameWithType = {
     val currCache = cacheAsUsed
     logger.debug(s"Creating dataframe for node: $path")
     val outputs = dependencies.map { item =>
       item.path -> currCache.finalResult(item.path).map(LocalExecOutput.apply)
-        .getOrElse(DisExecutionOutput(item.dataframeWithType))
+        .getOrElse(DisExecutionOutput(item.checkpointedDataframeWithType))
     }
     logger.debug(s"Dependent outputs for node: $path: $outputs")
-    builder.build(outputs.map(_._2), raw.extra, session)
+    val adf1 = builder.build(outputs.map(_._2), raw.extra, session)
+    adf1
   }
 
   lazy val encoderOut: ExpressionEncoder[Row] = {

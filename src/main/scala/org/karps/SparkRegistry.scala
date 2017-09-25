@@ -304,8 +304,11 @@ object SparkRegistry extends Logging {
         assert(f1.dataType == BooleanType, f1)
         assert(f2.name == "value", f2)
         val filt = adf.df.col("filter")
-        val df2 = adf.df.filter(filt === true).select("value")
-        DataFrameWithType.create(df2, AugmentedDataType.fromField(f2)).get
+        val df2 = adf.df.filter(filt === true)
+        val col = df2.col("value")
+        // TODO: not sure if this is correct, this should be checked.
+        val cwt = ColumnWithType(col, AugmentedDataType.fromField(f2), df2)
+        ColumnWithType.asDataFrame(cwt)
       case _ => KarpsException.fail(s"Expected a structure, but got $adf")
     }
   }
