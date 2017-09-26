@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package tensorflow;
+
+import "tensorflow/core/framework/node_def.proto";
+
+// Represents the graph of operations
+message GraphDef {
+    repeated NodeDef node = 1;
+};

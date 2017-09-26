@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package karps.core;
+
+import "karps/proto/types.proto";
+import "tensorflow/core/framework/graph.proto";
+
+enum Locality {
+  LOCAL = 0;
+  DISTRIBUTED = 1;
+};
+
+// A node in a computation graph.
+message Node {
+  Locality locality = 1;
+  Path path = 2;
+  string op_name = 3;
+  OpExtra op_extra = 4;
+  repeated Path parents = 5;
+  repeated Path logical_dependencies = 6;
+  SQLType infered_type = 7;
+};
+
+message Graph {
+  repeated Node nodes = 1;
+};
+
+// The local path of an element.
+message Path {
+  repeated string path = 1;
+};
+
+message OpExtra {
+  bytes content = 1;
+  // The content, in the text representation of a protobuf, for visual debugging.
+  string content_debug = 2;
+  // The binary content, encoded in base64.
+  string content_base64 = 3;
+};
+
+
+// TODO: rename to CompilationPhase
+message CompilationPhaseGraph {
+  string phase_name = 1;
+  // Eiter (graph, graph_tb) or (error_message) are defined.
+  Graph graph = 2;
+  // TODO: remove
+  string graph_tensorboard_repr = 3;
+  string error_message = 4;
+  // A representation of the graph that can be displayed with
+  // TensorBoard.
+  tensorflow.GraphDef graph_def = 5;
+}

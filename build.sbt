@@ -64,6 +64,8 @@ lazy val shaded = project.settings(
   assemblyShadeRules in assembly := Seq(
     ShadeRule.rename("com.google.protobuf.**" -> "org.karps.shaded.protobuf3.@1").inAll,
     ShadeRule.rename("org.json4s.**" -> "org.karps.shaded.json4s.@1").inAll,
+    ShadeRule.rename("io.netty.**" -> "org.karps.shaded.io.netty.@1").inAll,
+    ShadeRule.rename("com.google.common.**" -> "org.karps.shaded.com.google.common.@1").inAll,
     ShadeRule.rename("shapeless.**" -> "org.karps.shaded.shapeless.@1").inAll
   ),
   assemblyOption in assembly := (assemblyOption in assembly).value.copy(includeScala = false)
@@ -108,6 +110,8 @@ lazy val testing = Project("ks_testing", file(".")).settings(
   assemblyShadeRules in assembly := Seq(
     ShadeRule.rename("com.google.protobuf.**" -> "org.tensorframes.protobuf3shade.@1").inAll,
     ShadeRule.rename("org.json4s.**" -> "org.karps.shaded.json4s.@1").inAll,
+    ShadeRule.rename("io.netty.**" -> "org.karps.shaded.io.netty.@1").inAll,
+    ShadeRule.rename("com.google.common.**" -> "org.karps.shaded.com.google.common.@1").inAll,
     ShadeRule.rename("shapeless.**" -> "org.karps.shaded.shapeless.@1").inAll
   ),
   assemblyMergeStrategy in assembly := {
