@@ -5,6 +5,7 @@ package karps.core;
 import "karps/proto/graph.proto";
 import "karps/proto/io.proto";
 import "karps/proto/computation.proto";
+//import "karps/proto/api_internal.proto";
 
 service KarpsMain {
   rpc CreateSession (CreateSessionRequest) returns (CreateSessionResponse);
@@ -38,6 +39,7 @@ message ComputationStatusRequest {
 message ComputationStreamResponse {
   SessionId session = 1;
   ComputationId computation = 2;
+  // One or more of the following are returned:
   Graph start_graph = 3;
   Graph pinned_graph = 4;
   // Returns all the most recent info on a node if anything changes for this node.
@@ -53,4 +55,7 @@ message CompilationResult {
   // different compilation phase.
   // They are in order, until nothing is available.
   repeated CompilationPhaseGraph compilation_graph = 2;
+  // Some information about the compilation.
+  // This includes all the errors that may have happened.
+  //repeated AnalysisMessage messages = 3;
 }

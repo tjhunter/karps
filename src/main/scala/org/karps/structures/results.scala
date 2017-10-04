@@ -6,11 +6,16 @@ import karps.core.{graph => G}
 import karps.core.{computation => C}
 
 case class SparkComputationStats(
-    rddInfo: Seq[RDDInfo])
+    rddInfo: Seq[RDDInfo],
+    logicalInfo: SQLTreeInfo,
+    physicalInfo: SQLTreeInfo)
 
 object SparkComputationStats {
   def toProto(scs: SparkComputationStats): C.SparkStats = {
-    C.SparkStats(scs.rddInfo.map(RDDInfo.toProto))
+    C.SparkStats(
+      rddInfo = scs.rddInfo.map(RDDInfo.toProto),
+      parsed = SQLTreeInfo.toProto(scs.logicalInfo),
+      physical = SQLTreeInfo.toProto(scs.physicalInfo))
   }
 }
 

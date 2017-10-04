@@ -228,7 +228,7 @@ object KSession extends Logging {
         logger.info(s"Trying to access RDD info for $this")
         // Force the materialization of the dependencies first.
         for (it <- item.dependencies) {
-          it.dataframe
+//          it.dataframe
           it.checkpointedDataframe
           it.logical
         }
@@ -236,16 +236,19 @@ object KSession extends Logging {
         for (c <- item.logical.children) {
           logger.info(s"logical child: ${c.hashCode()} \n$c")
         }
-        logger.info(s"$this: schema=${item.dataframe.schema} ${item.rectifiedDataFrameSchema}")
-        logger.info(s"physical: ${item.executedPlan}")
-        item.dataframe.explain(true)
+        logger.info(s"$this: schema=${item.checkpointedDataframe.schema} ${item.rectifiedDataFrameSchema}")
+        logger.info(s"physical: ${item.physical}")
+        item.checkpointedDataframe.explain(true)
         logger.info(s"Spark info for $this: rdd=${item.rddId} dependencies=${item.RDDDependencies}")
-        val stats = SparkComputationStats(item.RDDDependencies)
+        val stats = SparkComputationStats(
+          item.RDDDependencies,
+          item.infoLogical,
+          item.infoPhysical)
         session.notifyExecutingInSpark(item.path, stats, item.locality)
         if (item.locality == Local) {
-          logger.info(s"Getting internal rows: ${item.collectedInternal}")
+//          logger.info(s"Getting internal rows: ${item.collectedInternal}")
           logger.info(s"$this: output schema is:")
-          item.dataframe.printSchema()
+          item.checkpointedDataframe.printSchema()
           logger.info(s"$this: Corrected schema is:\n${item.rectifiedDataFrameSchema}")
           logger.info(s"Getting rows: ${item.collected}")
           val rows = item.collected

@@ -170,6 +170,7 @@ message NodeId {
 // ******** logging **********
 
 enum MessageSeverity {
+
     INFO = 0;
     WARNING = 1;
     FATAL = 2;

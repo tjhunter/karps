@@ -43,7 +43,7 @@ class GrpcListener(
     // TODO: the computation is richer and contains some nodes that may not know about.
     logger.debug(s"$this: onComputation")
     val bcr = C.BatchComputationResult(targetPath=None, results=current.values.toSeq)
-    obs.onNext(baseMsg)
+    obs.onNext(baseMsg.copy(results = Option(bcr)))
     // Do nothing, it is already done at init.
   }
 
@@ -53,13 +53,17 @@ class GrpcListener(
       locality: Locality): Unit = synchronized {
     val p = SparkComputationStats.toProto(stats)
     val cr = current(path.local)
-    current += path.local -> cr.copy(sparkStats=Some(p))
+    val cr2 = cr.copy(sparkStats=Some(p))
+    current += path.local -> cr2
     // In the case of observables, we are not finished yet, as we wait for results.
     // No results expected for dataframes (just analysis).
     if (locality == Distributed) {
       finished += path.local
     }
     logger.debug(s"onAnalyzedDataFrame: got ${path.local} remaining: $remaining")
+    obs.onNext(baseMsg.copy(
+      results = Option(C.BatchComputationResult(targetPath=None, results=Seq(cr2)))
+    ))
   }
 
   def onFinished(path: GlobalPath, result: Try[CellWithType]): Unit = {
