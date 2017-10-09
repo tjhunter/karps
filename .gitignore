@@ -16,3 +16,8 @@ project/plugins/project/
 .scala_dependencies
 .worksheet
 .idea/
+
+# Specific
+haskell/.stack-work/
+build/
+.DS_Store

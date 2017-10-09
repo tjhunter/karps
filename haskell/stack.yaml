@@ -1,0 +1,19 @@
+flags: {}
+extra-package-dbs: []
+packages:
+- '.'
+extra-deps:
+- generator-0.5.5
+- cryptohash-sha256-0.11.100.1
+- aeson-pretty-0.8.2
+#- lens-labels-0.1.0.1
+- proto-lens-0.2.2.0
+- proto-lens-protoc-0.2.2.3
+- lens-labels-0.1.0.2
+- proto-lens-descriptors-0.2.2.0
+#- proto-lens-descriptors-0.2.2.0
+resolver: lts-7.13
+pvp-bounds: both
+build:
+  library-profiling: false
+  executable-profiling: false
