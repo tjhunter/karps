@@ -26,6 +26,7 @@ import qualified Data.ProtoLens.Reexport.Data.ByteString
 import qualified Data.ProtoLens.Reexport.Lens.Labels as Lens.Labels
 import qualified Proto.Karps.Proto.Graph
 import qualified Proto.Karps.Proto.Row
+import qualified Proto.Tensorflow.Core.Framework.NodeDef
 
 data BatchComputationResult = BatchComputationResult{_BatchComputationResult'targetPath
                                                      ::
@@ -372,7 +373,9 @@ instance Data.ProtoLens.Message PointerPath where
 data RDDInfo = RDDInfo{_RDDInfo'rddId :: !Data.Int.Int64,
                        _RDDInfo'className :: !Data.Text.Text,
                        _RDDInfo'repr :: !Data.Text.Text,
-                       _RDDInfo'parents :: ![Data.Int.Int64]}
+                       _RDDInfo'parents :: ![Data.Int.Int64],
+                       _RDDInfo'proto ::
+                       !(Prelude.Maybe Proto.Tensorflow.Core.Framework.NodeDef.NodeDef)}
              deriving (Prelude.Show, Prelude.Eq, Prelude.Ord)
 
 instance (a ~ Data.Int.Int64, b ~ Data.Int.Int64,
@@ -411,11 +414,33 @@ instance (a ~ [Data.Int.Int64], b ~ [Data.Int.Int64],
                  (\ x__ y__ -> x__{_RDDInfo'parents = y__}))
               Prelude.id
 
+instance (a ~ Proto.Tensorflow.Core.Framework.NodeDef.NodeDef,
+          b ~ Proto.Tensorflow.Core.Framework.NodeDef.NodeDef,
+          Prelude.Functor f) =>
+         Lens.Labels.HasLens "proto" f RDDInfo RDDInfo a b where
+        lensOf _
+          = (Prelude..)
+              (Lens.Family2.Unchecked.lens _RDDInfo'proto
+                 (\ x__ y__ -> x__{_RDDInfo'proto = y__}))
+              (Data.ProtoLens.maybeLens Data.Default.Class.def)
+
+instance (a ~
+            Prelude.Maybe Proto.Tensorflow.Core.Framework.NodeDef.NodeDef,
+          b ~ Prelude.Maybe Proto.Tensorflow.Core.Framework.NodeDef.NodeDef,
+          Prelude.Functor f) =>
+         Lens.Labels.HasLens "maybe'proto" f RDDInfo RDDInfo a b where
+        lensOf _
+          = (Prelude..)
+              (Lens.Family2.Unchecked.lens _RDDInfo'proto
+                 (\ x__ y__ -> x__{_RDDInfo'proto = y__}))
+              Prelude.id
+
 instance Data.Default.Class.Default RDDInfo where
         def
           = RDDInfo{_RDDInfo'rddId = Data.ProtoLens.fieldDefault,
                     _RDDInfo'className = Data.ProtoLens.fieldDefault,
-                    _RDDInfo'repr = Data.ProtoLens.fieldDefault, _RDDInfo'parents = []}
+                    _RDDInfo'repr = Data.ProtoLens.fieldDefault, _RDDInfo'parents = [],
+                    _RDDInfo'proto = Prelude.Nothing}
 
 instance Data.ProtoLens.Message RDDInfo where
         descriptor
@@ -443,6 +468,13 @@ instance Data.ProtoLens.Message RDDInfo where
                          Data.ProtoLens.FieldTypeDescriptor Data.Int.Int64)
                       (Data.ProtoLens.RepeatedField Data.ProtoLens.Packed parents)
                       :: Data.ProtoLens.FieldDescriptor RDDInfo
+                proto__field_descriptor
+                  = Data.ProtoLens.FieldDescriptor "proto"
+                      (Data.ProtoLens.MessageField ::
+                         Data.ProtoLens.FieldTypeDescriptor
+                           Proto.Tensorflow.Core.Framework.NodeDef.NodeDef)
+                      (Data.ProtoLens.OptionalField maybe'proto)
+                      :: Data.ProtoLens.FieldDescriptor RDDInfo
               in
               Data.ProtoLens.MessageDescriptor
                 (Data.Text.pack "karps.core.RDDInfo")
@@ -450,12 +482,14 @@ instance Data.ProtoLens.Message RDDInfo where
                    [(Data.ProtoLens.Tag 1, rddId__field_descriptor),
                     (Data.ProtoLens.Tag 2, className__field_descriptor),
                     (Data.ProtoLens.Tag 3, repr__field_descriptor),
-                    (Data.ProtoLens.Tag 4, parents__field_descriptor)])
+                    (Data.ProtoLens.Tag 4, parents__field_descriptor),
+                    (Data.ProtoLens.Tag 5, proto__field_descriptor)])
                 (Data.Map.fromList
                    [("rdd_id", rddId__field_descriptor),
                     ("class_name", className__field_descriptor),
                     ("repr", repr__field_descriptor),
-                    ("parents", parents__field_descriptor)])
+                    ("parents", parents__field_descriptor),
+                    ("proto", proto__field_descriptor)])
 
 data ResultStatus = UNUSED
                   | RUNNING
@@ -525,6 +559,112 @@ instance Prelude.Bounded ResultStatus where
         minBound = UNUSED
         maxBound = SCHEDULED
 
+data SQLTreeInfo = SQLTreeInfo{_SQLTreeInfo'nodeId ::
+                               !Data.Text.Text,
+                               _SQLTreeInfo'fullName :: !Data.Text.Text,
+                               _SQLTreeInfo'parentNodes :: ![Data.Text.Text],
+                               _SQLTreeInfo'proto ::
+                               !(Prelude.Maybe Proto.Tensorflow.Core.Framework.NodeDef.NodeDef)}
+                 deriving (Prelude.Show, Prelude.Eq, Prelude.Ord)
+
+instance (a ~ Data.Text.Text, b ~ Data.Text.Text,
+          Prelude.Functor f) =>
+         Lens.Labels.HasLens "nodeId" f SQLTreeInfo SQLTreeInfo a b where
+        lensOf _
+          = (Prelude..)
+              (Lens.Family2.Unchecked.lens _SQLTreeInfo'nodeId
+                 (\ x__ y__ -> x__{_SQLTreeInfo'nodeId = y__}))
+              Prelude.id
+
+instance (a ~ Data.Text.Text, b ~ Data.Text.Text,
+          Prelude.Functor f) =>
+         Lens.Labels.HasLens "fullName" f SQLTreeInfo SQLTreeInfo a b where
+        lensOf _
+          = (Prelude..)
+              (Lens.Family2.Unchecked.lens _SQLTreeInfo'fullName
+                 (\ x__ y__ -> x__{_SQLTreeInfo'fullName = y__}))
+              Prelude.id
+
+instance (a ~ [Data.Text.Text], b ~ [Data.Text.Text],
+          Prelude.Functor f) =>
+         Lens.Labels.HasLens "parentNodes" f SQLTreeInfo SQLTreeInfo a b
+         where
+        lensOf _
+          = (Prelude..)
+              (Lens.Family2.Unchecked.lens _SQLTreeInfo'parentNodes
+                 (\ x__ y__ -> x__{_SQLTreeInfo'parentNodes = y__}))
+              Prelude.id
+
+instance (a ~ Proto.Tensorflow.Core.Framework.NodeDef.NodeDef,
+          b ~ Proto.Tensorflow.Core.Framework.NodeDef.NodeDef,
+          Prelude.Functor f) =>
+         Lens.Labels.HasLens "proto" f SQLTreeInfo SQLTreeInfo a b where
+        lensOf _
+          = (Prelude..)
+              (Lens.Family2.Unchecked.lens _SQLTreeInfo'proto
+                 (\ x__ y__ -> x__{_SQLTreeInfo'proto = y__}))
+              (Data.ProtoLens.maybeLens Data.Default.Class.def)
+
+instance (a ~
+            Prelude.Maybe Proto.Tensorflow.Core.Framework.NodeDef.NodeDef,
+          b ~ Prelude.Maybe Proto.Tensorflow.Core.Framework.NodeDef.NodeDef,
+          Prelude.Functor f) =>
+         Lens.Labels.HasLens "maybe'proto" f SQLTreeInfo SQLTreeInfo a b
+         where
+        lensOf _
+          = (Prelude..)
+              (Lens.Family2.Unchecked.lens _SQLTreeInfo'proto
+                 (\ x__ y__ -> x__{_SQLTreeInfo'proto = y__}))
+              Prelude.id
+
+instance Data.Default.Class.Default SQLTreeInfo where
+        def
+          = SQLTreeInfo{_SQLTreeInfo'nodeId = Data.ProtoLens.fieldDefault,
+                        _SQLTreeInfo'fullName = Data.ProtoLens.fieldDefault,
+                        _SQLTreeInfo'parentNodes = [],
+                        _SQLTreeInfo'proto = Prelude.Nothing}
+
+instance Data.ProtoLens.Message SQLTreeInfo where
+        descriptor
+          = let nodeId__field_descriptor
+                  = Data.ProtoLens.FieldDescriptor "node_id"
+                      (Data.ProtoLens.StringField ::
+                         Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+                      (Data.ProtoLens.PlainField Data.ProtoLens.Optional nodeId)
+                      :: Data.ProtoLens.FieldDescriptor SQLTreeInfo
+                fullName__field_descriptor
+                  = Data.ProtoLens.FieldDescriptor "full_name"
+                      (Data.ProtoLens.StringField ::
+                         Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+                      (Data.ProtoLens.PlainField Data.ProtoLens.Optional fullName)
+                      :: Data.ProtoLens.FieldDescriptor SQLTreeInfo
+                parentNodes__field_descriptor
+                  = Data.ProtoLens.FieldDescriptor "parent_nodes"
+                      (Data.ProtoLens.StringField ::
+                         Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+                      (Data.ProtoLens.RepeatedField Data.ProtoLens.Unpacked parentNodes)
+                      :: Data.ProtoLens.FieldDescriptor SQLTreeInfo
+                proto__field_descriptor
+                  = Data.ProtoLens.FieldDescriptor "proto"
+                      (Data.ProtoLens.MessageField ::
+                         Data.ProtoLens.FieldTypeDescriptor
+                           Proto.Tensorflow.Core.Framework.NodeDef.NodeDef)
+                      (Data.ProtoLens.OptionalField maybe'proto)
+                      :: Data.ProtoLens.FieldDescriptor SQLTreeInfo
+              in
+              Data.ProtoLens.MessageDescriptor
+                (Data.Text.pack "karps.core.SQLTreeInfo")
+                (Data.Map.fromList
+                   [(Data.ProtoLens.Tag 1, nodeId__field_descriptor),
+                    (Data.ProtoLens.Tag 2, fullName__field_descriptor),
+                    (Data.ProtoLens.Tag 3, parentNodes__field_descriptor),
+                    (Data.ProtoLens.Tag 4, proto__field_descriptor)])
+                (Data.Map.fromList
+                   [("node_id", nodeId__field_descriptor),
+                    ("full_name", fullName__field_descriptor),
+                    ("parent_nodes", parentNodes__field_descriptor),
+                    ("proto", proto__field_descriptor)])
+
 data SessionId = SessionId{_SessionId'id :: !Data.Text.Text}
                deriving (Prelude.Show, Prelude.Eq, Prelude.Ord)
 
@@ -554,7 +694,11 @@ instance Data.ProtoLens.Message SessionId where
                 (Data.Map.fromList [(Data.ProtoLens.Tag 1, id__field_descriptor)])
                 (Data.Map.fromList [("id", id__field_descriptor)])
 
-data SparkStats = SparkStats{_SparkStats'rddInfo :: ![RDDInfo]}
+data SparkStats = SparkStats{_SparkStats'rddInfo :: ![RDDInfo],
+                             _SparkStats'parsed :: ![SQLTreeInfo],
+                             _SparkStats'analyzed :: ![SQLTreeInfo],
+                             _SparkStats'optimized :: ![SQLTreeInfo],
+                             _SparkStats'physical :: ![SQLTreeInfo]}
                 deriving (Prelude.Show, Prelude.Eq, Prelude.Ord)
 
 instance (a ~ [RDDInfo], b ~ [RDDInfo], Prelude.Functor f) =>
@@ -565,8 +709,47 @@ instance (a ~ [RDDInfo], b ~ [RDDInfo], Prelude.Functor f) =>
                  (\ x__ y__ -> x__{_SparkStats'rddInfo = y__}))
               Prelude.id
 
+instance (a ~ [SQLTreeInfo], b ~ [SQLTreeInfo],
+          Prelude.Functor f) =>
+         Lens.Labels.HasLens "parsed" f SparkStats SparkStats a b where
+        lensOf _
+          = (Prelude..)
+              (Lens.Family2.Unchecked.lens _SparkStats'parsed
+                 (\ x__ y__ -> x__{_SparkStats'parsed = y__}))
+              Prelude.id
+
+instance (a ~ [SQLTreeInfo], b ~ [SQLTreeInfo],
+          Prelude.Functor f) =>
+         Lens.Labels.HasLens "analyzed" f SparkStats SparkStats a b where
+        lensOf _
+          = (Prelude..)
+              (Lens.Family2.Unchecked.lens _SparkStats'analyzed
+                 (\ x__ y__ -> x__{_SparkStats'analyzed = y__}))
+              Prelude.id
+
+instance (a ~ [SQLTreeInfo], b ~ [SQLTreeInfo],
+          Prelude.Functor f) =>
+         Lens.Labels.HasLens "optimized" f SparkStats SparkStats a b where
+        lensOf _
+          = (Prelude..)
+              (Lens.Family2.Unchecked.lens _SparkStats'optimized
+                 (\ x__ y__ -> x__{_SparkStats'optimized = y__}))
+              Prelude.id
+
+instance (a ~ [SQLTreeInfo], b ~ [SQLTreeInfo],
+          Prelude.Functor f) =>
+         Lens.Labels.HasLens "physical" f SparkStats SparkStats a b where
+        lensOf _
+          = (Prelude..)
+              (Lens.Family2.Unchecked.lens _SparkStats'physical
+                 (\ x__ y__ -> x__{_SparkStats'physical = y__}))
+              Prelude.id
+
 instance Data.Default.Class.Default SparkStats where
-        def = SparkStats{_SparkStats'rddInfo = []}
+        def
+          = SparkStats{_SparkStats'rddInfo = [], _SparkStats'parsed = [],
+                       _SparkStats'analyzed = [], _SparkStats'optimized = [],
+                       _SparkStats'physical = []}
 
 instance Data.ProtoLens.Message SparkStats where
         descriptor
@@ -576,12 +759,52 @@ instance Data.ProtoLens.Message SparkStats where
                          Data.ProtoLens.FieldTypeDescriptor RDDInfo)
                       (Data.ProtoLens.RepeatedField Data.ProtoLens.Unpacked rddInfo)
                       :: Data.ProtoLens.FieldDescriptor SparkStats
+                parsed__field_descriptor
+                  = Data.ProtoLens.FieldDescriptor "parsed"
+                      (Data.ProtoLens.MessageField ::
+                         Data.ProtoLens.FieldTypeDescriptor SQLTreeInfo)
+                      (Data.ProtoLens.RepeatedField Data.ProtoLens.Unpacked parsed)
+                      :: Data.ProtoLens.FieldDescriptor SparkStats
+                analyzed__field_descriptor
+                  = Data.ProtoLens.FieldDescriptor "analyzed"
+                      (Data.ProtoLens.MessageField ::
+                         Data.ProtoLens.FieldTypeDescriptor SQLTreeInfo)
+                      (Data.ProtoLens.RepeatedField Data.ProtoLens.Unpacked analyzed)
+                      :: Data.ProtoLens.FieldDescriptor SparkStats
+                optimized__field_descriptor
+                  = Data.ProtoLens.FieldDescriptor "optimized"
+                      (Data.ProtoLens.MessageField ::
+                         Data.ProtoLens.FieldTypeDescriptor SQLTreeInfo)
+                      (Data.ProtoLens.RepeatedField Data.ProtoLens.Unpacked optimized)
+                      :: Data.ProtoLens.FieldDescriptor SparkStats
+                physical__field_descriptor
+                  = Data.ProtoLens.FieldDescriptor "physical"
+                      (Data.ProtoLens.MessageField ::
+                         Data.ProtoLens.FieldTypeDescriptor SQLTreeInfo)
+                      (Data.ProtoLens.RepeatedField Data.ProtoLens.Unpacked physical)
+                      :: Data.ProtoLens.FieldDescriptor SparkStats
               in
               Data.ProtoLens.MessageDescriptor
                 (Data.Text.pack "karps.core.SparkStats")
                 (Data.Map.fromList
-                   [(Data.ProtoLens.Tag 1, rddInfo__field_descriptor)])
-                (Data.Map.fromList [("rdd_info", rddInfo__field_descriptor)])
+                   [(Data.ProtoLens.Tag 1, rddInfo__field_descriptor),
+                    (Data.ProtoLens.Tag 2, parsed__field_descriptor),
+                    (Data.ProtoLens.Tag 3, analyzed__field_descriptor),
+                    (Data.ProtoLens.Tag 4, optimized__field_descriptor),
+                    (Data.ProtoLens.Tag 5, physical__field_descriptor)])
+                (Data.Map.fromList
+                   [("rdd_info", rddInfo__field_descriptor),
+                    ("parsed", parsed__field_descriptor),
+                    ("analyzed", analyzed__field_descriptor),
+                    ("optimized", optimized__field_descriptor),
+                    ("physical", physical__field_descriptor)])
+
+analyzed ::
+         forall f s t a b . Lens.Labels.HasLens "analyzed" f s t a b =>
+           Lens.Family2.LensLike f s t a b
+analyzed
+  = Lens.Labels.lensOf
+      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "analyzed")
 
 className ::
           forall f s t a b . Lens.Labels.HasLens "className" f s t a b =>
@@ -617,6 +840,13 @@ finalResult ::
 finalResult
   = Lens.Labels.lensOf
       ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "finalResult")
+
+fullName ::
+         forall f s t a b . Lens.Labels.HasLens "fullName" f s t a b =>
+           Lens.Family2.LensLike f s t a b
+fullName
+  = Lens.Labels.lensOf
+      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "fullName")
 
 id ::
    forall f s t a b . Lens.Labels.HasLens "id" f s t a b =>
@@ -656,6 +886,13 @@ maybe'localPath
   = Lens.Labels.lensOf
       ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "maybe'localPath")
 
+maybe'proto ::
+            forall f s t a b . Lens.Labels.HasLens "maybe'proto" f s t a b =>
+              Lens.Family2.LensLike f s t a b
+maybe'proto
+  = Lens.Labels.lensOf
+      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "maybe'proto")
+
 maybe'sparkStats ::
                  forall f s t a b .
                    Lens.Labels.HasLens "maybe'sparkStats" f s t a b =>
@@ -672,12 +909,54 @@ maybe'targetPath
   = Lens.Labels.lensOf
       ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "maybe'targetPath")
 
+nodeId ::
+       forall f s t a b . Lens.Labels.HasLens "nodeId" f s t a b =>
+         Lens.Family2.LensLike f s t a b
+nodeId
+  = Lens.Labels.lensOf
+      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "nodeId")
+
+optimized ::
+          forall f s t a b . Lens.Labels.HasLens "optimized" f s t a b =>
+            Lens.Family2.LensLike f s t a b
+optimized
+  = Lens.Labels.lensOf
+      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "optimized")
+
+parentNodes ::
+            forall f s t a b . Lens.Labels.HasLens "parentNodes" f s t a b =>
+              Lens.Family2.LensLike f s t a b
+parentNodes
+  = Lens.Labels.lensOf
+      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "parentNodes")
+
 parents ::
         forall f s t a b . Lens.Labels.HasLens "parents" f s t a b =>
           Lens.Family2.LensLike f s t a b
 parents
   = Lens.Labels.lensOf
       ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "parents")
+
+parsed ::
+       forall f s t a b . Lens.Labels.HasLens "parsed" f s t a b =>
+         Lens.Family2.LensLike f s t a b
+parsed
+  = Lens.Labels.lensOf
+      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "parsed")
+
+physical ::
+         forall f s t a b . Lens.Labels.HasLens "physical" f s t a b =>
+           Lens.Family2.LensLike f s t a b
+physical
+  = Lens.Labels.lensOf
+      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "physical")
+
+proto ::
+      forall f s t a b . Lens.Labels.HasLens "proto" f s t a b =>
+        Lens.Family2.LensLike f s t a b
+proto
+  = Lens.Labels.lensOf
+      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "proto")
 
 rddId ::
       forall f s t a b . Lens.Labels.HasLens "rddId" f s t a b =>
