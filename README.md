@@ -42,7 +42,7 @@ To run the server, you need:
  - the karps compiler in you PATH. If you are using MacOs or Linux, the easiest is to download the
  latest prebuilt version following the [instructions here]().
 
-The simplest way to run the server is to use the published Spark package:
+The simplest way to run the server is to use the published Spark package: TODO
 
 ## Developer instructions
 
