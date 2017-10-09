@@ -1,12 +1,12 @@
 # Karps-Haskell - Haskell bindings for Spark Datasets and Dataframes
 
-The Haskell side of the [Karps project](). This repository contains:
+The Haskell side of the [Karps project](..). This repository contains:
 
 - a client written in Haskell that sends pipelines to Spark for execution.
 
 - an optimizing compiler that takes high-level graphs of computations and translates them into
   lower-level, simpler operations. In addition to type checking, this compiler makes a number of
-   whole-program optimization and verification.
+   whole-program optimizations and verifications.
 
 There is also a separate set of utilities to visualize such pipelines using
 Jupyter notebooks and IHaskell.
@@ -153,5 +153,5 @@ Modifying the .proto files. These files are maintained in a separate project. He
 
 ```bash
 rm -r src/Proto
-protoc --plugin=protoc-gen-haskell=`which proto-lens-protoc`     --haskell_out=src/ -I $KARPS/src/main/protobuf $KARPS/src/main/protobuf/karps/proto/*.proto $KARPS/src/main/protobuf/tensorflow/core/framework/*.proto
+protoc --plugin=protoc-gen-haskell=`which proto-lens-protoc`     --haskell_out=src/ -I ../src/main/protobuf ../src/main/protobuf/karps/proto/*.proto ../src/main/protobuf/tensorflow/core/framework/*.proto
 ```
