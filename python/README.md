@@ -1,5 +1,16 @@
 # karps-python
-Python bindings for the Karps project
+Python bindings for the Karps project.
+
+This project implements a small module that interfaces with the Karps server through the Grpc protocol. It is the
+reference client implementation for Karps. It provides convenient integration with Jupyter/IPython, and some
+developer tools for other interactive environments such as Databricks notebooks.
+
+## User instructions
+
+Users should use the version published in pypi. TODO.
+
+See the notebooks in the [notebooks directory](notebooks/) for some examples. See the main readme for instructions
+on how to run the server.
 
 ## Development note.
 
@@ -19,7 +30,11 @@ $KARPS/src/main/protobuf/tensorflow/core/framework/attr_value.proto \
 $KARPS/src/main/protobuf/tensorflow/core/framework/graph.proto \
 $KARPS/src/main/protobuf/tensorflow/core/framework/node_def.proto
 
-How to run:
+The easiest is to use `pipenv` to set up all the dependencies and run the project.
+
+```
+pipenv install
+```
 
 ```bash
 PYTHONPATH=$PWD pipenv run ipython notebook

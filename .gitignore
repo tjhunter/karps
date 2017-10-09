@@ -23,6 +23,7 @@ build/
 .DS_Store
 
 # Python
+python/Pipfile.lock
 python/dist/
 python/karps.egg-info/
 python/karps/*.pyc
