@@ -12,4 +12,6 @@ object KarpsException {
   def fail(msg: String, cause: Exception = null): Nothing = {
     throw new KarpsException(msg)
   }
+
+  def apply(cause: String): KarpsException = new KarpsException(cause)
 }

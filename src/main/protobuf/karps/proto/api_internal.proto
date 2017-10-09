@@ -31,12 +31,22 @@ enum CompilingPhase {
     // Here is the most detailed explanation of what is happening inside the
     // Karps compiler.
 
+    // Current max: 11
+
     // The initial graph, as received and parsed.
     // A number of checks have happened already at that point.
     INITIAL = 0;
 
     // Nodes that are not reachable from the target outputs are removed.
     REMOVE_UNREACHABLE = 1;
+
+    // ****** Replace high level structural constructs *****
+
+    // Removes all references to broadcasts between observables.
+    // Broadcasting is convenient to express dependencies between observables (on the
+    // client side), but it needs to be replaced
+    // by lower-level operatorns when doing functional flattening.
+    REMOVE_OBSERVABLE_BROADCASTS = 10;
 
     // Information about data sources (time stamps) is inserted into the relevant graph
     // nodes.
@@ -48,6 +58,13 @@ enum CompilingPhase {
 
     // Parallel aggregations are merged into single aggregations.
     MERGE_AGGREGATIONS = 7;
+
+    // Special case for aggregations and transforms that happens to be common:
+    //    agg1      agg2
+    //    trans1    /
+    //         root
+    // This combines all the intermediate transforms into a single one.
+    MERGE_PREAGG_AGGREGATIONS = 11;
 
     // Parallel transforms are merged into single transforms.
     MERGE_TRANSFORMS = 8;
@@ -153,6 +170,7 @@ message NodeId {
 // ******** logging **********
 
 enum MessageSeverity {
+
     INFO = 0;
     WARNING = 1;
     FATAL = 2;

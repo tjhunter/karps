@@ -17,13 +17,16 @@ import org.apache.spark.sql.types._
 
 import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
 
-import karps.core.{types => T}
-import karps.core.{row => R}
 import org.karps.row.{AlgebraicRow, Cell, RowCell, RowArray}
 import org.karps.KarpsException
 import org.karps.structures.ProtoUtils._
 
+import karps.core.{types => T}
+import karps.core.{row => R}
 
+/**
+ * Nullability.
+ */
 sealed trait Nullable {
   def intersect(other: Nullable): Nullable
 }
@@ -123,6 +126,7 @@ object AugmentedDataType {
 
     val strict: StrictType = adt.dataType match {
       case _: IntegerType => StrictType.BasicType(INT)
+      case _: LongType => StrictType.BasicType(INT) // TODO: fix eventually
       case _: DoubleType => StrictType.BasicType(DOUBLE)
       case _: StringType => StrictType.BasicType(STRING)
       case _: BooleanType => StrictType.BasicType(BOOL)
@@ -233,6 +237,8 @@ object AugmentedDataType {
   // The type dt1 is a subset of the type dt2
   private def transfersTo(dt1: DataType, dt2: DataType): Boolean = (dt1, dt2) match {
     case (x, y) if x == y => true
+      // Special case as long as we do not have long implemented.
+    case (IntegerType, LongType) => true
     case (ArrayType(t1, nl1), ArrayType(t2, nl2)) => transfersTo(t1, t2) && transfersTo(nl1, nl2)
     case (st1: StructType, st2: StructType) =>
       if (st1.fields.length != st2.fields.length) {
@@ -370,9 +376,6 @@ object LocalSparkConversion {
  * primitive and non-primitive types in a uniform manner.
  */
 object DistributedSparkConversion extends Logging {
-
-//   import JsonSparkConversions.{get, sequence}
-//  import LocalSparkConversion.normalizeDataType
   
   // Takes a cell with a type and attempts to convert it to a cell collection.
   def deserializeDistributed(cwt: CellWithType): Try[CellCollection] = {

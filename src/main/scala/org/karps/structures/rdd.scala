@@ -1,11 +1,10 @@
 package org.karps.structures
 
-import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
-// import spray.json.DefaultJsonProtocol._
 import org.apache.spark.rdd.RDD
 
 import karps.core.{graph => G}
 import karps.core.{computation => C}
+import tensorflow.node_def.NodeDef
 
 
 case class RDDId private (repr: Int) extends AnyVal
@@ -25,7 +24,8 @@ case class RDDInfo private (
   id: RDDId,
   className: String,
   repr: String, // A human-readable representation of the RDD
-  parents: Seq[RDDId])
+  parents: Seq[RDDId],
+  proto: Option[NodeDef])
 
 object RDDInfo {
   def fromRDD(rdd: RDD[_]): RDDInfo = {
@@ -34,7 +34,8 @@ object RDDInfo {
       RDDId.fromRDD(rdd),
       rdd.getClass.getSimpleName,
       rdd.toString(),
-      parents)
+      parents,
+      None)
   }
   
   def toProto(r: RDDInfo): C.RDDInfo = {
@@ -42,7 +43,27 @@ object RDDInfo {
       rddId = r.id.repr,
       className = r.className,
       repr = r.repr,
-      parents = r.parents.map(_.repr.toLong)
+      parents = r.parents.map(_.repr.toLong),
+      proto = r.proto
     )
+  }
+}
+
+case class SQLTreeInfo(
+    nodeId: String,
+    fullName : String,
+    parentNodes: Seq[SQLTreeInfo],
+    proto: Option[NodeDef])
+
+object SQLTreeInfo {
+  def toProto(sti: SQLTreeInfo): Seq[C.SQLTreeInfo] = {
+    val n = C.SQLTreeInfo(
+      nodeId = sti.nodeId,
+      fullName = sti.fullName,
+      parentNodes = sti.parentNodes.map(_.nodeId),
+      proto = sti.proto
+    )
+    val cs = sti.parentNodes.flatMap(toProto)
+    n +: cs
   }
 }

@@ -4,6 +4,7 @@ package karps.core;
 
 import "karps/proto/graph.proto";
 import "karps/proto/row.proto";
+import "tensorflow/core/framework/node_def.proto";
 
 enum ResultStatus {
   UNUSED = 0;
@@ -39,6 +40,14 @@ message PointerPath {
 
 message SparkStats {
   repeated RDDInfo rdd_info = 1;
+  // The parsed logical plan
+  repeated SQLTreeInfo parsed = 2;
+  // The analyzed logical plan
+  repeated SQLTreeInfo analyzed = 3;
+  // The optimized logical plan.
+  repeated SQLTreeInfo optimized = 4;
+  // The final physical plan
+  repeated SQLTreeInfo physical = 5;
 };
 
 message RDDInfo {
@@ -46,7 +55,24 @@ message RDDInfo {
   string class_name = 2;
   string repr = 3;
   repeated int64 parents = 4;
+  // The proto representation to easily build the graph.
+  // The name has already been nicely converted.
+  tensorflow.NodeDef proto = 5;
 };
+
+// An elemement in the logical plan of catalyst.
+message SQLTreeInfo {
+  // A truncated name that can be used for indexing
+  // and display.
+  string node_id = 1;
+  // The full name as provided by catalyst.
+  string full_name = 2;
+  // The names of the parents.
+  repeated string parent_nodes = 3;
+  // The proto representation to easily build the graph.
+  // The name has already been nicely converted.
+  tensorflow.NodeDef proto = 4;
+}
 
 // ----------- Common structures ------------
 

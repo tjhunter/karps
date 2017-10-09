@@ -228,23 +228,25 @@ object KSession extends Logging {
         logger.info(s"Trying to access RDD info for $this")
         // Force the materialization of the dependencies first.
         for (it <- item.dependencies) {
-          it.dataframe
+          it.checkpointedDataframe
           it.logical
         }
         logger.info(s"logical: ${item.logical.hashCode()} \n${item.logical}")
         for (c <- item.logical.children) {
           logger.info(s"logical child: ${c.hashCode()} \n$c")
         }
-        logger.info(s"$this: schema=${item.dataframe.schema} ${item.rectifiedDataFrameSchema}")
-        logger.info(s"physical: ${item.executedPlan}")
-        item.dataframe.explain(true)
+        logger.info(s"$this: schema=${item.checkpointedDataframe.schema} ${item.rectifiedDataFrameSchema}")
+        logger.info(s"physical: ${item.physical}")
+        item.checkpointedDataframe.explain(true)
         logger.info(s"Spark info for $this: rdd=${item.rddId} dependencies=${item.RDDDependencies}")
-        val stats = SparkComputationStats(item.RDDDependencies)
+        val stats = SparkComputationStats(
+          item.RDDDependencies,
+          item.infoLogical,
+          item.infoPhysical)
         session.notifyExecutingInSpark(item.path, stats, item.locality)
         if (item.locality == Local) {
-          logger.info(s"Getting internal rows: ${item.collectedInternal}")
           logger.info(s"$this: output schema is:")
-          item.dataframe.printSchema()
+          item.checkpointedDataframe.printSchema()
           logger.info(s"$this: Corrected schema is:\n${item.rectifiedDataFrameSchema}")
           logger.info(s"Getting rows: ${item.collected}")
           val rows = item.collected
@@ -258,6 +260,12 @@ object KSession extends Logging {
           logger.debug(s"run: cwt=$cwt")
           session.notifyFinished(item.path, cwt)
         } else {
+          // Spark does not like the renaming operations and has a combinatorial
+          // explosion inside catalyst. As a workaroud, we force a checkpoint.
+          // The main problem here is the renaming, which could be handled directly inside
+          // the compiler.
+          // TODO: this should be done less often that every operation.
+          item.checkpointedDataframe
           // It is just a dataframe that we analyzed
           session.notifyFinishedAnalyzed(item.path, stats, item.locality)
         }

@@ -64,7 +64,9 @@ lazy val shaded = project.settings(
   assemblyShadeRules in assembly := Seq(
     ShadeRule.rename("com.google.protobuf.**" -> "org.karps.shaded.protobuf3.@1").inAll,
     ShadeRule.rename("org.json4s.**" -> "org.karps.shaded.json4s.@1").inAll,
+    ShadeRule.rename("com.trueaccord.scalapb.**" -> "org.karps.shaded.com.trueaccord.scalapb.@1").inAll,
     ShadeRule.rename("io.netty.**" -> "org.karps.shaded.io.netty.@1").inAll,
+    ShadeRule.rename("io.grpc.**" -> "org.karps.shaded.io.grpc.@1").inAll,
     ShadeRule.rename("com.google.common.**" -> "org.karps.shaded.com.google.common.@1").inAll,
     ShadeRule.rename("shapeless.**" -> "org.karps.shaded.shapeless.@1").inAll
   ),
@@ -84,7 +86,7 @@ lazy val ks_distribution = (project).settings(
                   |
                   |This project is only a technological preview. The API may change in the future.
                   |""".stripMargin,
-  spHomepage := "https://github.com/tjhunter/karps-server",
+  spHomepage := "https://github.com/tjhunter/karps",
   spAppendScalaVersion := true,
   libraryDependencies := nonShadedDependencies,
   libraryDependencies ++= sparkDependencies.map(_ % "provided"),
@@ -108,9 +110,11 @@ lazy val testing = Project("ks_testing", file(".")).settings(
   // Spark has a dependency on protobuf2, which conflicts with protobuf3.
   // Our own dep needs to be shaded.
   assemblyShadeRules in assembly := Seq(
-    ShadeRule.rename("com.google.protobuf.**" -> "org.tensorframes.protobuf3shade.@1").inAll,
+    ShadeRule.rename("com.google.protobuf.**" -> "org.karps.shaded.protobuf3shade.@1").inAll,
     ShadeRule.rename("org.json4s.**" -> "org.karps.shaded.json4s.@1").inAll,
     ShadeRule.rename("io.netty.**" -> "org.karps.shaded.io.netty.@1").inAll,
+    ShadeRule.rename("com.trueaccord.scalapb.**" -> "org.karps.shaded.com.trueaccord.scalapb.@1").inAll,
+    ShadeRule.rename("io.grpc.**" -> "org.karps.shaded.io.grpc.@1").inAll,
     ShadeRule.rename("com.google.common.**" -> "org.karps.shaded.com.google.common.@1").inAll,
     ShadeRule.rename("shapeless.**" -> "org.karps.shaded.shapeless.@1").inAll
   ),

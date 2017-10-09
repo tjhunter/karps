@@ -5,7 +5,6 @@ import scala.util.{Failure, Success, Try}
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.types._
 
-import org.karps.structures.{AugmentedDataType, IsNullable}
 import karps.core.{row => R}
 
 sealed trait Cell
@@ -113,6 +112,9 @@ object Cell {
     case (i: java.lang.Double, t: DoubleType) => Success(DoubleElement(i))
     // TODO: proper implementation of the long type
     case (i: Long, t: LongType) => Success(IntElement(i.toInt))
+      // TODO: special case as long as we do not have long support
+    case (i: Long, t: IntegerType) => Success(IntElement(i.toInt))
+    case (i: java.lang.Long, t: IntegerType) => Success(IntElement(i.toInt))
     case (s: String, t: StringType) => Success(StringElement(s))
     case (b: Boolean, t: BooleanType) => Success(BoolElement(b))
     case (b: java.lang.Boolean, t: BooleanType) => Success(BoolElement(b))

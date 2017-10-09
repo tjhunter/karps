@@ -4,13 +4,12 @@ import scala.util.{Failure, Success, Try}
 
 import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
 
-import org.apache.spark.sql.{Column, KarpsStubs, _}
+import org.apache.spark.sql.{functions, Column, KarpsStubs, _}
 import org.apache.spark.sql.catalyst.analysis.FunctionRegistry
 import org.apache.spark.sql.catalyst.expressions.aggregate.AggregateFunction
-import org.apache.spark.sql.types.{IntegerType, LongType}
 
 import org.karps.{ColumnWithType, KarpsException}
-import org.karps.structures.{AugmentedDataType, IsStrict, Nullable}
+import org.karps.structures.{AugmentedDataType, Nullable}
 
 object SQLFunctionsExtraction extends Logging {
   type SQLFunctionName = String
@@ -18,33 +17,39 @@ object SQLFunctionsExtraction extends Logging {
   def buildFunction(
       funName: String,
       inputs: Seq[ColumnWithType],
-      ref: DataFrame): Try[ColumnWithType] = {
+      ref: DataFrame,
+      expectedType: Option[AugmentedDataType]): Try[ColumnWithType] = {
+    for (sparkName <- nameTranslation.get(funName)) {
+      return buildFunction(sparkName, inputs, ref, expectedType)
+    }
+    // Special case, this should be done as a UDF instead.
+    if (funName.toLowerCase.trim == "inverse") {
+      val c = functions.lit(1.0).divide(inputs.head.col)
+      val inputNullability = Nullable.intersect(inputs.map(_.rectifiedSchema.nullability))
+      val res = buildColumn(c, ref, inputNullability, expectedType)
+      logger.debug(s"buildFunction: inverse: res=$res")
+      return res
+    }
     FunctionRegistry.builtin.lookupFunctionBuilder(funName.toLowerCase.trim) match {
       case Some(builder) =>
         val exps = inputs.map(_.col).map(KarpsStubs.getExpression)
         val expt = Try {
           builder.apply(exps)
         }
-        expt.map { exp =>
-          logger.debug(s"buildFunction: exp=$exp")
+        expt.flatMap { exp =>
           val c = exp match {
             case agg: AggregateFunction =>
               KarpsStubs.makeColumn(agg.toAggregateExpression(isDistinct = false))
             case x =>
               KarpsStubs.makeColumn(x)
           }
-          // Because the nullability is too extravagant in Spark, the following rules are applied:
-          //  - the nullability is as strict as the inputs let it be, unless the function is
-          // whitelisted
           val inputNullability = Nullable.intersect(inputs.map(_.rectifiedSchema.nullability))
-          logger.debug(s"buildFunction: inferred=$inputNullability inputs=$inputs")
-          val adt = inferDataType(c, ref, inputNullability)
-          val cwt = ColumnWithType(c, adt, ref)
-          logger.debug(s"buildFunction: cwt=$cwt")
-          // The output type may not be supported by Karps, so it needs to be rectified.
-          val rectified = rectifyNumericalType(cwt)
-          logger.debug(s"buildFunction: rectified=$rectified")
-          rectified
+          val res = buildColumn(c, ref, inputNullability, expectedType)
+          logger.debug(s"buildFunction: c=$c")
+          logger.debug(s"buildFunction: inputNullability=$inputNullability")
+          logger.debug(s"buildFunction: expectedType=$expectedType")
+          logger.debug(s"buildFunction: res=$res")
+          res
         }
 
       case None => Failure(new KarpsException(s"Could not find function name '$funName' in the " +
@@ -52,89 +57,38 @@ object SQLFunctionsExtraction extends Logging {
     }
   }
 
-  private def inferDataType(
-      c: Column, df: DataFrame, inputNullability: Nullable): AugmentedDataType = {
-    // Apply the expression first on the dataframe.
-    val df2 = df.select(c)
-    df2.schema.fields match {
-      case Array(f1) =>
-        AugmentedDataType(f1.dataType, inputNullability)
-      case _ => KarpsException.fail(s"df=$df df2=$df2 c=$c")
-    }
-  }
+  // Associate the SQL names with the Spark names.
+  private val nameTranslation = Map(
+    "plus"->"+",
+    "multiply"->"*",
+    "minus"->"-",
+    "divide"->"/",
+    "cast_double"->"double",
+    "greater_equal"->">="
+  )
 
-  private def build(n: SQLFunctionName, inputs: Seq[ColumnWithType]): Try[ColumnWithType] = {
-    logger.info(s"build called with n=$n inputs=$inputs")
-    if (inputs.isEmpty) {
-      // TODO: fix eventually
-      return Failure(new Exception(s"Cannot currently build expression with no input: $n"))
+  private def buildColumn(
+      c: Column,
+      ref: DataFrame,
+      inputNullability: Nullable,
+      expected: Option[AugmentedDataType]): Try[ColumnWithType] = {
+    val df2 = ref.select(c)
+    val dt = df2.schema.fields match {
+      case Array(f1) => f1.dataType
+      case _ => return Failure(KarpsException(s"ref=$ref df2=$df2 c=$c"))
     }
-    (FunctionRegistry.expressions.get(n.toLowerCase) match {
-      case None => Failure(new Exception(s"Cannot find $n in the set of builtin functions"))
-      case Some((info, builder)) =>
-        val e = builder.apply(inputs.map(i => KarpsStubs.getExpression(i.col)))
-        e match {
-          case agg: AggregateFunction =>
-            Success(new Column(agg.toAggregateExpression(isDistinct = false)))
-          case x =>
-            Success(new Column(x))
+    expected match {
+      case Some(adt) =>
+        // Check for errors.
+        for (errors <- AugmentedDataType.isCompatible(adt, df2.schema)) {
+          return Failure(KarpsException(s"Found errors: df2=$df2 adt=$adt error=$errors"))
         }
-    }).map { c =>
-      val c2 = rectifyNumericalType(inputs, c)
-      logger.debug(s"build: $c -> $c2: $c->$c2")
-      c2
+        // Incorporate the nullability of the parents.
+        val adt2 = adt.copy(nullability = adt.nullability.intersect(inputNullability))
+        Success(ColumnWithType(c, adt2, ref))
+      case None =>
+        val adt = AugmentedDataType(dt, inputNullability)
+        Success(ColumnWithType(c, adt, ref))
     }
-  }
-
-  // The datatype of the column as seen by Spark.
-  private def innerDataType(col: Column, ref: DataFrame): AugmentedDataType = {
-    ref.select(col).schema.fields match {
-      case Array(f) => AugmentedDataType.fromField(f)
-      case x => throw new Exception(s"Expected one field, got $x. Input was $col")
-    }
-  }
-
-  // This is very simple and does not attempt to be recursive.
-  // TODO: make it recursive
-  // TODO: prevent it from creating bad types to begin with.
-  private def rectifyNumericalType(cwt: ColumnWithType): ColumnWithType = {
-    cwt.rectifiedSchema.dataType match {
-      case x: LongType =>
-        val adt = cwt.rectifiedSchema.copy(dataType = IntegerType)
-        ColumnWithType(cwt.col.cast(IntegerType), adt, cwt.ref)
-      case _ => cwt
-    }
-  }
-
-  private def rectifyNumericalType(inputs: Seq[ColumnWithType], c: Column): ColumnWithType = {
-    logger.debug(s"rectifyNumericalType: inputs=$inputs")
-    logger.debug(s"rectifyNumericalType: c=$c")
-    // TODO: unsafe
-    val ref = inputs.head.ref
-    def isPrimNum(col: ColumnWithType): Option[AugmentedDataType] = {
-      if (col.rectifiedSchema.nullability == IsStrict) {
-        col.rectifiedSchema.dataType match {
-          case x: LongType => Some(col.rectifiedSchema)
-          case x: IntegerType => Some(col.rectifiedSchema)
-          case _ => None
-        }
-      } else None
-    }
-    val i = inputs.map(isPrimNum) match {
-      case Seq(Some(t)) => Some(t)
-      case _ => None
-    }
-    val sadt = innerDataType(c, ref)
-    // For the purpose of matching, since Spark makes some mistakes, we assume it is strict for
-    // numerical stuff.
-    val o = isPrimNum(ColumnWithType(c, AugmentedDataType(sadt.dataType, IsStrict), ref))
-    val res = (i, o) match {
-      case (Some(it), Some(ot)) if it != ot =>
-        ColumnWithType(c.cast(it.dataType), it, ref)
-      case _ =>
-        ColumnWithType(c, sadt, ref)
-    }
-    logger.debug(s"rectifyNumericalType: res=$res")
-    res
   }
 }

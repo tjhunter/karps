@@ -18,7 +18,7 @@ message Placeholder {
   SQLType data_type = 2;
 };
 
-// Low-level shuffle.
+// Low-level shuffle. (structured groupby, or keyed groupby.)
 message Shuffle {
   Aggregation agg_op = 1;
 }
@@ -31,7 +31,7 @@ message LocalStructuredTransform {
     Column col_op = 1;
 };
 
-
+// The structured reduction.
 message StructuredReduce {
   Aggregation agg_op = 1;
 };

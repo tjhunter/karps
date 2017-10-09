@@ -1,18 +1,13 @@
 package org.karps
 
-import scala.concurrent.Future
-import scala.util.{Failure, Success}
 import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
-import io.grpc.stub.StreamObserver
+
 import org.apache.spark.scheduler.{SparkListener, SparkListenerStageCompleted, SparkListenerStageSubmitted}
 import org.apache.spark.sql.SparkSession
+
 import org.karps.ops.{HdfsPath, HdfsResourceResult, SourceStamps}
 import org.karps.structures.{ComputationId, _}
-import org.karps.brain.{Brain, BrainTransformSuccess, CacheStatus}
 import org.karps.grpc.GrpcManager
-
-import scala.util.Try
-
 
 class KarpsListener(manager: Manager) extends SparkListener with Logging {
   override def onStageCompleted(stageCompleted: SparkListenerStageCompleted): Unit = {
@@ -23,7 +18,6 @@ class KarpsListener(manager: Manager) extends SparkListener with Logging {
     logger.debug(s"stage submitted: $stageSubmitted")
   }
 }
-
 
 
 /**

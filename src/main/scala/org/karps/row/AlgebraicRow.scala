@@ -5,8 +5,6 @@ import scala.util.{Failure, Success, Try}
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.types._
 
-import org.karps.structures.{AugmentedDataType, IsNullable}
-
 import karps.core.{row => R}
 
 /**
@@ -17,9 +15,6 @@ case class AlgebraicRow(cells: Seq[Cell])
 
 
 object AlgebraicRow {
-
-  import org.karps.structures.ProtoUtils.sequence
-  import Cell.CellOrdering
 
   def fromRow(r: Row, st: StructType): Try[AlgebraicRow] = {
     Cell.from(r.toSeq, st) match {

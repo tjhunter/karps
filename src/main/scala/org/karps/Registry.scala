@@ -4,11 +4,10 @@ import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
 
 import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
-import com.trueaccord.scalapb.json.JsonFormat
 
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.functions.{struct => sqlStruct}
-import org.apache.spark.sql.types.StructType
+import org.apache.spark.sql.types.{StructType, StructField}
 import org.apache.spark.sql._
 
 import org.karps.ops.Extraction
@@ -139,6 +138,7 @@ object DataFrameWithType extends Logging {
  *
  * Unlike Spark's columns, it also stores its refering dataframe.
  */
+// TODO: hide the constructor and add a method to access fields by name.
 case class ColumnWithType(
     col: Column,
     rectifiedSchema: AugmentedDataType,
@@ -150,18 +150,35 @@ case class ColumnWithType(
 }
 
 object ColumnWithType extends Logging {
-  def struct(cols: ColumnWithType*): Try[ColumnWithType] = {
+  def struct(cols: (String, ColumnWithType)*): Try[ColumnWithType] = {
     val reft = cols.headOption match {
-      case Some(c2) => Success(c2.ref)
+      case Some(c2) => Success(c2._2.ref)
       case None => Failure(new Exception("Structure cannot be empty"))
     }
     for {
       ref <- reft
-      s <- Try(sqlStruct(cols.map(_.col):_*))
+      s <- Try(sqlStruct(cols.map(z => z._2.col.alias(z._1)):_*))
     } yield {
-      val dt = KarpsStubs.getExpression(s).dataType
+      // Do not trust Spark and rebuild the datatype from the ADT.
+      val dt = StructType(cols.map { z =>
+        StructField(z._1, z._2.rectifiedSchema.dataType, nullable = z._2.rectifiedSchema.isNullable)
+      })
       ColumnWithType(s, AugmentedDataType(dt, IsStrict), ref)
     }
+  }
+
+  def asDataFrame(cwt: ColumnWithType): DataFrameWithType = {
+    // For structures at the top level, it is necessary to unpack these structures, otherwise Spark
+    // will just create a single data column at the top.
+    val df2 = cwt.rectifiedSchema.topLevelStruct match {
+      case Some(st) =>
+        val cols = st.fieldNames.map(fn => cwt.col.getField(fn).alias(fn))
+        cwt.ref.select(cols :_*)
+      case None =>
+        cwt.ref.select(cwt.col)
+    }
+    // This should always succeed.
+    DataFrameWithType.create(df2, cwt.rectifiedSchema).get
   }
 
   /**

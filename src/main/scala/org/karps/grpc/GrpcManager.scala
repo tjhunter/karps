@@ -5,10 +5,11 @@ import scala.concurrent.Future
 
 import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
 import io.grpc.stub.StreamObserver
+import io.grpc.Status
 
 import org.karps.Manager
 import org.karps.structures.{ComputationId, _}
-import org.karps.brain.{Brain, BrainTransformSuccess}
+import org.karps.brain.{Brain, BrainTransformSuccess, BrainTransformFailure}
 
 import karps.core.{interface => I}
 import karps.core.{computation => C}
@@ -33,35 +34,6 @@ class GrpcManager(
     current.create(sessionId)
     Future.successful(I.CreateSessionResponse())
   }
-
-//  override def createComputation(protoIn: I.CreateComputationRequest): Future[I.CreateComputationResponse] = {
-//    createComputation(protoIn, None)
-//    val protoOut = I.CreateComputationResponse()
-//    Future.successful(protoOut)
-//  }
-
-//  override def computationStatus(protoIn: I.ComputationStatusRequest): Future[C.BatchComputationResult] = {
-//    val sessionId = SessionId.fromProto(protoIn.session.get).get
-//    val computationId =
-//      ComputationId.fromProto(protoIn.computation.get)
-//    val paths = protoIn.requestedPaths.map(Path.fromProto)
-//    if (paths.isEmpty) {
-//      val s = current.statusComputation(sessionId, computationId).getOrElse(
-//        throw new Exception(s"$sessionId $computationId"))
-//      val proto = BatchComputationResult.toProto(s)
-//      Future.successful(proto)
-//    } else {
-//      val p = paths.head
-//      val gp = GlobalPath.from(sessionId, computationId, p)
-//      val s = current.status(gp).getOrElse(throw new Exception(gp.toString))
-//      val pr1 = ComputationResult.toProto(s, gp, Nil)
-//      val proto = C.BatchComputationResult(Option(Path.toProto(p)), Seq(pr1))
-//      Future.successful(proto)
-//    }
-//  }
-
-//  override def resourceStatus(req: AI.AnalyzeResourcesRequest): Future[AI.AnalyzeResourceResponse] =
-//    ???
 
   override def streamCreateComputation(
       request: I.CreateComputationRequest,
@@ -106,9 +78,10 @@ object GrpcManager extends Logging {
             logger.info(s"- $msg")
           }
           g2 -> steps
-        case x =>
-          logger.info(s"Brain failed to optimize graph, messages: $x")
-          val e = new Exception(x.toString)
+        case BrainTransformFailure(msg) =>
+          logger.info(s"Brain failed to optimize graph, messages: $msg")
+          val s = Status.UNKNOWN.withDescription(msg)
+          val e = s.asException()
           for (obs <- responseObserver) {
             // TODO: send the graph and the results back before throwing an error.
             obs.onError(e)

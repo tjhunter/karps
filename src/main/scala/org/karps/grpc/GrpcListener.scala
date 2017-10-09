@@ -1,21 +1,15 @@
 package org.karps.grpc
 
-
-
-import scala.concurrent.Future
 import scala.util.{Failure, Success}
+import scala.util.Try
 
 import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
 import io.grpc.stub.StreamObserver
-import org.apache.spark.scheduler.{SparkListener, SparkListenerStageCompleted, SparkListenerStageSubmitted}
-import org.apache.spark.sql.SparkSession
 
-import org.karps.{Manager, ComputationListener, Computation}
-import org.karps.ops.{HdfsPath, HdfsResourceResult, SourceStamps}
-import org.karps.structures.{ComputationId, _}
-import org.karps.brain.{Brain, CacheStatus, BrainTransformSuccess}
+import org.karps.ComputationListener
+import org.karps.structures._
+import org.karps.brain.{Brain, CacheStatus}
 
-import scala.util.Try
 import karps.core.{interface => I}
 import karps.core.{computation => C}
 import karps.core.{graph => G}
@@ -43,7 +37,7 @@ class GrpcListener(
     // TODO: the computation is richer and contains some nodes that may not know about.
     logger.debug(s"$this: onComputation")
     val bcr = C.BatchComputationResult(targetPath=None, results=current.values.toSeq)
-    obs.onNext(baseMsg)
+    obs.onNext(baseMsg.copy(results = Option(bcr)))
     // Do nothing, it is already done at init.
   }
 
@@ -53,18 +47,21 @@ class GrpcListener(
       locality: Locality): Unit = synchronized {
     val p = SparkComputationStats.toProto(stats)
     val cr = current(path.local)
-    current += path.local -> cr.copy(sparkStats=Some(p))
+    val cr2 = cr.copy(sparkStats=Some(p))
+    current += path.local -> cr2
     // In the case of observables, we are not finished yet, as we wait for results.
     // No results expected for dataframes (just analysis).
     if (locality == Distributed) {
       finished += path.local
     }
     logger.debug(s"onAnalyzedDataFrame: got ${path.local} remaining: $remaining")
+    obs.onNext(baseMsg.copy(
+      results = Option(C.BatchComputationResult(targetPath=None, results=Seq(cr2)))
+    ))
   }
 
   def onFinished(path: GlobalPath, result: Try[CellWithType]): Unit = {
     import C.ResultStatus._
-//    import I.ComputationStreamResponse.Updates._
     val cr = current(path.local)
     val cr2 = result match {
       case Success(cwt) =>
