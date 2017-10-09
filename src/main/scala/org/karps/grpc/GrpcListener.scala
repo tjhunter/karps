@@ -1,21 +1,15 @@
 package org.karps.grpc
 
-
-
-import scala.concurrent.Future
 import scala.util.{Failure, Success}
+import scala.util.Try
 
 import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
 import io.grpc.stub.StreamObserver
-import org.apache.spark.scheduler.{SparkListener, SparkListenerStageCompleted, SparkListenerStageSubmitted}
-import org.apache.spark.sql.SparkSession
 
-import org.karps.{Manager, ComputationListener, Computation}
-import org.karps.ops.{HdfsPath, HdfsResourceResult, SourceStamps}
-import org.karps.structures.{ComputationId, _}
-import org.karps.brain.{Brain, CacheStatus, BrainTransformSuccess}
+import org.karps.ComputationListener
+import org.karps.structures._
+import org.karps.brain.{Brain, CacheStatus}
 
-import scala.util.Try
 import karps.core.{interface => I}
 import karps.core.{computation => C}
 import karps.core.{graph => G}
@@ -68,7 +62,6 @@ class GrpcListener(
 
   def onFinished(path: GlobalPath, result: Try[CellWithType]): Unit = {
     import C.ResultStatus._
-//    import I.ComputationStreamResponse.Updates._
     val cr = current(path.local)
     val cr2 = result match {
       case Success(cwt) =>

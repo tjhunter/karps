@@ -1,7 +1,5 @@
 package org.karps.structures
 
-import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
-
 import karps.core.{graph => G}
 import karps.core.{computation => C}
 

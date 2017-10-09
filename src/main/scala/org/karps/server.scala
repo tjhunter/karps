@@ -47,6 +47,21 @@ object Boot extends App {
 
 }
 
+/**
+ * The main entry point for running karps.
+ *
+ * This file provides 2 interfaces:
+ *  - a GRPC interface for most GRPC communication
+ *  - a small, trimmed dowon interface that is used by the Haskell client,
+ *    and that will be deprecated soon.
+ *
+ * The implemented interface is described in 'interface.proto'
+ *
+ * @param karpsPort the port for the REST interface
+ * @param interface the binding address for the REST interface
+ * @param karpsGrpcPort the port for the GRPC interface
+ * @param grpcInterface the binding address for the GRPC interface
+ */
 class EntryPoint(
     val karpsPort: Int,
     val interface: String,
@@ -140,7 +155,6 @@ class KarpsGrpcServer(
         .addService(KarpsMainGrpc.bindService(manager, executionContext))
         .build.start()
     logger.info(s"GRPC server $server started, listening on port ${karpsGrpcPort}")
-    println(s"GRPC server $server started, listening on port ${karpsGrpcPort}")
     sys.addShutdownHook {
       logger.info(s"Exit hook called: Stopping GRPC server")
       stop()
@@ -209,19 +223,6 @@ trait KarpsRestService extends HttpService with Logging {
           logger.debug(s"Requesting ComputationStatus: $proto")
           val proto2 = Await.result(grpcInternal.resourceStatus(proto), 10.hours)
           complete(ProtoUtils.toBytes(proto2))
-        }
-      }
-    } ~
-    path("test") {
-      get {
-        respondWithMediaType(`text/html`) { // XML is marshalled to `text/xml` by default, so we simply override here
-          complete {
-            <html>
-              <body>
-                <h1>Say hello to <i>spray-routing</i> on <i>spray-can</i>!</h1>
-              </body>
-            </html>
-          }
         }
       }
     }

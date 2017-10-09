@@ -17,13 +17,16 @@ import org.apache.spark.sql.types._
 
 import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
 
-import karps.core.{types => T}
-import karps.core.{row => R}
 import org.karps.row.{AlgebraicRow, Cell, RowCell, RowArray}
 import org.karps.KarpsException
 import org.karps.structures.ProtoUtils._
 
+import karps.core.{types => T}
+import karps.core.{row => R}
 
+/**
+ * Nullability.
+ */
 sealed trait Nullable {
   def intersect(other: Nullable): Nullable
 }

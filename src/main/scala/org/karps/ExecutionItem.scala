@@ -3,7 +3,6 @@ package org.karps
 import java.nio.charset.Charset
 
 import scala.collection.mutable.ArrayBuffer
-import scala.util.{Failure, Success}
 
 import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
 import com.google.protobuf.ByteString
@@ -15,7 +14,6 @@ import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 import org.apache.spark.sql.catalyst.plans.QueryPlan
 import org.apache.spark.sql.catalyst.analysis.UnresolvedException
 
-import org.karps.row.Cell
 import org.karps.structures._
 
 import tensorflow.node_def.NodeDef

@@ -1,7 +1,5 @@
 package org.karps.structures
 
-import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
-// import spray.json.DefaultJsonProtocol._
 import org.apache.spark.rdd.RDD
 
 import karps.core.{graph => G}

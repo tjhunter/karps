@@ -1,8 +1,6 @@
-package org.karps
+package org.karps.structures
 
-import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
-
-import org.karps.structures._
+import org.karps.{ExecutionItem, KarpsException}
 
 /**
  * A computation is a unit of computations (as the name suggests).

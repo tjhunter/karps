@@ -4,7 +4,6 @@ import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
 
 import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
-import com.trueaccord.scalapb.json.JsonFormat
 
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.functions.{struct => sqlStruct}

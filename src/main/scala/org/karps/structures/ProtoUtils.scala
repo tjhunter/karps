@@ -15,7 +15,7 @@ object ProtoUtils {
   }
   
   def checkField[X](x: Option[X], fieldName: String): Try[X] = {
-    if (x == None) {
+    if (x.isEmpty) {
       missingField(fieldName)
     } else {
       Success(x.get)
@@ -37,11 +37,6 @@ object ProtoUtils {
   def fromExtra[A <: GeneratedMessage with Message[A]](extra: OpExtra)(
 implicit cmp: GeneratedMessageCompanion[A]): Try[A] = {
     fromBytes(extra.content)
-//    if (extra.content64.length > 0) {
-//      fromBytes(extra.content64)
-//    } else {
-//      fromBytes(extra.content)
-//    }
   }
 
   def fromBytes[A <: GeneratedMessage with Message[A]](extra: Array[Byte])(

@@ -228,7 +228,6 @@ object KSession extends Logging {
         logger.info(s"Trying to access RDD info for $this")
         // Force the materialization of the dependencies first.
         for (it <- item.dependencies) {
-//          it.dataframe
           it.checkpointedDataframe
           it.logical
         }
@@ -246,7 +245,6 @@ object KSession extends Logging {
           item.infoPhysical)
         session.notifyExecutingInSpark(item.path, stats, item.locality)
         if (item.locality == Local) {
-//          logger.info(s"Getting internal rows: ${item.collectedInternal}")
           logger.info(s"$this: output schema is:")
           item.checkpointedDataframe.printSchema()
           logger.info(s"$this: Corrected schema is:\n${item.rectifiedDataFrameSchema}")
