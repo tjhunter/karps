@@ -21,3 +21,13 @@ project/plugins/project/
 haskell/.stack-work/
 build/
 .DS_Store
+
+# Python
+python/dist/
+python/karps.egg-info/
+python/karps/*.pyc
+python/karps/__pycache__/
+python/karps/functions_std/__pycache__/
+python/karps/proto/*.pyc
+python/karps/proto/__pycache__/
+python/notebooks/.ipynb_checkpoints/
