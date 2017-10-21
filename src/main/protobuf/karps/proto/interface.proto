@@ -5,7 +5,7 @@ package karps.core;
 import "karps/proto/graph.proto";
 import "karps/proto/io.proto";
 import "karps/proto/computation.proto";
-//import "karps/proto/api_internal.proto";
+import "karps/proto/profiling.proto";
 
 service KarpsMain {
   rpc CreateSession (CreateSessionRequest) returns (CreateSessionResponse);
@@ -46,6 +46,9 @@ message ComputationStreamResponse {
   // Not super efficient as the spark stats will be repeatedly sent over.
   BatchComputationResult results = 5;
   CompilationResult compilation_result = 6;
+  // Some profiling information about the computation.
+  // This is sent as a single batch before the end of the stream.
+  ComputationTrace computation_trace = 7;
 };
 
 message CompilationResult {

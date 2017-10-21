@@ -6,15 +6,14 @@ import scala.util.control.NonFatal
 import scala.util.{Failure, Success, Try}
 
 import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
-import org.apache.spark.sql.Row
 
-import org.karps.row.AlgebraicRow
 import org.karps.structures._
 
 
 trait ComputationListener {
   def computationId: ComputationId
   def onComputation(comp: Computation): Unit
+  def onStarting(path: GlobalPath): Unit
   def onAnalyzed(
       path: GlobalPath,
       stats: SparkComputationStats,
@@ -111,6 +110,10 @@ class KSession(val id: SessionId) extends Logging {
       }
     }
     update()
+  }
+
+  private def notifyStarting(path: GlobalPath): Unit = synchronized {
+    listeners.get(path.computation).foreach(_.onStarting(path))
   }
 
   /**
@@ -226,6 +229,7 @@ object KSession extends Logging {
       logger.debug(s"$this: entering run")
       try {
         logger.info(s"Trying to access RDD info for $this")
+        session.notifyStarting(item.path)
         // Force the materialization of the dependencies first.
         for (it <- item.dependencies) {
           it.checkpointedDataframe

@@ -2,6 +2,7 @@
 """
 import logging
 from tensorflow.core.framework import graph_pb2
+from google.protobuf.json_format import MessageToJson
 
 from .proto import computation_pb2
 from .utils import Path
@@ -10,6 +11,7 @@ from .row import CellWithType, as_python_object, as_pandas_object
 __all__ = ['Computation']
 
 logger = logging.getLogger('karps')
+
 
 class Computation(object):
   """ An asynchronous computation.
@@ -47,6 +49,8 @@ class Computation(object):
     # Type: (string, string) -> NodeDef
     # key is (phase, node name)
     self._extra_by_name = {}
+    # The final profiling trace. This is expected once at the end of the computation.
+    self._profiling_trace = None
 
   def values(self):
     """ Returns the fetches (or the unique fetch if there is only one).
@@ -73,6 +77,27 @@ class Computation(object):
     logger.warning("Could not find compiler step %s. Available steps are %s and %s",
       step_name, step_names, extra_step_names)
     return None
+
+  def profiling_trace(self):
+    """ Profiling traces to understand the running time of this computation.
+
+    :return: an object that can be understood by standard profiler.
+    """
+    while self._profiling_trace is None:
+      self._progress()
+    return self._profiling_trace
+
+  def dump_profile(self, filename=None):
+    """Writes the profile in a file (or returns it as a string if no file is provided)"""
+    trace_data = self.profiling_trace()
+    ss = ",\n".join([MessageToJson(x) for x in trace_data.chrome_events])
+    ss = """{
+      "traceEvents": [""" + ss + "]}"
+    if filename is not None:
+      with open(filename, mode="w") as f:
+        f.write(ss)
+    else:
+      return ss
 
   def _values(self):
     # Returns the values if they are all done, None otherwise.
@@ -117,6 +142,9 @@ class Computation(object):
       if csr.compilation_result.compilation_graph:
         logger.debug("channel: received compilation steps")
         self._compilation_phases = csr.compilation_result.compilation_graph
+    if csr.HasField("computation_trace"):
+      logger.debug("channel: received profiling results")
+      self._profiling_trace = csr.computation_trace
     if csr.results:
       # Type: ComputationResult
       for res in csr.results.results:

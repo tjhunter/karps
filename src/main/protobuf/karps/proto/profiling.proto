@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package karps.core;
+
+import "karps/proto/graph.proto";
+
+// Some simple profiling data structures to understand the execution times of
+// the different pieces of a computation.
+
+message NodeComputationBeginEvent {
+};
+
+message NodeComputationEndEvent {
+}
+
+// Computation events.
+// These are high level events that happen for computations.
+// They are meant to be used for profiling and debugging, not for storing
+// state.
+message NodeComputationEvent {
+  Path local_path = 1;
+  int64 timestamp = 2;
+  oneof event {
+    NodeComputationBeginEvent begin_computation = 3;
+    NodeComputationEndEvent end_computation = 4;
+  };
+}
+
+// A high level, parsed representation of a trace that is easy to display with
+// chrome tracing tools.
+
+message ChromeTraceEvent {
+  string name = 1;
+  string ph = 2;
+  int64 ts = 3;
+  string pid = 4;
+  string tid = 5;
+}
+
+message ComputationTrace {
+  repeated ChromeTraceEvent chrome_events = 1;
+  repeated NodeComputationEvent computation_events = 2;
+}

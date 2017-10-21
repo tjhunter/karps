@@ -3,6 +3,7 @@ package org.apache.spark.sql
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 import org.apache.spark.sql.catalyst.expressions.Expression
+import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
 import org.apache.spark.sql.execution.{QueryExecution, SQLExecution}
 
 object KarpsStubs {
@@ -24,4 +25,6 @@ object KarpsStubs {
   def getExpression(c: Column): Expression = c.expr
 
   def makeColumn(exp: Expression): Column = Column.apply(exp)
+
+  def logicalPlan(df: DataFrame): LogicalPlan = df.logicalPlan
 }

@@ -66,7 +66,7 @@ object ColumnTransforms extends Logging {
     case ColStructure(fields, _) =>
       val fst = sequence(fields.map { f =>
         select0(cwt, f.fieldTrans).map { cwt2 =>
-          val c2 = cwt2.col.as(f.fieldName.name)
+          val c2 = cwt2.col.alias(f.fieldName.name)
           val f2 = StructField(
             f.fieldName.name, cwt2.rectifiedSchema.dataType, cwt2.rectifiedSchema.isNullable)
           c2 -> f2

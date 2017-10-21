@@ -130,6 +130,22 @@ object DataFrameWithType extends Logging {
         Failure(new KarpsException(s"Found multiple types: $x"))
     }
   }
+
+  /**
+   * Breaks the lineage in the logical plan.
+   *
+   * This is useful for long lineage that the planner cannot currently deal with.
+   *
+   * These are inserted haphazardly and do not follow a particular pattern.
+   */
+  def breakLogicalLineage(df: DataFrameWithType): DataFrameWithType = {
+    val df2 = breakLogicalLineageDF(df.df)
+    df.copy(df=df2)
+  }
+
+  def breakLogicalLineageDF(df: DataFrame): DataFrame = {
+    df.sparkSession.createDataFrame(df.javaRDD, df.schema)
+  }
 }
 
 
