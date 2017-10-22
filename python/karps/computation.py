@@ -88,7 +88,10 @@ class Computation(object):
     return self._profiling_trace
 
   def dump_profile(self, filename=None):
-    """Writes the profile in a file (or returns it as a string if no file is provided)"""
+    """Writes the profile in a file (or returns it as a string if no file is provided)
+
+    The profile can be read in Google Chrome, using the 'about://tracing' inspector.
+    """
     trace_data = self.profiling_trace()
     ss = ",\n".join([MessageToJson(x) for x in trace_data.chrome_events])
     ss = """{
