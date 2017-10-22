@@ -1,20 +1,23 @@
 package org.karps.ops
 
 import scala.util.{Failure, Success, Try}
+
 import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
+
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.{DataFrame, RelationalGroupedDataset}
-import org.karps.{ColumnWithType, DataFrameWithType}
+
 import org.karps.ops.Extraction.{FieldName, FieldPath}
 import org.karps.ops.SQLFunctionsExtraction.SQLFunctionName
 import org.karps.structures.{AugmentedDataType, IsStrict, OpExtra, ProtoUtils}
-import karps.core.{structured_transform => ST}
-import karps.core.{std => STD}
+import org.karps.{ColumnWithType, DataFrameWithType}
+
+import karps.core.{std => STD, structured_transform => ST}
 
 // This is
 object GroupedReduction extends Logging {
-  import org.karps.structures.ProtoUtils.sequence
   import AggregationParsing._
+  import org.karps.structures.ProtoUtils.sequence
 
   def groupReduceOrThrow(adf: DataFrameWithType, js: OpExtra): DataFrameWithType =
     groupReduce(adf, js).get

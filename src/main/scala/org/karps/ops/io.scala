@@ -1,14 +1,14 @@
 package org.karps.ops
 
-import org.apache.spark.sql.{DataFrame, DataFrameReader}
-import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
-import org.apache.spark.sql.types._
-import org.karps.row._
-
 import scala.util.{Failure, Success, Try}
-import karps.core.{io => IO}
-import karps.core.{types => T}
+
+import org.apache.spark.sql.types._
+import org.apache.spark.sql.{DataFrame, DataFrameReader}
+
+import org.karps.row._
 import org.karps.structures._
+
+import karps.core.{io => IO, types => T}
 
 /**
  * Reader objects for Spark.

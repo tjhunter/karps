@@ -13,7 +13,7 @@ import org.apache.spark.sql._
 import org.karps.ops.Extraction
 import org.karps.row.Cell
 import org.karps.structures._
-import karps.core.{computation => C}
+
 import karps.core.{std => S}
 
 

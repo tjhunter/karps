@@ -2,25 +2,26 @@ package org.karps.ops
 
 
 import scala.util.{Failure, Success, Try}
+
 import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
+
+import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
-import org.apache.spark.sql.{Column, DataFrame, KarpsStubs}
-import org.apache.spark.sql.catalyst.analysis.FunctionRegistry
-import org.karps.{ColumnWithType, DataFrameWithType, KarpsException}
+
 import org.karps.ops.Extraction.{FieldName, FieldPath}
-import org.karps.row.{BoolElement, DoubleElement, IntElement, StringElement, Empty}
+import org.karps.row._
 import org.karps.structures._
-import karps.core.{row => R}
-import karps.core.{structured_transform => ST}
-import karps.core.{std => STD}
+import org.karps.{ColumnWithType, KarpsException}
+
+import karps.core.{row => R, std => STD, structured_transform => ST}
 
 
 
 // TODO: refactor to use ColumnWithType, it will simplify things.
 object ColumnTransforms extends Logging {
-  import org.karps.structures.ProtoUtils.sequence
   import StructuredTransformParsing._
+  import org.karps.structures.ProtoUtils.sequence
 
   def select(
       cwt: ColumnWithType,

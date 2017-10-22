@@ -5,16 +5,15 @@ import scala.util.{Failure, Success}
 
 import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
 
-import org.apache.spark.SparkContext
 import org.apache.spark.sql._
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 
-import org.karps.row.{AlgebraicRow, Cell, RowArray, RowCell}
 import org.karps.ops.{ColumnTransforms, GroupedReduction, Readers, TypeConversions}
+import org.karps.row.{AlgebraicRow, Cell, RowArray, RowCell}
 import org.karps.structures._
-import karps.core.{row => R}
-import karps.core.{std => S}
+
+import karps.core.{row => R, std => S}
 
 
 object SparkRegistry extends Logging {
@@ -50,7 +49,6 @@ object SparkRegistry extends Logging {
     }
     def u2(r: Row) = fun(r, schema, at)
     val localUdf = org.apache.spark.sql.functions.udf(u2 _, at)
-    import df.sparkSession.implicits._
     val res = df.select(localUdf(struct(df.col(fname))))
     logger.debug(s"orderRowElements: df=$df, res=$res")
     res
@@ -83,7 +81,6 @@ object SparkRegistry extends Logging {
     }
     def u2(r: Row) = fun(r, schema)
     val localUdf = org.apache.spark.sql.functions.udf(u2 _, at)
-    import df.sparkSession.implicits._
     val res = df.select(localUdf(struct(df.col(fname))))
     logger.debug(s"orderRowElements: df=$df, res=$res")
     res

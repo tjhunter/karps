@@ -3,20 +3,20 @@ package org.karps
 import java.nio.charset.Charset
 
 import scala.collection.mutable.ArrayBuffer
-import scala.collection.JavaConversions._
 
-import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
 import com.google.protobuf.ByteString
+import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
+import tensorflow.attr_value._
+import tensorflow.node_def._
+
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql._
 import org.apache.spark.sql.catalyst.InternalRow
+import org.apache.spark.sql.catalyst.analysis.UnresolvedException
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 import org.apache.spark.sql.catalyst.plans.QueryPlan
-import org.apache.spark.sql.catalyst.analysis.UnresolvedException
-import org.karps.structures._
 
-import tensorflow.node_def._
-import tensorflow.attr_value._
+import org.karps.structures._
 
 /**
  * The elements that are going to be executed by the graph.
@@ -44,8 +44,6 @@ class ExecutionItem(
   private lazy val cacheAsUsed: ResultCache = cache()
 
   lazy val rectifiedDataFrameSchema = dataframeWithType.rectifiedSchema
-
-  private lazy val dataframe: DataFrame = dataframeWithType.df
 
   lazy val checkpointedDataframe: DataFrame = checkpointedDataframeWithType.df
 
