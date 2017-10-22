@@ -4,16 +4,13 @@ package org.karps.grpc
 import scala.concurrent.Future
 
 import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
-import io.grpc.stub.StreamObserver
 
 import org.karps.Manager
 import org.karps.structures.{ComputationId, _}
-import org.karps.brain.{Brain, BrainTransformSuccess}
 import org.karps.ops.{HdfsResourceResult, HdfsPath}
 
 import karps.core.{interface => I}
 import karps.core.{computation => C}
-import karps.core.{graph => G}
 import karps.core.{api_internal => AI}
 import karps.core.api_internal.KarpsRestGrpc.KarpsRest
 

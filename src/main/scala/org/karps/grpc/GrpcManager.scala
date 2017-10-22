@@ -4,19 +4,15 @@ package org.karps.grpc
 import scala.concurrent.Future
 
 import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
-import io.grpc.stub.StreamObserver
 import io.grpc.Status
+import io.grpc.stub.StreamObserver
 
 import org.karps.Manager
+import org.karps.brain.{Brain, BrainTransformFailure, BrainTransformSuccess}
 import org.karps.structures.{ComputationId, _}
-import org.karps.brain.{Brain, BrainTransformSuccess, BrainTransformFailure}
 
-import karps.core.{interface => I}
-import karps.core.{computation => C}
-import karps.core.{graph => G}
-import karps.core.{api_internal => AI}
 import karps.core.interface.KarpsMainGrpc.KarpsMain
-import karps.core.api_internal.KarpsRestGrpc.KarpsRest
+import karps.core.{graph => G, interface => I}
 
 /**
  * Wrapper for all the GRPC calls.

@@ -23,6 +23,7 @@ python3 -m grpc_tools.protoc -I../src/main/protobuf/ --python_out=. --grpc_pytho
 ../src/main/protobuf/karps/proto/graph.proto \
 ../src/main/protobuf/karps/proto/interface.proto \
 ../src/main/protobuf/karps/proto/io.proto \
+../src/main/protobuf/karps/proto/profiling.proto \
 ../src/main/protobuf/karps/proto/row.proto \
 ../src/main/protobuf/karps/proto/std.proto \
 ../src/main/protobuf/karps/proto/structured_transform.proto \

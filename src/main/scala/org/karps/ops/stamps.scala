@@ -3,12 +3,10 @@ package org.karps.ops
 import scala.util.{Failure, Success, Try}
 
 import org.apache.hadoop.fs.{FileSystem, Path}
+
 import org.apache.spark.sql.SparkSession
 
-import karps.core.{interface => I}
-import karps.core.{api_internal => AI}
-import karps.core.{io => IO}
-import karps.core.{computation => C}
+import karps.core.{api_internal => AI, io => IO}
 
 case class HdfsPath(s: String)
 

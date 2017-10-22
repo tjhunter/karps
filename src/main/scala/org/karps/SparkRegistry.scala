@@ -5,16 +5,15 @@ import scala.util.{Failure, Success}
 
 import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
 
-import org.apache.spark.SparkContext
 import org.apache.spark.sql._
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 
-import org.karps.row.{AlgebraicRow, Cell, RowArray, RowCell}
 import org.karps.ops.{ColumnTransforms, GroupedReduction, Readers, TypeConversions}
+import org.karps.row.{AlgebraicRow, Cell, RowArray, RowCell}
 import org.karps.structures._
-import karps.core.{row => R}
-import karps.core.{std => S}
+
+import karps.core.{row => R, std => S}
 
 
 object SparkRegistry extends Logging {
@@ -50,7 +49,6 @@ object SparkRegistry extends Logging {
     }
     def u2(r: Row) = fun(r, schema, at)
     val localUdf = org.apache.spark.sql.functions.udf(u2 _, at)
-    import df.sparkSession.implicits._
     val res = df.select(localUdf(struct(df.col(fname))))
     logger.debug(s"orderRowElements: df=$df, res=$res")
     res
@@ -83,7 +81,6 @@ object SparkRegistry extends Logging {
     }
     def u2(r: Row) = fun(r, schema)
     val localUdf = org.apache.spark.sql.functions.udf(u2 _, at)
-    import df.sparkSession.implicits._
     val res = df.select(localUdf(struct(df.col(fname))))
     logger.debug(s"orderRowElements: df=$df, res=$res")
     res
@@ -308,12 +305,13 @@ object SparkRegistry extends Logging {
         val col = df2.col("value")
         // TODO: not sure if this is correct, this should be checked.
         val cwt = ColumnWithType(col, AugmentedDataType.fromField(f2), df2)
-        ColumnWithType.asDataFrame(cwt)
+        // Break the lineage to help.
+        DataFrameWithType.breakLogicalLineage(ColumnWithType.asDataFrame(cwt))
       case _ => KarpsException.fail(s"Expected a structure, but got $adf")
     }
   }
 
-  val localStructuredTransforrm = new OpBuilder {
+  val localStructuredTransform = new OpBuilder {
 
     override def op: String = "org.spark.LocalStructuredTransform"
 
@@ -348,8 +346,8 @@ object SparkRegistry extends Logging {
       // Get the dataframe input:
       val adf = parents match {
         case Seq(DisExecutionOutput(dfwt)) => dfwt
-        case Seq(LocalExecOutput(cwt)) =>
-          DataFrameWithType.fromCells(Seq(cwt), session).get
+        case Seq(LocalExecOutput(cwt_)) =>
+          DataFrameWithType.fromCells(Seq(cwt_), session).get
       }
       val cwt = DataFrameWithType.asTypedColumn(adf)
       logger.debug(s"StructuredTransform: cwt = $cwt")
@@ -357,15 +355,23 @@ object SparkRegistry extends Logging {
       logger.debug(s"StructuredTransform: cwt2 = $cwt2")
       val adf2 = cwt2.map(ColumnWithType.asDataFrame)
       logger.debug(s"StructuredTransform: adf2 = $adf2")
-      adf2.get
+      // It would be nice to remove this break, but Spark does not like
+      // plans with lots of renaming.
+      DataFrameWithType.breakLogicalLineage(adf2.get)
     }
   }
 
-  val groupedReduction = createTypedBuilderD("org.spark.GroupedReduction")(
-    GroupedReduction.groupReduceOrThrow)
+  val groupedReduction = {
+    def f(adf: DataFrameWithType, js: OpExtra) =
+      DataFrameWithType.breakLogicalLineage(GroupedReduction.groupReduceOrThrow(adf, js))
+    createTypedBuilderD("org.spark.GroupedReduction")(f)
+  }
 
-  val structuredReduction = createTypedBuilderD("org.spark.StructuredReduce")(
-    GroupedReduction.reduceOrThrow)
+  val structuredReduction = {
+    def f(adf: DataFrameWithType, js: OpExtra) =
+      DataFrameWithType.breakLogicalLineage(GroupedReduction.reduceOrThrow(adf, js))
+    createTypedBuilderD("org.spark.StructuredReduce")(f)
+  }
 
   val join = createBuilderDD("org.spark.Join") { (df1, df2, js) =>
     val key1f = df1.schema.fields match {
@@ -404,7 +410,7 @@ object SparkRegistry extends Logging {
     join,
     locLiteral,
     localPackBuilder,
-    localStructuredTransforrm,
+    localStructuredTransform,
     persist,
     select2,
     structuredReduction,

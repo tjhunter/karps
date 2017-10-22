@@ -6,15 +6,15 @@ import scala.util.control.NonFatal
 import scala.util.{Failure, Success, Try}
 
 import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
-import org.apache.spark.sql.Row
+import io.grpc.StatusRuntimeException
 
-import org.karps.row.AlgebraicRow
 import org.karps.structures._
 
 
 trait ComputationListener {
   def computationId: ComputationId
   def onComputation(comp: Computation): Unit
+  def onStarting(path: GlobalPath): Unit
   def onAnalyzed(
       path: GlobalPath,
       stats: SparkComputationStats,
@@ -31,11 +31,11 @@ trait ComputationListener {
  *
  * @param id
  */
-class KSession(val id: SessionId) extends Logging {
+class KSession(val id: SessionId, numConcurrentTasks: Int = 5) extends Logging {
 
   import KSession._
 
-  private val executor = Executors.newSingleThreadExecutor()
+  private val executor = Executors.newFixedThreadPool(numConcurrentTasks)
 
   @volatile
   private[this] var state = State(new ResultCache, Map.empty)
@@ -111,6 +111,10 @@ class KSession(val id: SessionId) extends Logging {
       }
     }
     update()
+  }
+
+  private def notifyStarting(path: GlobalPath): Unit = synchronized {
+    listeners.get(path.computation).foreach(_.onStarting(path))
   }
 
   /**
@@ -226,6 +230,7 @@ object KSession extends Logging {
       logger.debug(s"$this: entering run")
       try {
         logger.info(s"Trying to access RDD info for $this")
+        session.notifyStarting(item.path)
         // Force the materialization of the dependencies first.
         for (it <- item.dependencies) {
           it.checkpointedDataframe
@@ -270,6 +275,11 @@ object KSession extends Logging {
           session.notifyFinishedAnalyzed(item.path, stats, item.locality)
         }
       } catch {
+        case NonFatal(e: StatusRuntimeException) =>
+          // Extract the real cause:
+          logger.warn("Got GRPC runtime exception (cause)", e.getCause)
+          logger.warn("Got GRPC runtime exception", e)
+          session.notifyFinished(item.path, Failure(e.getCause))
         case NonFatal(e) =>
           session.notifyFinished(item.path, Failure(e))
         case t: Throwable =>

@@ -1,20 +1,17 @@
 package org.karps.brain
 
-import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
-import java.io.BufferedReader
 import java.io.DataOutputStream
-import java.io.InputStreamReader
-import java.net.HttpURLConnection
-import java.net.URL
+import java.net.{HttpURLConnection, URL}
+
 import scala.util.control.NonFatal
+
+import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
 import org.apache.commons.io.IOUtils
 
 import org.karps.brain.CacheStatus.NodeComputedSuccess
-import org.karps.structures.{ComputationId, GlobalPath, SessionId, Path}
-import org.karps.structures.ProtoUtils
+import org.karps.structures._
 
-import karps.core.{graph => G}
-import karps.core.{api_internal => AI}
+import karps.core.{api_internal => AI, graph => G}
 
 private[brain] case class NodeId private (private val s: String)
 

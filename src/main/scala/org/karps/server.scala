@@ -1,7 +1,7 @@
 package org.karps
 
-import java.util.concurrent.Executors
 import java.net.InetSocketAddress
+import java.util.concurrent.Executors
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
@@ -11,22 +11,19 @@ import akka.io.IO
 import akka.pattern.ask
 import akka.util.Timeout
 import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
-import spray.can.Http
-import spray.http.MediaTypes._
-import spray.routing._
-import io.grpc.{Server, ServerBuilder}
 import io.grpc.netty.NettyServerBuilder
+import io.grpc.{Server, ServerBuilder}
+import spray.can.Http
+import spray.routing._
 
 import org.karps.brain.HaskellBrain
-import org.karps.grpc.{GrpcManager, GrpcInternalManager}
+import org.karps.grpc.{GrpcInternalManager, GrpcManager}
 import org.karps.structures._
 
-import karps.core.{interface => I}
-import karps.core.{api_internal => AI}
-import karps.core.{computation => C}
+import karps.core.api_internal.KarpsRestGrpc.KarpsRest
 import karps.core.interface.KarpsMainGrpc
 import karps.core.interface.KarpsMainGrpc.KarpsMain
-import karps.core.api_internal.KarpsRestGrpc.KarpsRest
+import karps.core.{api_internal => AI, interface => I}
 
 
 object Boot extends App {

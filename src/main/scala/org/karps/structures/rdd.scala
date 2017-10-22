@@ -1,6 +1,8 @@
 package org.karps.structures
 
 import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.catalyst.plans.QueryPlan
+import org.apache.spark.sql.catalyst.trees.TreeNode
 
 import karps.core.{graph => G}
 import karps.core.{computation => C}
@@ -50,12 +52,18 @@ object RDDInfo {
 }
 
 case class SQLTreeInfo(
-    nodeId: String,
+    // Used as a node path
+    nodeId: SQLTreeInfo.TreeInfoNodeId,
     fullName : String,
     parentNodes: Seq[SQLTreeInfo],
-    proto: Option[NodeDef])
+    proto: Option[NodeDef],
+    planNode: Option[Any]) { // Should be QueryPlan[_], but erased for simplification.
+  override def toString: String = s"SQLTreeInfo(nodeId=$nodeId)"
+}
 
 object SQLTreeInfo {
+  type TreeInfoNodeId = String
+
   def toProto(sti: SQLTreeInfo): Seq[C.SQLTreeInfo] = {
     val n = C.SQLTreeInfo(
       nodeId = sti.nodeId,

@@ -4,20 +4,19 @@ import java.nio.charset.Charset
 
 import scala.collection.mutable.ArrayBuffer
 
-import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
 import com.google.protobuf.ByteString
+import com.typesafe.scalalogging.slf4j.{StrictLogging => Logging}
+import tensorflow.attr_value._
+import tensorflow.node_def._
 
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql._
 import org.apache.spark.sql.catalyst.InternalRow
+import org.apache.spark.sql.catalyst.analysis.UnresolvedException
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 import org.apache.spark.sql.catalyst.plans.QueryPlan
-import org.apache.spark.sql.catalyst.analysis.UnresolvedException
 
 import org.karps.structures._
-
-import tensorflow.node_def.NodeDef
-import tensorflow.attr_value.AttrValue
 
 /**
  * The elements that are going to be executed by the graph.
@@ -46,15 +45,11 @@ class ExecutionItem(
 
   lazy val rectifiedDataFrameSchema = dataframeWithType.rectifiedSchema
 
-  private lazy val dataframe: DataFrame = dataframeWithType.df
-
   lazy val checkpointedDataframe: DataFrame = checkpointedDataframeWithType.df
 
-  // Breaks the lineage.
-  // This is a workaround for current plans that explode due to renaming.
+  // TODO: this checkpointed variable is not used anymore, this is handled by the ops.
   lazy val checkpointedDataframeWithType: DataFrameWithType = {
-    val df1 = session.createDataFrame(dataframe.javaRDD, dataframe.schema)
-    dataframeWithType.copy(df=df1)
+    dataframeWithType
   }
 
   private lazy val dataframeWithType: DataFrameWithType = {
@@ -75,7 +70,7 @@ class ExecutionItem(
 
   private lazy val queryExecution = checkpointedDataframe.queryExecution
   private lazy val executedPlan = queryExecution.executedPlan
-  lazy val logical = queryExecution.logical
+  lazy val logical = KarpsStubs.logicalPlan(checkpointedDataframe)
   lazy val physical = queryExecution.sparkPlan
 
   lazy val rdd: RDD[InternalRow] = {
@@ -126,20 +121,34 @@ class ExecutionItem(
   }
 
   lazy val infoLogical: SQLTreeInfo = {
-    val paths: Seq[String] = dependencies.flatMap(_.infoLogical.proto.map(_.name))
-    ExecutionItem.captureSQLTree(path, paths, logical)
+    val deps = dependencies.map(_.infoLogical)
+    ExecutionItem.captureSQLTree(path, deps, logical)
   }
 
   lazy val infoPhysical: SQLTreeInfo = {
-    val paths: Seq[String] = dependencies.flatMap(_.infoPhysical.proto.map(_.name))
-    ExecutionItem.captureSQLTree(path, paths, physical)
+    val deps = dependencies.map(_.infoPhysical)
+    ExecutionItem.captureSQLTree(path, deps, physical)
   }
 
   def executionId: String = _execId.get
 }
 
 object ExecutionItem extends Logging {
-  private case class SparkState()
+
+  class TreeNodeWrap(private val tn: QueryPlan[_]) {
+    override def equals(obj: scala.Any): Boolean = {
+      obj.isInstanceOf[TreeNodeWrap] && obj.asInstanceOf[TreeNodeWrap].tn.fastEquals(tn)
+    }
+
+    override def hashCode(): Int = tn.hashCode()
+  }
+
+  type IMap[V] = Map[TreeNodeWrap, V]
+
+  private def fromValues[T <: QueryPlan[T], V](
+      s: Seq[(QueryPlan[T], V)]): IMap[V] = {
+    s.map(z => new TreeNodeWrap(z._1.asInstanceOf[QueryPlan[_]]) -> z._2) .toMap
+  }
 
   private def captureRDDIds[T](
       rdd: RDD[T],
@@ -164,7 +173,8 @@ object ExecutionItem extends Logging {
       dependencies: Seq[String],
       rddis: Map[RDDId, RDDInfo]): Seq[RDDInfo] = {
     val infos = rddis.values.toSeq.sortBy(_.id).toList
-    val otherPaths = infos.map(info => info.id -> s"$path/${info.className}_${info.id.repr}").toMap
+    val otherPaths = infos.map(info =>
+      info.id -> s"$path/${info.className}_${info.id.repr}").toMap
     infos.map { info =>
       val proto = {
         val n = otherPaths(info.id)
@@ -206,41 +216,58 @@ object ExecutionItem extends Logging {
   }
 
   private def captureSQLTree[T <: QueryPlan[T]](
-      path: GlobalPath, dependencies: Seq[String], plan: T): SQLTreeInfo = {
-    captureSQLTree0(path, dependencies, plan, 0)._1
+      path: GlobalPath, dependencies: Seq[SQLTreeInfo], plan: T): SQLTreeInfo = {
+    val deps = fromValues(dependencies.flatMap(sti => sti.planNode.map(n =>
+      n.asInstanceOf[T] -> sti)))
+    logger.debug(s"captureSQLTree: deps=$deps")
+    captureSQLTree0(path, deps, plan, 0)._1
   }
 
   private def captureSQLTree0[T <: QueryPlan[T]](
       path: GlobalPath,
-      dependencies: Seq[String],
+      dependencies: IMap[SQLTreeInfo],
       plan: T,
       startIndex: Int): (SQLTreeInfo, Int) = {
+    // The plan was already generated in one of the dependencies -> no need to further
+    // process this path. The index is not changing.
+    val id0 = System.identityHashCode(plan)
+    val id1 = plan.hashCode()
+    dependencies.get(new TreeNodeWrap(plan)) match {
+      case Some(sqlti) =>
+        logger.debug(s"captureSQLTree0: $path $id0 $id1 -> old plan: ${sqlti.nodeId}")
+        // Disconnect this node.
+        return sqlti.copy(parentNodes = Nil, proto=None, planNode = None) -> startIndex
+      case None =>
+        logger.debug(s"captureSQLTree0: $path $id0 $id1 -> no plan found")
+    }
     val n = fancyName(plan.verboseString)
     val n2 = s"${n}_$startIndex"
     var idx = startIndex + 1
     val cs = plan.children.map { c =>
-      // Do not pass the dependencies to the child nodes.
-      val (sti, idx2) = captureSQLTree0(path, Nil, c, idx)
+      val (sti, idx2) = captureSQLTree0(path, dependencies, c, idx)
       idx = idx2
       sti
     }
+    val nodeId = path.local.toString + "/" + n2
     val proto = {
-      val p = path.local.toString + "/" + n2
       val cPaths = cs.flatMap(c => c.proto).flatMap(p2 => Option(p2.name))
       val attrs = Map(
         "verbose" -> toAttrValue(plan.verboseString),
         "schema" -> toAttrValue(plan.schemaString),
+        "id" -> toAttrValue(System.identityHashCode(plan).toString),
+        "hash" -> toAttrValue(plan.hashCode().toString),
         "simple" -> toAttrValue(plan.simpleString))
       // Tensorflow conversion to indicate the dep nodes.
-      val depPaths = dependencies.map(x => "^"+x)
+      val depPaths = dependencies.values.map(x => "^"+x.nodeId)
       NodeDef(
-        name=p,
+        name=nodeId,
         op = n,
         input = cPaths ++ depPaths,
         attr=attrs
       )
     }
-    SQLTreeInfo(n2, plan.verboseString, cs, proto=Some(proto)) -> idx
+    val untyped = Some(plan).asInstanceOf[Option[QueryPlan[_]]]
+    SQLTreeInfo(nodeId, plan.verboseString, cs, proto=Some(proto), planNode = untyped) -> idx
   }
 
   // Performs some cleanup on the name so that it is easier to display with tensorboard.
