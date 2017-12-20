@@ -1,9 +1,15 @@
+
 # A formalism for data systems
 
 This is considerations for formalizing some ideas found in modern data systems.
 
 The code examples are done using mathematical notations and Haskell functions, which should be
 clear enough in most of the case.
+
+## General principles
+
+Distribution of computation
+Representation is not observable
 
 ## Setting
 
@@ -70,40 +76,80 @@ mass :: Dataset a -> Nat
 
 With this structure, there is not much we can do so far, apart from querying the value of a dataset
 at various points. We are going to add many more operations now. One of the simplest and yet most
-effective ways to transform a dataset is to apply some operation to all its points. This is the 
-functiorial `fmap`:
+effective ways to transform a dataset is to apply some operation to all its points. 
+
+We are going to add a twist to it though, relative to the distribution principle: if a dataset 
+is splittable, we would like the transform to be splittable too:
+
+```hs
+f :: Dataset a -> Dataset b
+f (d1 U d2) = (f d1) U (f d2)
+```
+
+It turns out that this adds a lot of structure to all the possible point transforms; in particular
+the transforms have to be automorphisms over the dataset monoid.
+
+__Proposition: neutral element__: 
+```hs
+f {} = {}
+```
+
+__Proposition: characterization__: All the point transforms can be uniquely characterized by their
+operations on elements. More precisely, by the point function:
+```hs
+point_f :: a -> [b]
+```
+(up to a permutation of the elements in the return list). TODO
+
+The last proposition shows that the _only_ valid transforms a fully described by what happens 
+on each point, and that each point can only get mapped to a collection of other points.
+We can now fully qualify transforms about how many points they produce for each point: exactly one
+(mass-preserving), at most once (mass-shrinking) or arbitrary.
+
+__Mass-preserving transform__ A mass-preserving transform obeys the following law:
+forall d, `mass (f d) == mass d`
+
+It is fully characterized by a function `point_f :: a -> b`. Conversely, any such function defines
+a mass-preserving transform. This is the functiorial `fmap` that is familiar to functional 
+programmers:
 
 ```hs
 map :: (a -> b) -> Dataset a -> Dataset b
-map f d = ...
 ```
 
-From the definition, the result is clearly a dataset, and the `map` operation follows the 
-laws of the functors.
+__Shrinking transform__ A mass-shrinking transform (or shrinking transform in short) reduces the 
+mass of a dataset: `forall d, mass (f d) <= mass d`. Similarly, it is fully characterized by its 
+optional return on each point:
 
-Prop: Mass conservation: forall f, `mass (map f d) == mass d`.
-
-The point transform is also called the mass-preserving transform, because it is the only 
-transform that conserves the mass for any functon `f`. TODO: prove.
+```hs
+mapMaybe :: (a -> Maybe b) -> Dataset a -> Dataset b
+```
 
 ### Reductions
 
-A monoidal reduction, or reduction, is a function `f` that takes a dataset and returns a
-scalar value, in a way that it also maps the structural properties of a dataset. It is 
-a function:
+Reductions correspond to the action of taking a dataset and condensing its information into 
+a single value. This is the second fundamental operation one can do on a dataset.
 
 ```hs
 f :: Dataset a -> b
 ```
 
-with the additional restriction that there exists another function `+_f` that describes a monoid
-structure over the set `S_b`. More precisely, `f` and `+_f` are linked through the following:
+Again, we would like this transform to obey some distribution principle: reducing a dataset 
+to a single value should be done independently from the structure of the dataset, and it should be
+run in parallel if the dataset is the union of subsets. This is expressed through the following 
+definition:
+
+__Definition__ A reduction `f` is said to be monoidal, or universal, if there exists a function
+`+_f :: b -> b -> b` that obeys the following distributivity rule:
 
 ```hs
 f (d1 union d2) = (f d1) +_f (f d2)
 ```
 
-A couple of useful properties can be derived:
+A monoidal reduction can be interpreted as carrying over through computations of the underlying
+structure of the dataset. It turns out that the property above is quite strong and imposes a 
+lot of constraints on the definition of `+_f`:
+
 
 __Monoid structure__ The relation `(Im f, +_f)` describes a monoid over `Im f`. The neutral element
 of this monoid is `f {}`.
@@ -112,8 +158,92 @@ __Characterization__ This morphism is fully described by the values of `f` over 
 
 __Unicity__ This monoidal law is unique. TODO
 
-### Groups and joins
+__Composition__ This trivial property has important performance consequences:
+If `f1` and `f2` are both monoidal reductions, then `f1 &&& f2` is also a monoidal reduction.
+
+### Reductions - examples
+
+Here are a couple of fundamental examples of reductions.
+
+### Joins
+
+```hs
+join :: Dataset (k, a) -> Dataset (k, b) -> Dataset (k, Maybe a, Maybe b)
+```
+
+It follows some distributivity law, as we would expect:
+
+```hs
+join (a1 U a2) b == (join a1 b) U (join a2 b)
+join a b = join b a
+mass (join a b) == max (mass (key a1 U key a2))
+```
+
+TODO: is it enough to defin the union through axioms?
+
+### Groups
+
+A group corresponds to the notion that data points can somehow be associated together. It allows
+to express transforms on potentially many datasets all at once.
+
+__Definition: group__ A group is a function from datasets to datasets:
+
+```hs
+type Group k v = k -> Dataset v
+```
+
+Of course, this is a very high-level definition, and we will see how it works out in practice.
+A practical implementation of a group may be done as follow, thanks to Currification: a group 
+is the type `k -> v -> Nat`, or through Currying: `(k, v) -> Nat`, which suggest an alternative 
+representation for groups:
+
+```hs
+type Group k v = Dataset (k, v)
+```
+
+We will use one representation or the other according to the situation.
+
+Reductions over groups. Define the following operator:
+
+```hs
+shuffle :: Reduce a b -> Group k a -> Dataset (k, b)
+```
+
+```hs
+groupBy :: (v -> k) -> Dataset v -> Group k v
+```
+
+__Distributivity of shuffle__
+
+This distributivity law shows the power of the universal reductions.
+
+```hs
+shuffle f (g1 `union` g2) = map (+_f) (join (shuffle f g1) (shuffle f g2))
+```
+
+### Filter
+
+```hs
+filter :: (a -> Bool) -> Dataset a -> Dataset a
+```
+
+This is a simple example of contraction.
 
 ### Ordered reductions
+
+```
+orderedReduce :: Ord a => Dataset (a, b) -> [b]
+```
+
+### Canonical representation
+
+```hs
+shuffle count . groupBy id 
+```
+
+### Indexing and counting
+
+Here are a couple of operations one can do to as substitutes for usual operations in SQL, using the
+basic transforms outlined above.
 
 ### Substitutes for random operations
