@@ -2,12 +2,75 @@
 % Timothy Hunter
 % December 27, 2017
 
-We introduce here some general principles that should be considered when building a distributed 
-data processing engine. These principles do not depend on a particular choice of implementation 
-architectures but stem from first principles. We hope that these principles can guide the 
-implementation of future distributed data systems.
+This article draws on the foundations of measure theory and group theory to offer a formalism of 
+large scale data systems. Starting from first principles, we show that most operations on 
+datasets can be reduced to a small algebra of operations that are well suited for optimizations
+and for composition into much larger systems in a coherent fashion, and in handling streaming data.
+We hope that these principles can inform the implementation of future distributed data systems.
 
 # Introduction
+
+The explosion in the collection of data has lead to the rise of diverse frameworks to store and 
+manipulate this data accordingly.
+
+The SQL language has enjoyed considerable success as a standard
+querying interface for the non-programmers. On the other end of the spectrum of complexity,
+engineers in charge of processing such large amounts of data have devised a number of tools to
+distribute computations against these large datasets, such as MapReduce and Hadoop.
+
+_(TODO:talk about streaming and fast reaction)_
+
+_(TODO:talk about separating storage from compute)_
+
+If one looks at the landscape of the data processing systems, several trends emerge:
+
+ - unification of different paradigms (streaming, batch processing, interactive analytics)
+ 
+ - separating storage from compute does not work for workloads with high operational intensity like 
+   machine learning (see TPUs, GPU processing, John Canny's research).
+   
+ - big data systems are used as foundations for implementing much larger systems.
+ 
+ - More generally, the same set of challenges that led to handling files with version control systems 
+   are now prevalent in continuous systems (TODO: cite matei)
+
+
+When a system is designed to serve as the substrate on top of which more complex systems are built, 
+establishing sound principles and structures is paramount. Without these, complex and unforeseen 
+interactions emerge that expose some behavior that on the face of it, is a logical consequences of 
+the initial specifications, but yields surprising or confusing results to the user of such a system.
+
+Artificial intelligence is arguably not well captured by current systems because of its roots in
+statistics, and its peculiar needs. At a high level, ML is not that different from other data 
+processing frameworks: it condenses data into a model (in the case of supervised learning), and 
+then applies this model to some unseen data.
+
+Data processing systems are primarily focused on transforming data, and as such reading and writing 
+data is a critical, but poorly formalized, part of such systems. For example, from the perspective
+of a programmer, to a distributed file system is often considered with the same flexibility as
+writing to a local file, even though the possibility - and the cost - of an error is considerably
+higher. This is why databases have been developed as data storage 
+systems with strong guarantees (TODO: unclear sentence). An important motivation of this article is to 
+provide a framework in which reading and writing data is considered a primitive operation, and
+on which all sorts of mechanical transforms, checks and optimizations can be applied.
+
+This article is structured as such:
+
+ - it first introduces high-level principles based on observability of data (a prerequisite in 
+   distributed systems)
+
+ - it establishes necesary mathematical structure that naturally derives from these first 
+    principles
+ 
+ - it discusses possible ways to address temporal aspects and streaming data.
+ 
+ - it offers some hints at implementation and a proof of concept built on top of Spark.
+
+The code examples are done using mathematical notations and Haskell functions, which should be
+clear enough in most of the case.
+
+
+# Introduction (old)
 
 There has been a tremendous explosion in the collection and processing of data of all kind. In order 
 to cope with this gathering, several strategies have emerged: adapting old tools or inventing new
@@ -57,61 +120,37 @@ a loose interface hamper the construction of more complex, task-specific abstrac
 the considerations below can guide in the implementation of a computing system that can serve as a 
 basis for more complex systems built on top of it.
 
-When a system is designed to serve as the substrate on top of which more complex systems are built, 
-establishing sound principles and structures is paramount. Without these, complex and unforeseen 
-interactions emerge that expose some behavior that on the face of it, is a logical consequences of 
-the initial specifications, but yields surprising or confusing results to the user of such a system.
-
-Artificial intelligence is arguably not well captured by current systems because of its roots in
-statistics, and its peculiar needs. At a high level, ML is not that different from other data 
-processing frameworks: it condenses data into a model (in the case of supervised learning), and 
-then applies this model to some unseen data.
-
-Data processing systems are primarily focused on transforming data, and as such reading and writing 
-data is a critical, but poorly formalized part of such systems. For example, writing to a distributed 
-file system is often considered with the same flexibility as writing to a local file, even though the
-cost of a mistake is considerably higher. This is why databases have been developed as data storage 
-systems with strong guarantees (TODO: unclear). An important motivation of this article is to 
-provide a framework in which reading and writing data is considered a primitive operation like any 
-other, and on which all sorts of mechanical transforms, checks and optimizations can be applied.
-
-This paper does the following:
- - it starts with some high-level principles that one should seek in a data processing system
- - it establishes necesary mathematical structure that naturally derives from the first 
-    principles
- - it discusses  possible ways to address the temporal aspects and streaming data.
- - it offers some hints at implementation and a proof of concept built on top of Spark.
-
-The code examples are done using mathematical notations and Haskell functions, which should be
-clear enough in most of the case.
 
 
 # General principles
 
-This section is concerned with some ideas that hold no matter the type of system. 
+This section is concerned with some ideas that hold no matter the type of system:
 
- 0. Perspective of the observer
+ 0. Perspective of the observer, only reductions can be observed.
  
- 1. Representation is not observable 
+ 1. The data representation is not observable 
  
- 2. No intrinsic ordering
+ 2. The flow of computations follows the structure of the data.
  
- 3. Computations are distributed
+ 3. Reductions are deterministic
  
- 4. Computations are deterministic
+ 4. Failures are not observables
  
 
 This paper starts from a few general principles and shows how can reconstruct some commonly used
 constructs in big data systems.
 
-_Observer perspective_ A dataset is a collection of values. Only two operations can be done on a 
+_Observer perspective_ A dataset is a collection of values. Two operations can be done on a 
 dataset:
+
  - transforming it into another dataset.
  - condensing the dataset into a single value. This is also what is called _reducing_ the dataset
    into an observable (value).
 
 The observer principle states that the user (the observer) only has access to observables, and not 
-to the dataset itself. We will see a lot of different observables in this paper.
+to the dataset itself. This idea is familiar to physicists, who have long considered adopted a
+similar posture in quantum physics, in which the measure of the physical system itself (a wave 
+function) is integral part of the design.
 
 _Abstraction of data representation_ In this setting, the data structure that backs the dataset is 
 not observable and has no incidence on the results (the values of the observables). This is not
@@ -123,7 +162,7 @@ value in all cases. (TODO: this is up to numerical precision issues).
 There are a variety of data structures to represent a collection of values, backed by an equally 
 large number of implementations (B-Trees, sequences, lists, lists of lists, maps, etc.). This 
 principle ensures that implementation details do not percolate through the interface, and we will
-see a few implementations in Section XXX. An additional motivation
+see a few implementations in Section TODO. An additional motivation
 is the ability to tie some formal statistical concepts such as distributions to justify and 
 explain some choices.
 
@@ -131,14 +170,13 @@ The next principle is specific to data systems, and probably the most restrictiv
 structure that it imposes on the computation model. Yet, it covers a very wide variety of 
 reductions that users would consider on data systems.
 
-_Distributed computations_ The computations follow the structure of the data.
+_Distributed computations_ The flow of computations follows the structure of the data.
 
 This naturally follows from the abstraction of the data representation: in the trade-off between 
 separating compute from storage, or tying compute and storage, operations performed on the data
 should not depend on specific choice. Computations can either be run close to the data or require 
 data movement. That last principle ensures that the programming model is oblivious to this 
-implementation choice. We will see in the next structure how this princple translates into 
-particular choices of structures.
+implementation choice.
 
 _Deterministic observables_ Given the same inputs of datasets and observables, any observable shall 
 yield the same results. (TODO: up to numerical precision).
@@ -151,18 +189,24 @@ TODO: have a principle that says that trying to access the value of an observabl
 value (error, exception, failure, etc.). However, the changes to the environment caused by producing
 a bottom value are not observable. Practically, this means that repeatedly trying to write a dataset 
 to a file (possibly distributed), however many failures occur in the process, will not be observed.
-This is not respected in current systems for example, when the append mode is used.
+This is not respected in current systems for example, when the append mode is used, or at great cost
+in performance. 
+TODO: this is pretty weak and unjustified.
+
+The rest of this section explores in more details how this formalism applies to abstract data 
+representations.
 
 
 ## Datasets
 
-We consider operations over some sets of values, in which we want to follow some basic principles.
+We consider operations over some sets of values, in which we want to apply the basic principles 
+outlined above.
 All the operations perform either on values or sets of values, and data processing consists in 
 writing some functions that transform sets into other sets, or into values.
 As mentioned before, here are a couple of assumptions that we will work on:
  - the exact representation of the data is not observable. This is often not verified in such
  systems.
- - the data is considered static. It does not change over time.
+ - the data is considered static. It does not change over time. This will be addressed in Section TODO.
 
 We consider here a simple formalism: call $\mathcal{U}$ the set of all the values, called 
 the _universe_. We assume that the universe is countable and separable.
@@ -176,13 +220,14 @@ $d:\mathcal{U}\rightarrow\mathbb{N}$ with the restriction:
 $$
 \sum_{x\in\mathcal{U}}d\left(x\right)<\infty
 $$
-In terms of types:
+In terms of types, a simple dataset could be defined as such:
 ```hs
 type Dataset a = a -> Nat
 ```
 
 __Note__ Basic arithmetic over sets ensures that the function defined above is a measure in the 
-sense of distributions. Since we work with a countable and separable set, we do not need the 
+sense of distributions (TODO: add link to definition of measures). Since we work with a countable 
+and separable set, we do not need the 
 technical conditions that would be found in more more complex normed spaces. A part of this work is 
 dedicated to working out the sufficient conditions that would hold in all generality.
 
@@ -191,11 +236,11 @@ dedicated to working out the sufficient conditions that would hold in all genera
 We now define a number of common operations that will be present throughout the rest of the paper.
 
 __Union__ The union of two datasets is a dataset:
-$$(d_1 + d_2)(x) = d_1(x) + d_2(x)$$
+$$(d_1 \cup d_2)(x) = d_1(x) + d_2(x)$$
 
 ```hs
 union :: Dataset a -> Dataset a -> Dataset a
-(union d1 d2) x = d1 x + d2 x
+union d1 d2 = \x -> d1 x + d2 x
 ```
 
 This operation is of course symmetric, associative, commutative and has a zero element (the
@@ -210,16 +255,25 @@ denote it $\delta_a$.
 dirac :: a -> Dataset a
 dirac x y = if x == y then 1 else 0
 ```
-TODO: is it a distribution or an observation?
+TODO: fix in the paper: it is a distribution.
 
 One trivial consequence is the fact that a dataset is the (finite) sum of diracs. This fact will 
 have its importance later.
 
-__Mass__ The mass of a dataset is the count of all its points. The name sounds related to physics
+To simplify the notations, we introduce the following shorthands:
+
+
+\begin{align*}
+n\cdot\left\{ x\right\}  & =\left\{ x\right\} \cup\left(\left(n-1\right)\cdot\left\{ x\right\} \right)\\
+0\cdot\left\{ x\right\}  & =\left\{ \right\} 
+\end{align*}
+
+
+__Mass__ The mass $\mu$ of a dataset is the count of all its points. The name sounds related to physics
 and we will see the intuition behind it later.
 
 $$
-mass\left(x\right) = \sum_{x\in\mathcal{U}}d\left(x\right)
+\mu\left(x\right) = \sum_{x\in\mathcal{U}}d\left(x\right)
 $$
 
 
@@ -233,7 +287,7 @@ With this structure, there is not much we can do so far, apart from querying the
 at various points. We are going to add many more operations now. One of the simplest and yet most
 effective ways to transform a dataset is to apply some operation to all its points individually.
 We are going to characterize the transforms that are the most regular with respect to the 
-distribution principle: if a dataset 
+Distribution principle: if a dataset 
 is a union, we would like the transform to respect this union.
 
 _Definition: regular transform_ A function `f :: Dataset a -> Dataset b` is said to be _regular_
@@ -268,27 +322,33 @@ individual points, and that each point can only get mapped to a collection of ot
 We can now fully qualify transforms about how many points they produce for each point: exactly one
 (mass-preserving), at most once (mass-shrinking) or arbitrary.
 
-__Mass-preserving transform__ A mass-preserving transform obeys the following law:
-forall d, `mass (f d) == mass d`
+_Definition: Mass-preserving transform_ A mass-preserving transform obeys the following invariant:
+$$
+\forall d\in\mathbb{D},\,\mu\left(f\left(d\right)\right)=\mu\left(d\right)
+$$
 
 It is fully characterized by a function `point_f :: a -> b`. Conversely, any such function defines
-a mass-preserving transform. This is the functiorial `fmap` that is familiar to functional 
+a mass-preserving transform. This is the functional `fmap` familiar to functional 
 programmers:
 
 ```hs
 map :: (a -> b) -> Dataset a -> Dataset b
 ```
 
-__Shrinking transform__ A mass-shrinking transform (or shrinking transform in short) reduces the 
-mass of a dataset: `forall d, mass (f d) <= mass d`. Similarly, it is fully characterized by its 
+_Definition: Shrinking transform_ A mass-shrinking transform (or shrinking transform in short) reduces the 
+mass of a dataset:
+$$
+\forall d\in\mathbb{D},\,\mu\left(f\left(d\right)\right)\leq\mu\left(d\right)
+$$
+Similarly, it is fully characterized by its 
 optional return on each point:
 
 ```hs
 mapMaybe :: (a -> Maybe b) -> Dataset a -> Dataset b
 ```
 
-__k-regular transforms__ A regular transform is said to be k-regular if for all dataset $d$:
-$$\text{m}\left(f\left(d\right)\right)\leq k\text{m}\left(d\right)$$
+_Definition: k-regular transform_ A regular transform is said to be k-regular if for all dataset $d$:
+$$\mu\left(f\left(d\right)\right)\leq k\mu\left(d\right)$$
 
 Note that k can always be chosen a natural integer, since the description of a transform is 
 equivalent to the description of its effect on each data point (which produces a finite number of 
@@ -323,18 +383,52 @@ $$
 
 A monoidal reduction can be interpreted as carrying over through computations of the underlying
 structure of the dataset. It turns out that the property above is quite strong and imposes a 
-lot of constraints on the definition of `+_r`:
+lot of constraints on the definition of $+_r$:
 
 
-__Monoid structure__ The relation `(Im r, +_r)` describes a monoid over `Im f`. The neutral element
-of this monoid is `r(\{\})`.
+__Proposition: Monoid structure__ The relation $\left(\text{Im}\left(r\right),+_{r}\right)$
+describes a monoid over $\text{Im}\left(r\right)$. The neutral element
+of this monoid is $r(\{\})$.
 
-__Characterization__ This morphism is fully described by the values of `r` over diracs and `{}`.
+ - __Characterization__ This morphism is fully described by the values of `r` over diracs and `{}`.
 
-__Unicity__ This monoidal law is unique over `Im f`. TODO
+ - __Unicity__ This monoidal law is unique over $\text{Im}\left(r\right)$
 
-__Composition__ This trivial property has important performance consequences:
-If `r` and `s` are both monoidal reductions, then `r &&& s` is also a monoidal reduction.
+__Composition__ This trivial proposition has important consequences for optimizations:
+If `r` and `s` are both monoidal reductions, then the pair reduction: `\(x,y) -> (r x, s y)`
+is also a monoidal reduction. This allows arbitrary merging of various reductions against the same
+dataset into a single reduction, whil preserving the semantics of the program. We will see more 
+examples of this proposition in action in section TODO.
+
+How justified is this framework? It turns out that such computation generalize the notion of integration
+outside the ordinary ring of the reals. For any morphism between the set of distributions and some
+other monoid, one can define the integral as follows. Given a distribution $d$ and a reduction $r$,
+the integral:
+
+$$
+\int r\text{d}d=\int_{\mathcal{U}}r\text{d}\left(d\right)=\sum_{x}r\left(d\left(x\right)\cdot\left\{ x\right\} \right)
+$$
+
+In particular, we recover the usual properties of distributivity of the integral.
+
+$$
+\int\left(r\oplus s\right)\text{d}d=\int r\text{d}d\oplus\int s\text{d}d
+$$
+
+One key intutive 
+difference with the usual understanding of integration is that in the context of data manipulation,
+the emphasis is on the measure, not the reductor. Which is why we propose to introduce a different
+terminology to make this change more palatable:
+
+$$
+\ointop d\text{d}r=\intop r\text{d}d
+$$
+
+which leads for example to the more natural distributivity property:
+
+$$
+\ointop\left(d\cup e\right)\text{d}r=\ointop d\text{d}r+_{r}\ointop e\text{d}r
+$$
 
 ### Reductions - examples
 
@@ -387,7 +481,13 @@ with a single summary.
 How to build observables from reductions? As we will see, a large number of observables are built 
 from reductions in the form $f\left(r_{1}\left(d\right),r_{2}\left(d\right),\cdots\right)$ , in 
 which the final function $f$ is pretty simple. A classic example is of course the mean, which is 
-the sum divided by the count. Such a decomposition is very useful from the perspective of the 
+the sum divided by the count:
+
+$$
+\text{mean}\left(d\right)=\frac{\ointop d\text{d}\left(\text{sum}\right)}{\ointop d\text{d}\left(\text{count}\right)}
+$$
+
+Such a decomposition is very useful from the perspective of the 
 computational model.
 
  - it is common that data comes in batches $d_1, d_2, \cdots$. With such a decomposition, it is 
