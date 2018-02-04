@@ -419,9 +419,9 @@ The following operations are examples of reductions.
 
 __count__ In this case, $+_{\text{count}}$ is the regular addition over naturals.
 
-__sum__ $+_{\text{count}}$ is the regular addition over reals.
+__sum__ $+_{\text{sum}}$ is the regular addition over reals.
 
-__max__ $+_{\text{count}}$ is the pairwise maxium over 2 values.
+__max__ $+_{\text{max}}$ is the pairwise maximum over 2 values.
 
 __indicator function__ $+_{\boldsymbol{1}}$ is the `OR` binary function.
 
