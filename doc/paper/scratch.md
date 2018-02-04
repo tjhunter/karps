@@ -378,7 +378,7 @@ if there exists a function $+_{r}\,:\,\mathcal{D}\rightarrow\mathcal{D}\rightarr
  that obeys the following distributivity rule:
 
 $$
-r\left(d_{1}\cup d_{2}\right)=r\left(d_{1}\right)+_{r}f\left(d_{2}\right)
+r\left(d_{1}\cup d_{2}\right)=r\left(d_{1}\right)+_{r}r\left(d_{2}\right)
 $$
 
 A monoidal reduction can be interpreted as carrying over through computations of the underlying
@@ -409,44 +409,29 @@ $$
 \int r\text{d}d=\int_{\mathcal{U}}r\text{d}\left(d\right)=\sum_{x}r\left(d\left(x\right)\cdot\left\{ x\right\} \right)
 $$
 
-In particular, we recover the usual properties of distributivity of the integral.
-
-$$
-\int\left(r\oplus s\right)\text{d}d=\int r\text{d}d\oplus\int s\text{d}d
-$$
-
 One key intutive 
 difference with the usual understanding of integration is that in the context of data manipulation,
-the emphasis is on the measure, not the reductor. Which is why we propose to introduce a different
-terminology to make this change more palatable:
-
-$$
-\ointop d\text{d}r=\intop r\text{d}d
-$$
-
-which leads for example to the more natural distributivity property:
-
-$$
-\ointop\left(d\cup e\right)\text{d}r=\ointop d\text{d}r+_{r}\ointop e\text{d}r
-$$
+the emphasis is on the measure, not the reductor.
 
 ### Reductions - examples
 
-Here are a couple of fundamental examples of reductions.
+The following operations are examples of reductions.
 
-__count__ In this case, `+_count` is the regular addition over naturals.
+__count__ In this case, $+_{\text{count}}$ is the regular addition over naturals.
 
-__sum__ `+_sum` is the regular addition over reals.
+__sum__ $+_{\text{count}}$ is the regular addition over reals.
 
-__max__ `+_max` is the maxium over 2 values.
+__max__ $+_{\text{count}}$ is the pairwise maxium over 2 values.
 
-__dirac__ The existence of a point. TODO
+__indicator function__ $+_{\boldsymbol{1}}$ is the `OR` binary function.
 
 __top-K__ Given an order on a dataset, computing the top K values with respcet to this ordering is 
-a common operation. `+_topk :: b^k -> b^k -> b^k` takes the top K values out of the union of 
-2 lists.
+a common operation. $+_{\text{top}}\,:\,A^{k}\times A^{k}\rightarrow A^{k}$
+takes the top K values out of the union of 2 lists.
 
-__variance, higher order moments__ Based on sum and count, one can also obtain all the higher order moments.
+__variance, higher order moments__ Using `sum`, `count` and basic arithmetic, all other higher
+order moments can be obtained. Numerically stable implementations can also be obtained in one pass
+but this is beyond the scope of this article.
 
 Here are some less common operations, but that still shows the power of this abstract representation.
 
@@ -455,23 +440,23 @@ point-wise `OR` operation over each bit of the bloom filter.
 
 __sketches__ This is the same idea with sketches, by taking pointwise sums of values.
 
-__approximate quantiles__ It turns out that the algorithms used to build quantiles rely on intermediate
-data structures that are much amenable to be distributed. These data structures can the be post-processed
+__approximate quantiles__ The algorithms used to build quantiles rely on intermediate
+data structures that are much amenable to be distributed using monoidal reductions. These data structures can the be post-processed
 to obtain approximate quantiles.
 
-__Naive bayes models__ and more generally models that rely on sufficient statistics.
+__Naive bayes models__ and more generally models that rely on sufficient statistics without iteration.
 
-__Approximate top K__ TODO
-
-The most important composition property of monoids is that a pair of monidal reductions is also 
-a monoidal reduction itself.
+__Hashing and signatures__ Commutative hash functions are also monoidal reductions. An example 
+of such function is the modular exponentiation $f\left(x_{1},x_{2}\right)=a^{x_{1}+x_{2}}\mod b$ for
+well chosen prime numbers $a$ and $b$.
 
 ### Reductions - counter examples
 
 A few operations do not enjoy such strong properties however.
 
-Machine learning models, in all generality. These models usually rely on solving a convex optimization
+Machine learning algorithms, in all generality. These models usually rely on solving a convex optimization
 problem, and convexity does not carry over the union.
+TODO: check submodularity
 
 Modes of distributions. This is intuitive: it relies on counting point wise, which cannot be done
 with a single summary.
@@ -481,44 +466,50 @@ with a single summary.
 How to build observables from reductions? As we will see, a large number of observables are built 
 from reductions in the form $f\left(r_{1}\left(d\right),r_{2}\left(d\right),\cdots\right)$ , in 
 which the final function $f$ is pretty simple. A classic example is of course the mean, which is 
-the sum divided by the count:
-
-$$
-\text{mean}\left(d\right)=\frac{\ointop d\text{d}\left(\text{sum}\right)}{\ointop d\text{d}\left(\text{count}\right)}
-$$
-
-Such a decomposition is very useful from the perspective of the 
+the sum divided by the count. Such a decomposition is very useful from the perspective of the 
 computational model.
 
- - it is common that data comes in batches $d_1, d_2, \cdots$. With such a decomposition, it is 
+ - it is common that datasets come in batches $d_1, d_2, \cdots$. With such a decomposition, it is 
  trivial to compute the update, as it is simply the application the reduction to the last batch.
  In that sense, these distributivity laws are akin to derivation in real analysis. More on that 
  later.
  
  - for data that is ordered, and for which we want to perform an operation such as windowing,
- or cumulative sums, this structure dramatically speeds up computations without requiring any 
- input from the user. We will see in the subsequent sections how butterfly schemes can be built
- up on arbitrary monoidal reductions, hence the name universal.
+ or cumulative sums, this structure can substantially improve algorithm design by providing an
+ automatic scheme to share intermediate data, for example using buttefly schemes. 
+ TODO: this is speculative, but this article is dense enough as it is.
 
 ## Joins
+
+A join is a fundamental operation from the relational model. In its more general form, it has the 
+following function signature:
 
 ```hs
 join :: Dataset (k, a) -> Dataset (k, b) -> Dataset (k, Maybe a, Maybe b)
 ```
 
-It follows some distributivity law, as we would expect:
+Some variants such as left, right, outer and inner joins can be derived from this signature 
+when combined with filter. For the purpose of this discussion, we just want to note that joins
+enjoy a wide variety of structural invariants, which makes them particularly useful. For instance,
+the following distributivity law holds:
 
-```hs
-join (a1 U a2) b == (join a1 b) U (join a2 b)
-join a b = join b a
-mass (join a b) == max (mass (key a1 U key a2))
-```
 
-TODO: is it enough to define the union through axioms?
+$$
+\text{join\ensuremath{\left(a_{1}\cup a_{2},b\right)}=join\ensuremath{\left(a_{1},b\right)\cup}join\ensuremath{\left(a_{2},b\right)}}
+$$
+
+ - left joins are mass-preserving in their first arguments
+ 
+ - right joins are mass-preserving in their second arguments
+ 
+ - inner joins are mass shrinking
+
+TODO: it should be possible to define joins just based on the axioms above and on the distributivity
+laws, but this does not bring much to the discussion.
 
 ## Groups
 
-A group corresponds to the notion that data points can somehow be associated together. It allows
+A group corresponds to the notion that data points can somehow be associated together. As a byproduct it allows
 to express transforms on potentially many datasets all at once.
 
 __Definition: group__ A group is a function from datasets to datasets:
@@ -528,63 +519,120 @@ type Group k v = k -> Dataset v
 ```
 
 Of course, this is a very high-level definition, and we will see how it works out in practice.
-A practical implementation of a group may be done as follow, thanks to Currification: a group 
-is the type `k -> v -> Nat`, or through Currying: `(k, v) -> Nat`, which suggest an alternative 
-representation for groups:
+A practical implementation of a group using the formalism above may be done as follow, thanks to
+Currying: when we expand the types, a group is the type `k -> v -> Nat`, or equivalently through 
+Currying: `(k, v) -> Nat`, which suggest an alternative representation for groups:
 
 ```hs
 type Group k v = Dataset (k, v)
 ```
 
-We will use one representation or the other according to the situation.
+We will use one representation or the other according to the situation. This remark also justifies 
+why groups of groups is hardly found in practice, as they can be reduced to a group with a single
+composite key.
 
-Reductions over groups. Define the following operator:
+
+Reductions over groups. Groups are interesting thanks to the two operations below, that allow to 
+represent a dataset as a partition of sub-sets, and to apply a reducing operation on each of these 
+subsets.
+
+The shuffle operations takes a reduction and applies it logically to each of the logical subsets of 
+the group, to form a final dataset.
 
 ```hs
 shuffle :: Reduce a b -> Group k a -> Dataset (k, b)
 ```
 
+Its opposite operation, the grouping operation, takes a collection of values and a partition function,
+and applies this partitioning:
+
 ```hs
 groupBy :: (v -> k) -> Dataset v -> Group k v
 ```
 
-__Distributivity of shuffle__
+Considerable work has gone on efficient implementation of these operations, mostly in the context of 
+databases, so we will not discuss here how these operations get implemented. Instead we will consider
+them as fundamental parts of the framework.
 
-This distributivity law shows the power of the universal reductions.
 
-```hs
-shuffle f (g1 `union` g2) = map (+_f) (join (shuffle f g1) (shuffle f g2))
-```
+__Distributivity of shuffle__ In the context of our framework, we note the following distributivity
+property of the shuffle, which has important applications in practice when datasets are obtained 
+in an incremental fashion. Given a reducer $r$ and two datasets $a$ and $b$, the following holds:
+
+$$
+\text{shuffle}\left(r,a\cup b\right)=\text{fmap}\left(+_{r},\text{join}\left(\text{shuffle}\left(r,a\right),\text{shuffle}\left(r,b\right)\right)\right)
+$$
+
+In other words, if one has already computed a shuffle for some dataset $a$, there is no need to keep
+this dataset anymore if new data appears, the output of the shuffle is enough. Furthermore, this transform
+is entirely mechanical, which means that from the perspective of the user, there is no need to implement 
+complex schemes to deal with historical data if it has already been processed.
+TODO: make stronger.
+
+## Miscellanous operations.
+
+Here are a few other operations that can naturally be added to the framework above.
+
+TODO: remove these?
 
 ### Filter
+
+Filtering is the canonical example of a contraction.
 
 ```hs
 filter :: (a -> Bool) -> Dataset a -> Dataset a
 ```
 
-This is a simple example of contraction.
-
 ### Ordered reductions
+
+Given some ordering on some keys of type `a`, this operation returns all the elements, sorted.
 
 ```
 orderedReduce :: Ord a => Dataset (a, b) -> [b]
 ```
 
-### Canonical representation
+### Normalized representation
+
+It is useful for some operations to have a compact representation of a dataset without duplicates.
+We call the __normalized representation of a dataset_ the dataset of values and associated counts 
+of these values. This is the representation that minimizes the mass of a dataset while preserving 
+the entropy.
+
+The implementation of this operation is straightforward:
 
 ```hs
-shuffle count . groupBy id 
+normalize :: Dataset a -> Dataset (a, Nat)
+normalize d = shuffle count (groupBy id d)
 ```
+
+A normalized representation is very useful in the context of sorting values or adding some entropy
+to a dataset. Note that this representation can also be approximated by a sketch if the values 
+themselves are not required but just their existence.
 
 ### Indexing and counting
 
-Here are a couple of operations one can do to as substitutes for usual operations in SQL, using the
-basic transforms outlined above.
+Using normalized representation, one can add indexing and counting operations to a dataset without 
+having to add special operators and without having to define an ordering on the values. Given a
+normalized dataset, one can define the following `enumerate` that multiplies each value along with an 
+index:
 
-### Substitutes for random operations
+```hs
+enumerate (parallelize [('a', 3)]) == parallelize [('a', 0), ('a', 1), ('a', 2)]
+```
+
+A naive implementation of this function is not very robust in practice to large indexes. We show 
+in the appendix how this indexing operation can be performed using $\mathcal{O}\left(\log n\right)$ 
+shuffles and $k$-regular transforms only. In essence, this function can be implemented 
+in time that is nearly bounded to the size of the dataset and independent of the largest index values,
+all using more primitive operations.
+
+TODO: it is possible to have a nice implementation so that `enumerate` distributes over unions of 
+datasets (approximately, using sketches), and have all the guarantees above.
+
+### Random operations
 
 It is common to associate a random value $x_i$ to each value $z_i$ of a dataset. What does random mean in that 
-respect? It means that the random value $x_i$ is not correlated in a statistical sense to the 
+respect? One possible view is that the random value $x_i$ is not correlated in a statistical sense to the 
 original value $z_i$: knowing one does not convey information about the other. I argue here that 
 there are two ways to construct such random values, either by building a carefully constructed 
 suite of values independently from the values of the dataset (the classical way), or using 
@@ -602,22 +650,23 @@ values), then applying a one-way function $\kappa$ will construct values that un
 the original values and the other random values. If a dataset $d$ is max-entropic, then the 
 dataset $\left(d,\kappa\left(d\right)\right)$ has random values.
 
-This scheme can be extended to non-distinct datasets, using the `enumerate` operation, which 
-we will discuss below. Such an approach has the advantage of generating values in a way that respects
-all the dataset axioms. Generating random values is not a special operation, but simply yet another 
+This scheme can be extended to non-distinct datasets, using the `enumerate` operation,
+presented above. Such an approach has the advantage of generating values in a way that respects
+all the dataset axioms: generating random values is not a special operation, but simply yet another 
 dataset transform.
 
 # Time series and streaming
 
-_Definition: Stream_ A stream is a growing series of dataset:
+_Definition: Stream._ A stream is a growing series of dataset:
 ```hs
 type Stream a = Nat -> Dataset a
 ```
-such that $s_{t} \in s_{t+1}$. 
+such that $s_{t} \subset s_{t+1}$. 
 
 The intuition behind a stream is that of a collection that is observed incrementally.
 Because it is essentially a dataset, most of the results over datasets carry 
 naturally over.
+
 TODO: using category theory to define the results?
 
 One of the main considerations when dealing with streams is about stability and
@@ -630,15 +679,19 @@ _Definition: stable stream_: A stream $s$ is stable if there exists an integrabl
 $g:\mathbb{U}\rightarrow\mathbb{R}$ and a constant $K>0$ so that for all elements:
 
 $$
-s_{t}\left(x\right)\leq\text{mass}\left(s_{t}\right)g\left(x\right)
+s_{t}\left(x\right)\leq\mu\left(s_{t}\right)g\left(x\right)
 $$
 
 $$
-\text{mass}\left(s_{t-1}\right)-\text{mass}\left(s_{t}\right)\leq K
+\forall x,\,\frac{s_{t}\left(x\right)}{\mu\left(s_{t}\right)}\,\text{converges}
+$$
+
+$$
+\mu\left(s_{t-1}\right)-\mu\left(s_{t}\right)\leq K
 $$
 
 (And recall that $g$ is integrable if:)
-$\text{mass}\left(g\right)<\infty$
+$\mu\left(g\right)<\infty$
 
 This is enough to define the limit of a stream using the 
 
@@ -654,24 +707,33 @@ TODO: build a norm based on that.
  
 ## convergence properties of streams
 
+Because we work in non-numeric spaces such as bloom filters or lists of strings, defining the 
+convergence of a monoid is a bit more technical.
+
 ### Notion of convergence
 
 TODO: introduce the notion of limit using the o() notation instead of usual limit. Use distance.
  
-_Definition: stable reduction and signature_: A reduction is stable if for any stable stream s, 
-there exists a value u(s) so that:
+_Definition: stable reduction and signature_: A reduction $r$ is stable if for any stable stream $s$, 
+there exists a value $u_r(s)$ so that:
 
-f(s_n) ~ f(count(s_n) . {u(s)})
+$$
+r\left(s_{t}\right)\sim r\left(\mu\left(s_{t}\right)\cdot\left\{ u_r\left(s\right)\right\} \right)
+$$
 
-This function is called the signature of the reduction: sig(f)(s).
+This function is called the signature of the reduction: sig(r)(s).
+
+TODO: prove that the signature is unique.
+
+TODO: explain the intuition with convergence theorems in statistics.
 
 _Definition: expectation of a stream_ This is the signature. 
 
 ### Examples of stable reductions
 
-Some examples: max, mean, sum, count, quantiles, bloom filters, top-K, moments, mode
+A lot of the usual reductions are stable, which is the interest of this notion: max, mean, sum, count, approximate quantiles, bloom filters, top-K, moments, mode
 
-Some counter-examples: the following are not stable: hash (by design)
+Some counter-examples: the following are not stable: hash, which is intuitive.
 
 ### Main theorem
 
