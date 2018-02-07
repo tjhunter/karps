@@ -657,7 +657,7 @@ dataset transform.
 
 # Time series and streaming
 
-_Definition: Stream._ A stream is a growing series of dataset:
+_Definition: Stream._ A stream $s$ is a growing series of dataset:
 ```hs
 type Stream a = Nat -> Dataset a
 ```
@@ -693,7 +693,11 @@ $$
 (And recall that $g$ is integrable if:)
 $\mu\left(g\right)<\infty$
 
-This is enough to define the limit of a stream using the 
+The last condition is rather technical and easy to implement in practice by breaking an update into multiple sub-updates.
+
+Most of the well-behaved streams are stable. One example that is _not_ stable is the 
+indicator stream: $s_{t}=\left[1,t\right]$. No integrable function can bound this stream,
+even if it converges pointwise toward $0$.
 
 ### Distances in data space
 
@@ -704,7 +708,7 @@ element:
  - usual L1 distance for the rest 
 
 TODO: build a norm based on that.
- 
+
 ## convergence properties of streams
 
 Because we work in non-numeric spaces such as bloom filters or lists of strings, defining the 
@@ -758,28 +762,33 @@ runtimes: Spark, a generic SQL database, and the Pandas framework.
 Spark (or for that matter, the other map-reduce based frameworks) make a distinction between 
 _transforms_ and _actions_. This distinction is inspired by the difference between the pure (functional)
 transforms and the effects, which are captured in the runtime monad of the underlying system. We 
-propose to treat all the effects of a data systems as observables, and this is the essence of making
-dataset an applicative.
+propose to _treat all the effects of a data system as observables_. In more pedantic terms, 
+data processing can be expressed as a category of applicatives, instead of a category of monads.
+In a monad, the value retured by one computation can influence the choice or result of another. For 
+exemple, one could check if a file exist before opening another file. With applicatives, the 
+structure of computations (the sequencing of effects) is fixed.
 
-Recall that an applicative functor has the following laws:
+Recall that an applicative functor `f` is defined by the three following laws:
 
- 1. `map`, the functional map.
+ 1. `map :: (a -> b) -> f a -> f b`, the functional map.
  
- 2. `lift`, which takes a value and lifts it
-
-In our case, `lift` takes either a value or a function and wraps it as a dataset or observable. 
-This works nicely. TODO.
+ 2. `pure :: a -> f a`, which takes a value and brings it into the context
+ 
+ 3. `concat :: f (a -> b) -> f a -> f b` which combines two elements already in a context.
 
 The essence of applicative functors is that _the transformation on the data can be described independently from the data itself_.
-This is a crucial point for distributed systems, in which the datasets can be huge. This approach 
+This is a crucial point for distributed systems, in which datasets can be huge. This approach 
 is different from the current implementations, which explicitly or implictly rely on an outer 
-monad. Take the example of the following Spark snippet, in which a dataset gets written and then
+context to perform imperative tasks such as writing files, etc. This manipulation of an outer 
+context follows monadic laws, which are strictly less general than applicative laws. 
+Take the example of the following Spark snippet, in which a dataset gets written and then
 some other operations are perfomed:
 
 ```scala
-val data: Dataset[Int] = ???
-data.write.parquet("file")
-data.write.parquet("file")
+val data: Dataset[Row] = ...
+data.write.parquet("mydata")
+// One could check here that 'mydata' has been written
+data.write.parquet("mydata")
 ```
 
 This code performs two consecutive actions (writing the data twice).
@@ -792,7 +801,7 @@ The question of I/O will be dealt with in more depth in the next section, but co
 the following optimization that is already possible with applicative semantics:
 
 ```scala
-val data: Dataset[Int] = ???
+val data: Dataset[Row] = ...
 val theMin: Int = data.min
 data.write("/mydata")
 val theMax: Int = data.max
@@ -822,7 +831,7 @@ sparkContext.write(data, "/mydata")
 data.uncache()
 ```
 
-A number of operations has happened:
+A number of operations have happened:
  - the operation of writing the dataset has been identified has independent from the other reductions.
    In fact, some extra caching logic is automatically inserted if necessary.
  - both reductions were subsumed into a single pass over the data. This can significantly speed up
@@ -932,3 +941,11 @@ This is the case in a few operations:
  data is at least expected (for example, we expect a feature columns with arrays of doubles).
  This is where a functional style can help by clearly delineating the expected schema from the other
  parts.
+
+# Appendix 1 - sampling and expansion algorithms
+
+TODO: show how one can do sampling with and without replacement in bounded computation time.
+
+TODO: show to to do efficient parallel bootstrapts with monoids
+
+TODO: show how this merges into bag of little bootstraps
