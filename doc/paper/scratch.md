@@ -4,23 +4,35 @@
 
 This article draws on the foundations of measure theory and group theory to offer a formalism of 
 large scale data systems. Starting from first principles, we show that most operations on 
-datasets can be reduced to a small algebra of operations that are well suited for optimizations
-and for composition into much larger systems in a coherent fashion, and in handling streaming data.
+datasets can be reduced to a small algebra of primitive functions that are well suited for optimizations
+and for composition into much larger systems, and in handling streaming and statistical data.
 We hope that these principles can inform the implementation of future distributed data systems.
 
 # Introduction
 
 The explosion in the collection of data has lead to the rise of diverse frameworks to store and 
-manipulate this data accordingly.
+manipulate this data accordingly. These frameworks tend to either adapt some old paradigms or to 
+emerge from the operational aspects of big data.
 
-The SQL language has enjoyed considerable success as a standard
-querying interface for the non-programmers. On the other end of the spectrum of complexity,
-engineers in charge of processing such large amounts of data have devised a number of tools to
-distribute computations against these large datasets, such as MapReduce and Hadoop.
+As far as old paradigms are concerned, the SQL language has enjoyed considerable success as a standard
+querying interface for the non-programmers. On the other end of the spectrum of complexity and expressivity,
+engineers in charge of processing large amounts of data have devised a number of tools to
+distribute computations against these large datasets, and have formalized these tools into 
+operational abstractions such as MapReduce (ex: Spark, Flink, BigQuery).
 
-_(TODO:talk about streaming and fast reaction)_
-
-_(TODO:talk about separating storage from compute)_
+At their respective levels, these abstractions share the idea of separating storage from compute. 
+They free programmers from considerations around how to access and store data, and entrust the 
+implementing frameworks with taking reasonable decisions. While this approach is reasonable in most
+scenarios, some specific domains such as machine learning or genomics rely on specific access 
+patterns and hardware to enjoy the necessary performance. For these domains, the separation between 
+storage and compute breaks down: genomics and deep learning are concerned with streaming massive 
+volumes of data through very few dedicated and very powerful computing cores. Furthermore in 
+reinforcement learning, reactivity (and latency) is paramount, at the expense of overall computing 
+throughput. Such problems have been successfully tackled by specialized frameworks (tensorflow, Ray,
+etc.) which do not presume a clean separation between storage and compute, but rather the capacity 
+to access data in a specific pattern (streaming). This paper, rather than assuming a strict
+separation between storage and compute, formalizes APIs in which the distribution and the scheduling 
+of computations follows the representation of the data.
 
 If one looks at the landscape of the data processing systems, several trends emerge:
 
@@ -39,11 +51,19 @@ When a system is designed to serve as the substrate on top of which more complex
 establishing sound principles and structures is paramount. Without these, complex and unforeseen 
 interactions emerge that expose some behavior that on the face of it, is a logical consequences of 
 the initial specifications, but yields surprising or confusing results to the user of such a system.
+As such, this paper is mostly concerned with the soundness of its interfaces and delegates practical
+considerations to further study, with the hope that these interfaces are representative of current 
+and future needs.
 
-Artificial intelligence is arguably not well captured by current systems because of its roots in
-statistics, and its peculiar needs. At a high level, ML is not that different from other data 
-processing frameworks: it condenses data into a model (in the case of supervised learning), and 
-then applies this model to some unseen data.
+Artificial intelligence is not well captured by current data systems because of its roots in
+statistics, and its peculiar needs. Statistical workloads can usually trade some exactness in results
+for large computing gains, as shown by BlinkDB in some workloads. Current exploration has so far
+focused on starting from a high level goal (embedding constraints in SQL for example) and working 
+these constraints through an existing engine. This paper proposes a bottom-up approach. It
+focuses on establishing a small, highly structured set of primitive operations that capture well 
+the requirements of statistical techniques such as the bootstrap or model learning. In the streaming
+section, we will show that in this context, a statistical workload has the same characteristics as a
+streaming workload, and that for both we can establish some convergence and soundness guarantees.
 
 Data processing systems are primarily focused on transforming data, and as such reading and writing 
 data is a critical, but poorly formalized, part of such systems. For example, from the perspective
@@ -253,7 +273,7 @@ denote it $\delta_a$.
 
 ```hs
 dirac :: a -> Dataset a
-dirac x y = if x == y then 1 else 0
+dirac x = \y -> if x == y then 1 else 0
 ```
 TODO: fix in the paper: it is a distribution.
 
