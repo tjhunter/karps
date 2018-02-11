@@ -22,17 +22,17 @@ operational abstractions such as MapReduce (ex: Spark, Flink, BigQuery).
 
 At their respective levels, these abstractions share the idea of separating storage from compute. 
 They free programmers from considerations around how to access and store data, and entrust the 
-implementing frameworks with taking reasonable decisions. While this approach is reasonable in most
+implementing frameworks with taking reasonable decisions. While this approach is effective in most
 scenarios, some specific domains such as machine learning or genomics rely on specific access 
-patterns and hardware to enjoy the necessary performance. For these domains, the separation between 
+patterns and hardware to enjoy good performance. For these domains, the separation between 
 storage and compute breaks down: genomics and deep learning are concerned with streaming massive 
-volumes of data through very few dedicated and very powerful computing cores. Furthermore in 
+volumes of data through a handful of dedicated, powerful computing cores. Furthermore, in 
 reinforcement learning, reactivity (and latency) is paramount, at the expense of overall computing 
 throughput. Such problems have been successfully tackled by specialized frameworks (tensorflow, Ray,
 etc.) which do not presume a clean separation between storage and compute, but rather the capacity 
-to access data in a specific pattern (streaming). This paper, rather than assuming a strict
+to access data in a specific pattern (streaming data for example). This paper, rather than assuming a strict
 separation between storage and compute, formalizes APIs in which the distribution and the scheduling 
-of computations follows the representation of the data.
+of computations _adopts the structure of the data_.
 
 If one looks at the landscape of the data processing systems, several trends emerge:
 
@@ -56,13 +56,13 @@ considerations to further study, with the hope that these interfaces are represe
 and future needs.
 
 Artificial intelligence is not well captured by current data systems because of its roots in
-statistics, and its peculiar needs. Statistical workloads can usually trade some exactness in results
+statistics, and its peculiar characteristics. Statistical workloads can usually trade some exactness in results
 for large computing gains, as shown by BlinkDB in some workloads. Current exploration has so far
 focused on starting from a high level goal (embedding constraints in SQL for example) and working 
 these constraints through an existing engine. This paper proposes a bottom-up approach. It
 focuses on establishing a small, highly structured set of primitive operations that capture well 
 the requirements of statistical techniques such as the bootstrap or model learning. In the streaming
-section, we will show that in this context, a statistical workload has the same characteristics as a
+section, we will show that a statistical workload has the same characteristics as a
 streaming workload, and that for both we can establish some convergence and soundness guarantees.
 
 Data processing systems are primarily focused on transforming data, and as such reading and writing 
@@ -84,69 +84,18 @@ This article is structured as such:
  
  - it discusses possible ways to address temporal aspects and streaming data.
  
- - it offers some hints at implementation and a proof of concept built on top of Spark.
+ - it offers some hints at implementation and a proof of concept built on top of Spark, written in
+   the Haskell and Python programming languages.
 
 The code examples are done using mathematical notations and Haskell functions, which should be
 clear enough in most of the case.
-
-
-# Introduction (old)
-
-There has been a tremendous explosion in the collection and processing of data of all kind. In order 
-to cope with this gathering, several strategies have emerged: adapting old tools or inventing new
-data processing engines adapted to the underlying infrastructures and to the choices of 
-implementations. As far as traditional tools are concerned, the rise of SQL for handling distributed 
-datasets has been remarkable, as this technology was first invented in TODO for single computers. 
-SQL is now considered the _lingua franca_ of data processing, and it can be found in various
-flavors in all modern industrial systems (BigQuery, Spark, Redshift, ...). That said, SQL is not 
-the only computing model in the world of distributed computing. Owing to the then unique needs of 
-Google, the MapReduce paradigm has enjoyed considerable success in technical tasks, especially 
-through more recent frameworks inspired by its principles, such as Spark or Flink. Unlike SQL though,
-these frameworks require more understanding of the implementation in order to be productive: they 
-offer a different tradeoff of flexibility and ease of use. 
-
-Data collection hardly happens once in the context of a business, and reactivity to new data is 
-considered a critical feature of modern companies. As such, a number of systems have been designed 
-to cope with the incoming flux of data as soon as it gets collected. Some examples include Kafka
-or Flink. The interfaces of such systems are mostly concerned with expressing some chaining of 
-operations between multiple stages and efficiently processing a record as soon as possible, at the 
-expense of performance (TODO this is wrong). Because such systems were started by solving
-distributed challenges first, they do not have the strong theoretical backing found in other 
-frameworks such as SQL.
-
-The major theme in the last two years has been unification. Moving data between each system is 
-inefficient for technical and commercial considerations: the data storage is optimized for the
-task (streaming, batch, etc.) and in these systems, the architecture of the data storage is key for 
-the processing architecture. Furthermore, commercial SQL engines that are tied to a specific 
-cloud system such as Google BigQuery or Amazon Redshift/Athena have little incentive to be fully 
-compatible with competitors' systems. It is easier to recreate the missing capablity in a walled 
-garden rather than adapting the internals and be at the mercy of changes in a dependent system. The 
-cost of coordination is too high.
-
-This is why most popular systems nowadays offer multiple capabilites under one umbrella: batch 
-processing of data, streaming processing, high-level processing with SQL or other structured
-interfaces. This is mostly the case for Spark and Flink. Unification is achieved through a common 
-interface that is capable and expressive enough to address the needs of high-level interfaces such 
-as SQL, but that also abstracts enough of the _modus operandi_ so as to give flexibility to 
-run and distribute the computations. Without this flexibility, taking automated decisions is 
-either impossible or inefficient. These interfaces need to find a tradeoff between expressivity 
-and abstraction.
-
-These intermediate interfaces are usually rather ad-hoc and built around the low-level system. 
-This is why we propose here a description of interfaces for data systems that is not bound to 
-a particular implementation but rather that derives from principles in programming languages and 
-statistics. Why should we bother? As data systems grow in complexity, the possibilities offered by
-a loose interface hamper the construction of more complex, task-specific abstractions. We hope that 
-the considerations below can guide in the implementation of a computing system that can serve as a 
-basis for more complex systems built on top of it.
-
 
 
 # General principles
 
 This section is concerned with some ideas that hold no matter the type of system:
 
- 0. Perspective of the observer, only reductions can be observed.
+ 0. Perspective of the observer: only reductions can be observed.
  
  1. The data representation is not observable 
  
@@ -165,7 +114,7 @@ dataset:
 
  - transforming it into another dataset.
  - condensing the dataset into a single value. This is also what is called _reducing_ the dataset
-   into an observable (value).
+   into an observable (a value).
 
 The observer principle states that the user (the observer) only has access to observables, and not 
 to the dataset itself. This idea is familiar to physicists, who have long considered adopted a
@@ -224,6 +173,7 @@ outlined above.
 All the operations perform either on values or sets of values, and data processing consists in 
 writing some functions that transform sets into other sets, or into values.
 As mentioned before, here are a couple of assumptions that we will work on:
+
  - the exact representation of the data is not observable. This is often not verified in such
  systems.
  - the data is considered static. It does not change over time. This will be addressed in Section TODO.
@@ -235,12 +185,12 @@ the set of all values can be tagged with _types_. A type is essentially a subset
 Types are mostly useful when writing programs and for clarity, not so much for our mathematical 
 derivations.
 
-_Definition: dataset_ A dataset is a _finite measure_ over the set of values. 
+_Definition: dataset._ A dataset is a _finite measure_ over the set of values. 
 $d:\mathcal{U}\rightarrow\mathbb{N}$ with the restriction: 
 $$
 \sum_{x\in\mathcal{U}}d\left(x\right)<\infty
 $$
-In terms of types, a simple dataset could be defined as such:
+In terms of types, a dataset is simple a function that counts how many times a value is observed:
 ```hs
 type Dataset a = a -> Nat
 ```
@@ -275,12 +225,11 @@ denote it $\delta_a$.
 dirac :: a -> Dataset a
 dirac x = \y -> if x == y then 1 else 0
 ```
-TODO: fix in the paper: it is a distribution.
 
 One trivial consequence is the fact that a dataset is the (finite) sum of diracs. This fact will 
 have its importance later.
 
-To simplify the notations, we introduce the following shorthands:
+To simplify the notations, we introduce the following shorthand notation:
 
 
 \begin{align*}
@@ -305,12 +254,12 @@ mass :: Dataset a -> Nat
 
 With this structure, there is not much we can do so far, apart from querying the value of a dataset
 at various points. We are going to add many more operations now. One of the simplest and yet most
-effective ways to transform a dataset is to apply some operation to all its points individually.
+effective ways to transform a dataset is to apply some operation to each of its points individually.
 We are going to characterize the transforms that are the most regular with respect to the 
 Distribution principle: if a dataset 
 is a union, we would like the transform to respect this union.
 
-_Definition: regular transform_ A function `f :: Dataset a -> Dataset b` is said to be _regular_
+_Definition: regular transform._ A function `f :: Dataset a -> Dataset b` is said to be _regular_
 if the following applies:
 
 $$
@@ -321,14 +270,14 @@ $$
 It turns out that this adds a lot of structure to all the possible point transforms; in particular
 the transforms have to be automorphisms over the dataset monoid.
 
-__Proposition: neutral element__: The empty set is a neutral element:
+__Proposition: neutral element.__ The empty set is a neutral element:
 ```hs
 f {} = {}
 ```
 
 The following proposition justifies the programming interfaces of most distributed systems:
 
-__Proposition: characterization__: All the point transforms can be uniquely characterized by their
+__Proposition: characterization.__ All the point transforms can be uniquely characterized by their
 operations on elements. More precisely, by the point function:
 ```hs
 point_f :: a -> [b]
@@ -342,7 +291,7 @@ individual points, and that each point can only get mapped to a collection of ot
 We can now fully qualify transforms about how many points they produce for each point: exactly one
 (mass-preserving), at most once (mass-shrinking) or arbitrary.
 
-_Definition: Mass-preserving transform_ A mass-preserving transform obeys the following invariant:
+_Definition: Mass-preserving transform._ A mass-preserving transform obeys the following invariant:
 $$
 \forall d\in\mathbb{D},\,\mu\left(f\left(d\right)\right)=\mu\left(d\right)
 $$
@@ -355,7 +304,7 @@ programmers:
 map :: (a -> b) -> Dataset a -> Dataset b
 ```
 
-_Definition: Shrinking transform_ A mass-shrinking transform (or shrinking transform in short) reduces the 
+_Definition: Shrinking transform._ A mass-shrinking transform (or shrinking transform in short) reduces the 
 mass of a dataset:
 $$
 \forall d\in\mathbb{D},\,\mu\left(f\left(d\right)\right)\leq\mu\left(d\right)
@@ -367,7 +316,7 @@ optional return on each point:
 mapMaybe :: (a -> Maybe b) -> Dataset a -> Dataset b
 ```
 
-_Definition: k-regular transform_ A regular transform is said to be k-regular if for all dataset $d$:
+_Definition: k-regular transform._ A regular transform is said to be k-regular if for all dataset $d$:
 $$\mu\left(f\left(d\right)\right)\leq k\mu\left(d\right)$$
 
 Note that k can always be chosen a natural integer, since the description of a transform is 
@@ -532,7 +481,7 @@ laws, but this does not bring much to the discussion.
 A group corresponds to the notion that data points can somehow be associated together. As a byproduct it allows
 to express transforms on potentially many datasets all at once.
 
-__Definition: group__ A group is a function from datasets to datasets:
+__Definition: group__ A group is a function from values to datasets:
 
 ```hs
 type Group k v = k -> Dataset v
@@ -548,7 +497,7 @@ type Group k v = Dataset (k, v)
 ```
 
 We will use one representation or the other according to the situation. This remark also justifies 
-why groups of groups is hardly found in practice, as they can be reduced to a group with a single
+why a specific type for groups of groups is hardly found in practice, as they can be reduced to a group with a single
 composite key.
 
 
@@ -614,7 +563,7 @@ orderedReduce :: Ord a => Dataset (a, b) -> [b]
 ### Normalized representation
 
 It is useful for some operations to have a compact representation of a dataset without duplicates.
-We call the __normalized representation of a dataset_ the dataset of values and associated counts 
+We call the _normalized representation of a dataset_ the dataset of values and associated counts 
 of these values. This is the representation that minimizes the mass of a dataset while preserving 
 the entropy.
 
@@ -666,7 +615,7 @@ different results.
 
 I argue that a cryptographic scheme should be the default in distributed datasets. It stems from 
 the following observation: if each of the value in a dataset is unique (distinct from all other
-values), then applying a one-way function $\kappa$ will construct values that uncorrelated from both
+values), then applying a one-way function $\kappa$ will construct values that are uncorrelated from both
 the original values and the other random values. If a dataset $d$ is max-entropic, then the 
 dataset $\left(d,\kappa\left(d\right)\right)$ has random values.
 
@@ -723,6 +672,7 @@ even if it converges pointwise toward $0$.
 
 TODO: introduce a notion of distance between 2 elements of the same type. It is natural for any
 element:
+
  - edit distance for strings (or vector distance)
  - edit distance for arrays and maps
  - usual L1 distance for the rest 
@@ -852,11 +802,13 @@ data.uncache()
 ```
 
 A number of operations have happened:
+
  - the operation of writing the dataset has been identified has independent from the other reductions.
    In fact, some extra caching logic is automatically inserted if necessary.
  - both reductions were subsumed into a single pass over the data. This can significantly speed up
-   computations and is accomplished through elementary graph analysis.
- - the final difference is pushed into the same query.
+   computations and is accomplished automatically, through elementary analysis of the compute graph.
+ - the final difference is pushed into the same query, which will trigger Spark's whole stage code
+   generation.
  - finally, getting the result needs to be explicitly called out to run. With the proper assistance 
    of the interactive system, this is hardly an issue in practice.
 
@@ -878,7 +830,7 @@ can handle streaming data with no change. As mentioned above, if the program det
 is not necessary (such as a place being overwritten later but never read in between), it removes 
 such a write and all the dependent operations.
 
-As an interesting application, a number of seemingly incorrect programs now make sense, owing to
+As an interesting application, a number of seemingly illegal programs now make sense, owing to
 the uniform treatment of all side effects as observations. Consider the following trivial function that 
 takes a dataset, writes it and then returns the count of observations:
 
@@ -891,7 +843,7 @@ def function(d: Dataset[a]): Observable[Long] = {
 This is an aggregation, and as such it can be used in groups:
 
 ```scala
-val data: Dataset[(Int, a)] = ???
+val data: Dataset[(Int, a)] = ...
 val data2: Dataset[Long] = data.group().reduce(function)
 ```
 
@@ -941,10 +893,6 @@ only update the required parts of the files.
 Writing presents interesting challenges when trying to use distributed file systems that offer fairly 
 weak forms of consistency. This has been covered in other pices of literature, so we will not cover it here.
 
-## User-defined inputs
-
-A critical components for modern data processing systems is the ability to extend the system with additional 
-processing facilities.
 
 ## Miscellani
 
