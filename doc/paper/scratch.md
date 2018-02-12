@@ -626,11 +626,47 @@ dataset transform.
 
 # Time series and streaming
 
+This section is concerned about datasets that grow in time. The source of this growth is usually
+one of the following:
+
+ - the dataset is revealed incrementally in time as new data becomes available. This is the classic
+  case of streaming datasets.
+
+ - the dataset is explored in an increasing fashion, with the hope that processing a small 
+  fraction of the dataset will provide an approximate but still useful result. This is the 
+  model followed by BlinkDB and G-OLA.
+
+We consider these two applications as different facets of the same context, in which one obtains
+increasing samples all generated from some underlying distribution. This begs the question: can we
+determine whether the observation mechanism is going to converge towards some value that is related
+to the underlying distribution, and how sensitive is this result to our sampling? Consider the
+following simple query that would check the deviation from some normal quantiles:
+
+```python
+df.count(df >= 2 * df.stddev()) / df.count()
+```
+
+This query brings some interesting problems about what it means when being performed online. 
+Can we assert that the quantity is going to converge as more data is observed?
+
+This section attempts to provide an answer to this question, as well as a general framework that would 
+provide some guarantees that the following query does not converge:
+
+```python
+hash(df)
+```
+
+but that this query would:
+
+```python
+max(hash(df)) - min(hash(df))
+```
+
 _Definition: Stream._ A stream $s$ is a growing series of dataset:
 ```hs
 type Stream a = Nat -> Dataset a
 ```
-such that $s_{t} \subset s_{t+1}$. 
+such that $s_{t} \subseteq s_{t+1}$. 
 
 The intuition behind a stream is that of a collection that is observed incrementally.
 Because it is essentially a dataset, most of the results over datasets carry 
