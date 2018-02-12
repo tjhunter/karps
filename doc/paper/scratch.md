@@ -731,7 +731,12 @@ $$
 r\left(s_{t}\right)\sim r\left(\mu\left(s_{t}\right)\cdot\left\{ u_r\left(s\right)\right\} \right)
 $$
 
-This function is called the signature of the reduction: sig(r)(s).
+This function is called the signature of the reduction: sig(r)(s). The intuition of a stable reduction
+is that in the limit, as more and more data gets to be observed, the output of a reduction looks as
+if the dataset had been collapsed on a single value. For example, in the case of `max`, one only 
+needs the largest value from the stream, everything else can be discarded. This intution carries also
+to more exotic objects such as bloom filters or `max_hash` (which is intimately related to
+HyperLogLog and approximate counts).
 
 TODO: prove that the signature is unique.
 
