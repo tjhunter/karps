@@ -33,3 +33,9 @@ python/karps/functions_std/__pycache__/
 python/karps/proto/*.pyc
 python/karps/proto/__pycache__/
 python/notebooks/.ipynb_checkpoints/
+.ipynb_checkpoints/
+
+# Paper
+doc/paper/scratch.pdf
+doc/paper/test.pdf
+doc/paper/test.html
