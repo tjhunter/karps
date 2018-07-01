@@ -13,7 +13,7 @@ It consists in multiple sub-projects:
 - a serving library, called
   [karps-server](https://github.com/krapsh/karps), that implements this specification on top of Spark.
   It is written in Scala and is loaded as a standard Spark package.
-- an [optimizing compiler](https://github.com/tjhunter/karps-haskell), that takes descriptions of 
+- an [optimizing compiler](https://github.com/tjhunter/karps-haskell), that takes descriptions of
   data pipeline in the above specification and produces improved, lower-level representations more
   amenable to Spark or Pandas.
 - a [Haskell client](https://github.com/tjhunter/karps-haskell), which generates such computation
@@ -53,4 +53,17 @@ in Spark 2.0, using Spark 2.1 is strongly recommended.
 ./build/sbt ks_testing/assembly && $SPARK_HOME/bin/spark-submit \
     ./target/testing/scala-2.11/ks_testing-assembly-0.2.0.jar --name karps-server\
      --class org.karps.Boot --master "local[1]" -v
+```
+
+
+Modifying the .proto files. These files are maintained in a separate project. Here are some steps to update the interface (from the base directory of karps-haskell)
+
+```bash
+rm -r haskell/src/Proto
+protoc --plugin=protoc-gen-haskell=`which proto-lens-protoc`     --haskell_out=./haskell/src -I ./src/main/protobuf ./src/main/protobuf/karps/proto/*.proto ./src/main/protobuf/tensorflow/core/framework/*.proto
+```
+
+```bash
+rm -r haskell/src/Proto
+protoc --plugin=protoc-gen-haskell=./haskell/.stack-work/install/x86_64-osx/lts-11.15/8.2.2/bin/proto-lens-protoc     --haskell_out=./haskell/src -I ./src/main/protobuf ./src/main/protobuf/karps/proto/*.proto ./src/main/protobuf/tensorflow/core/framework/*.proto
 ```

@@ -6,9 +6,12 @@ module Spark.Core.Internal.RowStructures where
 import Data.Vector(Vector)
 import qualified Data.Vector as V
 import qualified Data.Text as T
+import Data.ProtoLens(def)
+import Lens.Micro((&), (.~))
 
 import Spark.Core.Internal.ProtoUtils
 import qualified Proto.Karps.Proto.Row as P
+import qualified Proto.Karps.Proto.Row_Fields as P
 
 -- | The basic representation of one row of data. This is a standard type that comes out of the
 -- SQL engine in Spark.
@@ -35,13 +38,14 @@ data Row = Row {
 
 
 instance ToProto P.Cell Cell where
-  toProto = cellToProto where
-    cellToProto Empty = P.Cell Nothing
-    cellToProto (IntElement i) = P.Cell . Just . P.Cell'IntValue $ fromIntegral i
-    cellToProto (DoubleElement i) = P.Cell . Just . P.Cell'DoubleValue $ i
-    cellToProto (StringElement i) = P.Cell . Just . P.Cell'StringValue $ i
-    cellToProto (BoolElement i) = P.Cell . Just . P.Cell'BoolValue $ i
-    cellToProto (RowArray v) = P.Cell . Just . P.Cell'ArrayValue . P.ArrayCell $ v' where
+  toProto c = cellToProto c where
+    cellToProto :: Cell -> P.Cell
+    cellToProto Empty = def
+    cellToProto (IntElement i) = def & P.intValue .~ (fromIntegral i)
+    cellToProto (DoubleElement i) = def & P.doubleValue .~ i
+    cellToProto (StringElement i) = def & P.stringValue .~ i
+    cellToProto (BoolElement i) = def & P.boolValue .~ i
+    cellToProto (RowArray v) = def & P.arrayValue .~ (def & P.values .~ v') where
       v' = cellToProto <$> V.toList v
-    cellToProto (RowElement (Row v)) = P.Cell . Just . P.Cell'StructValue . P.Row $ v' where
+    cellToProto (RowElement (Row v)) = def & P.structValue .~ (def & P.values .~ v') where
       v' = cellToProto <$> V.toList v

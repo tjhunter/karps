@@ -1,10 +1,18 @@
 {- This file was auto-generated from karps/proto/std.proto by the proto-lens-protoc program. -}
 {-# LANGUAGE ScopedTypeVariables, DataKinds, TypeFamilies,
-  UndecidableInstances, MultiParamTypeClasses, FlexibleContexts,
-  FlexibleInstances, PatternSynonyms, MagicHash, NoImplicitPrelude
-  #-}
-{-# OPTIONS_GHC -fno-warn-unused-imports #-}
-module Proto.Karps.Proto.Std where
+  UndecidableInstances, GeneralizedNewtypeDeriving,
+  MultiParamTypeClasses, FlexibleContexts, FlexibleInstances,
+  PatternSynonyms, MagicHash, NoImplicitPrelude, DataKinds #-}
+{-# OPTIONS_GHC -fno-warn-unused-imports#-}
+{-# OPTIONS_GHC -fno-warn-duplicate-exports#-}
+module Proto.Karps.Proto.Std
+       (Join(..), Join'JoinType(..), Join'JoinType(),
+        Join'JoinType'UnrecognizedValue, LocalPointer(..),
+        LocalStructuredTransform(..), Placeholder(..), Shuffle(..),
+        StructuredReduce(..), StructuredTransform(..))
+       where
+import qualified Data.ProtoLens.Reexport.Lens.Labels.Prism
+       as Lens.Labels.Prism
 import qualified Data.ProtoLens.Reexport.Prelude as Prelude
 import qualified Data.ProtoLens.Reexport.Data.Int as Data.Int
 import qualified Data.ProtoLens.Reexport.Data.Word as Data.Word
@@ -13,6 +21,9 @@ import qualified Data.ProtoLens.Reexport.Data.ProtoLens
 import qualified
        Data.ProtoLens.Reexport.Data.ProtoLens.Message.Enum
        as Data.ProtoLens.Message.Enum
+import qualified
+       Data.ProtoLens.Reexport.Data.ProtoLens.Service.Types
+       as Data.ProtoLens.Service.Types
 import qualified Data.ProtoLens.Reexport.Lens.Family2
        as Lens.Family2
 import qualified Data.ProtoLens.Reexport.Lens.Family2.Unchecked
@@ -23,57 +34,76 @@ import qualified Data.ProtoLens.Reexport.Data.Text as Data.Text
 import qualified Data.ProtoLens.Reexport.Data.Map as Data.Map
 import qualified Data.ProtoLens.Reexport.Data.ByteString
        as Data.ByteString
+import qualified Data.ProtoLens.Reexport.Data.ByteString.Char8
+       as Data.ByteString.Char8
 import qualified Data.ProtoLens.Reexport.Lens.Labels as Lens.Labels
+import qualified Data.ProtoLens.Reexport.Text.Read as Text.Read
 import qualified Proto.Karps.Proto.Computation
 import qualified Proto.Karps.Proto.Graph
 import qualified Proto.Karps.Proto.StructuredTransform
 import qualified Proto.Karps.Proto.Types
 
-data Join = Join{_Join'jointType :: !Join'JoinType}
-          deriving (Prelude.Show, Prelude.Eq, Prelude.Ord)
+{- | Fields :
 
-instance (a ~ Join'JoinType, b ~ Join'JoinType,
-          Prelude.Functor f) =>
-         Lens.Labels.HasLens "jointType" f Join Join a b where
-        lensOf _
+    * 'Proto.Karps.Proto.Std_Fields.jointType' @:: Lens' Join Join'JoinType@
+ -}
+data Join = Join{_Join'jointType :: !Join'JoinType,
+                 _Join'_unknownFields :: !Data.ProtoLens.FieldSet}
+              deriving (Prelude.Show, Prelude.Eq, Prelude.Ord)
+instance (Lens.Labels.HasLens' f Join x a, a ~ b) =>
+         Lens.Labels.HasLens f Join Join x a b
+         where
+        lensOf = Lens.Labels.lensOf'
+instance Prelude.Functor f =>
+         Lens.Labels.HasLens' f Join "jointType" (Join'JoinType)
+         where
+        lensOf' _
           = (Prelude..)
               (Lens.Family2.Unchecked.lens _Join'jointType
                  (\ x__ y__ -> x__{_Join'jointType = y__}))
               Prelude.id
-
 instance Data.Default.Class.Default Join where
-        def = Join{_Join'jointType = Data.Default.Class.def}
-
+        def
+          = Join{_Join'jointType = Data.Default.Class.def,
+                 _Join'_unknownFields = ([])}
 instance Data.ProtoLens.Message Join where
-        descriptor
+        messageName _ = Data.Text.pack "karps.core.Join"
+        fieldsByTag
           = let jointType__field_descriptor
                   = Data.ProtoLens.FieldDescriptor "joint_type"
-                      (Data.ProtoLens.EnumField ::
+                      (Data.ProtoLens.ScalarField Data.ProtoLens.EnumField ::
                          Data.ProtoLens.FieldTypeDescriptor Join'JoinType)
-                      (Data.ProtoLens.PlainField Data.ProtoLens.Optional jointType)
+                      (Data.ProtoLens.PlainField Data.ProtoLens.Optional
+                         (Lens.Labels.lensOf
+                            ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "jointType")))
                       :: Data.ProtoLens.FieldDescriptor Join
               in
-              Data.ProtoLens.MessageDescriptor (Data.Text.pack "karps.core.Join")
-                (Data.Map.fromList
-                   [(Data.ProtoLens.Tag 1, jointType__field_descriptor)])
-                (Data.Map.fromList [("joint_type", jointType__field_descriptor)])
-
+              Data.Map.fromList
+                [(Data.ProtoLens.Tag 1, jointType__field_descriptor)]
+        unknownFields
+          = Lens.Family2.Unchecked.lens _Join'_unknownFields
+              (\ x__ y__ -> x__{_Join'_unknownFields = y__})
 data Join'JoinType = Join'INNER
-                   deriving (Prelude.Show, Prelude.Eq, Prelude.Ord)
-
-instance Data.Default.Class.Default Join'JoinType where
-        def = Join'INNER
-
-instance Data.ProtoLens.FieldDefault Join'JoinType where
-        fieldDefault = Join'INNER
-
+                   | Join'JoinType'Unrecognized !Join'JoinType'UnrecognizedValue
+                       deriving (Prelude.Show, Prelude.Eq, Prelude.Ord)
+newtype Join'JoinType'UnrecognizedValue = Join'JoinType'UnrecognizedValue Data.Int.Int32
+                                            deriving (Prelude.Eq, Prelude.Ord, Prelude.Show)
 instance Data.ProtoLens.MessageEnum Join'JoinType where
         maybeToEnum 0 = Prelude.Just Join'INNER
-        maybeToEnum _ = Prelude.Nothing
+        maybeToEnum k
+          = Prelude.Just
+              (Join'JoinType'Unrecognized
+                 (Join'JoinType'UnrecognizedValue (Prelude.fromIntegral k)))
         showEnum Join'INNER = "INNER"
+        showEnum
+          (Join'JoinType'Unrecognized (Join'JoinType'UnrecognizedValue k))
+          = Prelude.show k
         readEnum "INNER" = Prelude.Just Join'INNER
-        readEnum _ = Prelude.Nothing
-
+        readEnum k
+          = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
+instance Prelude.Bounded Join'JoinType where
+        minBound = Join'INNER
+        maxBound = Join'INNER
 instance Prelude.Enum Join'JoinType where
         toEnum k__
           = Prelude.maybe
@@ -83,473 +113,451 @@ instance Prelude.Enum Join'JoinType where
               Prelude.id
               (Data.ProtoLens.maybeToEnum k__)
         fromEnum Join'INNER = 0
+        fromEnum
+          (Join'JoinType'Unrecognized (Join'JoinType'UnrecognizedValue k))
+          = Prelude.fromIntegral k
         succ Join'INNER
           = Prelude.error
               "Join'JoinType.succ: bad argument Join'INNER. This value would be out of bounds."
+        succ _
+          = Prelude.error
+              "Join'JoinType.succ: bad argument: unrecognized value"
         pred Join'INNER
           = Prelude.error
               "Join'JoinType.pred: bad argument Join'INNER. This value would be out of bounds."
+        pred _
+          = Prelude.error
+              "Join'JoinType.pred: bad argument: unrecognized value"
         enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
         enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
         enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
         enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
+instance Data.Default.Class.Default Join'JoinType where
+        def = Join'INNER
+instance Data.ProtoLens.FieldDefault Join'JoinType where
+        fieldDefault = Join'INNER
+{- | Fields :
 
-instance Prelude.Bounded Join'JoinType where
-        minBound = Join'INNER
-        maxBound = Join'INNER
-
+    * 'Proto.Karps.Proto.Std_Fields.computation' @:: Lens' LocalPointer Proto.Karps.Proto.Computation.ComputationId@
+    * 'Proto.Karps.Proto.Std_Fields.maybe'computation' @:: Lens' LocalPointer
+  (Prelude.Maybe Proto.Karps.Proto.Computation.ComputationId)@
+    * 'Proto.Karps.Proto.Std_Fields.localPath' @:: Lens' LocalPointer Proto.Karps.Proto.Graph.Path@
+    * 'Proto.Karps.Proto.Std_Fields.maybe'localPath' @:: Lens' LocalPointer (Prelude.Maybe Proto.Karps.Proto.Graph.Path)@
+    * 'Proto.Karps.Proto.Std_Fields.dataType' @:: Lens' LocalPointer Proto.Karps.Proto.Types.SQLType@
+    * 'Proto.Karps.Proto.Std_Fields.maybe'dataType' @:: Lens' LocalPointer (Prelude.Maybe Proto.Karps.Proto.Types.SQLType)@
+ -}
 data LocalPointer = LocalPointer{_LocalPointer'computation ::
                                  !(Prelude.Maybe Proto.Karps.Proto.Computation.ComputationId),
                                  _LocalPointer'localPath ::
                                  !(Prelude.Maybe Proto.Karps.Proto.Graph.Path),
                                  _LocalPointer'dataType ::
-                                 !(Prelude.Maybe Proto.Karps.Proto.Types.SQLType)}
-                  deriving (Prelude.Show, Prelude.Eq, Prelude.Ord)
-
-instance (a ~ Proto.Karps.Proto.Computation.ComputationId,
-          b ~ Proto.Karps.Proto.Computation.ComputationId,
-          Prelude.Functor f) =>
-         Lens.Labels.HasLens "computation" f LocalPointer LocalPointer a b
+                                 !(Prelude.Maybe Proto.Karps.Proto.Types.SQLType),
+                                 _LocalPointer'_unknownFields :: !Data.ProtoLens.FieldSet}
+                      deriving (Prelude.Show, Prelude.Eq, Prelude.Ord)
+instance (Lens.Labels.HasLens' f LocalPointer x a, a ~ b) =>
+         Lens.Labels.HasLens f LocalPointer LocalPointer x a b
          where
-        lensOf _
+        lensOf = Lens.Labels.lensOf'
+instance Prelude.Functor f =>
+         Lens.Labels.HasLens' f LocalPointer "computation"
+           (Proto.Karps.Proto.Computation.ComputationId)
+         where
+        lensOf' _
           = (Prelude..)
               (Lens.Family2.Unchecked.lens _LocalPointer'computation
                  (\ x__ y__ -> x__{_LocalPointer'computation = y__}))
               (Data.ProtoLens.maybeLens Data.Default.Class.def)
-
-instance (a ~
-            Prelude.Maybe Proto.Karps.Proto.Computation.ComputationId,
-          b ~ Prelude.Maybe Proto.Karps.Proto.Computation.ComputationId,
-          Prelude.Functor f) =>
-         Lens.Labels.HasLens "maybe'computation" f LocalPointer LocalPointer
-         a b where
-        lensOf _
+instance Prelude.Functor f =>
+         Lens.Labels.HasLens' f LocalPointer "maybe'computation"
+           (Prelude.Maybe Proto.Karps.Proto.Computation.ComputationId)
+         where
+        lensOf' _
           = (Prelude..)
               (Lens.Family2.Unchecked.lens _LocalPointer'computation
                  (\ x__ y__ -> x__{_LocalPointer'computation = y__}))
               Prelude.id
-
-instance (a ~ Proto.Karps.Proto.Graph.Path,
-          b ~ Proto.Karps.Proto.Graph.Path, Prelude.Functor f) =>
-         Lens.Labels.HasLens "localPath" f LocalPointer LocalPointer a b
+instance Prelude.Functor f =>
+         Lens.Labels.HasLens' f LocalPointer "localPath"
+           (Proto.Karps.Proto.Graph.Path)
          where
-        lensOf _
+        lensOf' _
           = (Prelude..)
               (Lens.Family2.Unchecked.lens _LocalPointer'localPath
                  (\ x__ y__ -> x__{_LocalPointer'localPath = y__}))
               (Data.ProtoLens.maybeLens Data.Default.Class.def)
-
-instance (a ~ Prelude.Maybe Proto.Karps.Proto.Graph.Path,
-          b ~ Prelude.Maybe Proto.Karps.Proto.Graph.Path,
-          Prelude.Functor f) =>
-         Lens.Labels.HasLens "maybe'localPath" f LocalPointer LocalPointer a
-         b where
-        lensOf _
+instance Prelude.Functor f =>
+         Lens.Labels.HasLens' f LocalPointer "maybe'localPath"
+           (Prelude.Maybe Proto.Karps.Proto.Graph.Path)
+         where
+        lensOf' _
           = (Prelude..)
               (Lens.Family2.Unchecked.lens _LocalPointer'localPath
                  (\ x__ y__ -> x__{_LocalPointer'localPath = y__}))
               Prelude.id
-
-instance (a ~ Proto.Karps.Proto.Types.SQLType,
-          b ~ Proto.Karps.Proto.Types.SQLType, Prelude.Functor f) =>
-         Lens.Labels.HasLens "dataType" f LocalPointer LocalPointer a b
+instance Prelude.Functor f =>
+         Lens.Labels.HasLens' f LocalPointer "dataType"
+           (Proto.Karps.Proto.Types.SQLType)
          where
-        lensOf _
+        lensOf' _
           = (Prelude..)
               (Lens.Family2.Unchecked.lens _LocalPointer'dataType
                  (\ x__ y__ -> x__{_LocalPointer'dataType = y__}))
               (Data.ProtoLens.maybeLens Data.Default.Class.def)
-
-instance (a ~ Prelude.Maybe Proto.Karps.Proto.Types.SQLType,
-          b ~ Prelude.Maybe Proto.Karps.Proto.Types.SQLType,
-          Prelude.Functor f) =>
-         Lens.Labels.HasLens "maybe'dataType" f LocalPointer LocalPointer a
-         b where
-        lensOf _
+instance Prelude.Functor f =>
+         Lens.Labels.HasLens' f LocalPointer "maybe'dataType"
+           (Prelude.Maybe Proto.Karps.Proto.Types.SQLType)
+         where
+        lensOf' _
           = (Prelude..)
               (Lens.Family2.Unchecked.lens _LocalPointer'dataType
                  (\ x__ y__ -> x__{_LocalPointer'dataType = y__}))
               Prelude.id
-
 instance Data.Default.Class.Default LocalPointer where
         def
           = LocalPointer{_LocalPointer'computation = Prelude.Nothing,
                          _LocalPointer'localPath = Prelude.Nothing,
-                         _LocalPointer'dataType = Prelude.Nothing}
-
+                         _LocalPointer'dataType = Prelude.Nothing,
+                         _LocalPointer'_unknownFields = ([])}
 instance Data.ProtoLens.Message LocalPointer where
-        descriptor
+        messageName _ = Data.Text.pack "karps.core.LocalPointer"
+        fieldsByTag
           = let computation__field_descriptor
                   = Data.ProtoLens.FieldDescriptor "computation"
-                      (Data.ProtoLens.MessageField ::
+                      (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
                          Data.ProtoLens.FieldTypeDescriptor
                            Proto.Karps.Proto.Computation.ComputationId)
-                      (Data.ProtoLens.OptionalField maybe'computation)
+                      (Data.ProtoLens.OptionalField
+                         (Lens.Labels.lensOf
+                            ((Lens.Labels.proxy#) ::
+                               (Lens.Labels.Proxy#) "maybe'computation")))
                       :: Data.ProtoLens.FieldDescriptor LocalPointer
                 localPath__field_descriptor
                   = Data.ProtoLens.FieldDescriptor "local_path"
-                      (Data.ProtoLens.MessageField ::
+                      (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
                          Data.ProtoLens.FieldTypeDescriptor Proto.Karps.Proto.Graph.Path)
-                      (Data.ProtoLens.OptionalField maybe'localPath)
+                      (Data.ProtoLens.OptionalField
+                         (Lens.Labels.lensOf
+                            ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "maybe'localPath")))
                       :: Data.ProtoLens.FieldDescriptor LocalPointer
                 dataType__field_descriptor
                   = Data.ProtoLens.FieldDescriptor "data_type"
-                      (Data.ProtoLens.MessageField ::
+                      (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
                          Data.ProtoLens.FieldTypeDescriptor Proto.Karps.Proto.Types.SQLType)
-                      (Data.ProtoLens.OptionalField maybe'dataType)
+                      (Data.ProtoLens.OptionalField
+                         (Lens.Labels.lensOf
+                            ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "maybe'dataType")))
                       :: Data.ProtoLens.FieldDescriptor LocalPointer
               in
-              Data.ProtoLens.MessageDescriptor
-                (Data.Text.pack "karps.core.LocalPointer")
-                (Data.Map.fromList
-                   [(Data.ProtoLens.Tag 1, computation__field_descriptor),
-                    (Data.ProtoLens.Tag 2, localPath__field_descriptor),
-                    (Data.ProtoLens.Tag 4, dataType__field_descriptor)])
-                (Data.Map.fromList
-                   [("computation", computation__field_descriptor),
-                    ("local_path", localPath__field_descriptor),
-                    ("data_type", dataType__field_descriptor)])
+              Data.Map.fromList
+                [(Data.ProtoLens.Tag 1, computation__field_descriptor),
+                 (Data.ProtoLens.Tag 2, localPath__field_descriptor),
+                 (Data.ProtoLens.Tag 4, dataType__field_descriptor)]
+        unknownFields
+          = Lens.Family2.Unchecked.lens _LocalPointer'_unknownFields
+              (\ x__ y__ -> x__{_LocalPointer'_unknownFields = y__})
+{- | Fields :
 
+    * 'Proto.Karps.Proto.Std_Fields.colOp' @:: Lens' LocalStructuredTransform
+  Proto.Karps.Proto.StructuredTransform.Column@
+    * 'Proto.Karps.Proto.Std_Fields.maybe'colOp' @:: Lens' LocalStructuredTransform
+  (Prelude.Maybe Proto.Karps.Proto.StructuredTransform.Column)@
+ -}
 data LocalStructuredTransform = LocalStructuredTransform{_LocalStructuredTransform'colOp
                                                          ::
                                                          !(Prelude.Maybe
-                                                             Proto.Karps.Proto.StructuredTransform.Column)}
-                              deriving (Prelude.Show, Prelude.Eq, Prelude.Ord)
-
-instance (a ~ Proto.Karps.Proto.StructuredTransform.Column,
-          b ~ Proto.Karps.Proto.StructuredTransform.Column,
-          Prelude.Functor f) =>
-         Lens.Labels.HasLens "colOp" f LocalStructuredTransform
-         LocalStructuredTransform a b where
-        lensOf _
+                                                             Proto.Karps.Proto.StructuredTransform.Column),
+                                                         _LocalStructuredTransform'_unknownFields ::
+                                                         !Data.ProtoLens.FieldSet}
+                                  deriving (Prelude.Show, Prelude.Eq, Prelude.Ord)
+instance (Lens.Labels.HasLens' f LocalStructuredTransform x a,
+          a ~ b) =>
+         Lens.Labels.HasLens f LocalStructuredTransform
+           LocalStructuredTransform
+           x
+           a
+           b
+         where
+        lensOf = Lens.Labels.lensOf'
+instance Prelude.Functor f =>
+         Lens.Labels.HasLens' f LocalStructuredTransform "colOp"
+           (Proto.Karps.Proto.StructuredTransform.Column)
+         where
+        lensOf' _
           = (Prelude..)
               (Lens.Family2.Unchecked.lens _LocalStructuredTransform'colOp
                  (\ x__ y__ -> x__{_LocalStructuredTransform'colOp = y__}))
               (Data.ProtoLens.maybeLens Data.Default.Class.def)
-
-instance (a ~
-            Prelude.Maybe Proto.Karps.Proto.StructuredTransform.Column,
-          b ~ Prelude.Maybe Proto.Karps.Proto.StructuredTransform.Column,
-          Prelude.Functor f) =>
-         Lens.Labels.HasLens "maybe'colOp" f LocalStructuredTransform
-         LocalStructuredTransform a b where
-        lensOf _
+instance Prelude.Functor f =>
+         Lens.Labels.HasLens' f LocalStructuredTransform "maybe'colOp"
+           (Prelude.Maybe Proto.Karps.Proto.StructuredTransform.Column)
+         where
+        lensOf' _
           = (Prelude..)
               (Lens.Family2.Unchecked.lens _LocalStructuredTransform'colOp
                  (\ x__ y__ -> x__{_LocalStructuredTransform'colOp = y__}))
               Prelude.id
-
 instance Data.Default.Class.Default LocalStructuredTransform where
         def
           = LocalStructuredTransform{_LocalStructuredTransform'colOp =
-                                       Prelude.Nothing}
-
+                                       Prelude.Nothing,
+                                     _LocalStructuredTransform'_unknownFields = ([])}
 instance Data.ProtoLens.Message LocalStructuredTransform where
-        descriptor
+        messageName _
+          = Data.Text.pack "karps.core.LocalStructuredTransform"
+        fieldsByTag
           = let colOp__field_descriptor
                   = Data.ProtoLens.FieldDescriptor "col_op"
-                      (Data.ProtoLens.MessageField ::
+                      (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
                          Data.ProtoLens.FieldTypeDescriptor
                            Proto.Karps.Proto.StructuredTransform.Column)
-                      (Data.ProtoLens.OptionalField maybe'colOp)
+                      (Data.ProtoLens.OptionalField
+                         (Lens.Labels.lensOf
+                            ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "maybe'colOp")))
                       :: Data.ProtoLens.FieldDescriptor LocalStructuredTransform
               in
-              Data.ProtoLens.MessageDescriptor
-                (Data.Text.pack "karps.core.LocalStructuredTransform")
-                (Data.Map.fromList
-                   [(Data.ProtoLens.Tag 1, colOp__field_descriptor)])
-                (Data.Map.fromList [("col_op", colOp__field_descriptor)])
+              Data.Map.fromList [(Data.ProtoLens.Tag 1, colOp__field_descriptor)]
+        unknownFields
+          = Lens.Family2.Unchecked.lens
+              _LocalStructuredTransform'_unknownFields
+              (\ x__ y__ -> x__{_LocalStructuredTransform'_unknownFields = y__})
+{- | Fields :
 
+    * 'Proto.Karps.Proto.Std_Fields.locality' @:: Lens' Placeholder Proto.Karps.Proto.Graph.Locality@
+    * 'Proto.Karps.Proto.Std_Fields.dataType' @:: Lens' Placeholder Proto.Karps.Proto.Types.SQLType@
+    * 'Proto.Karps.Proto.Std_Fields.maybe'dataType' @:: Lens' Placeholder (Prelude.Maybe Proto.Karps.Proto.Types.SQLType)@
+ -}
 data Placeholder = Placeholder{_Placeholder'locality ::
                                !Proto.Karps.Proto.Graph.Locality,
                                _Placeholder'dataType ::
-                               !(Prelude.Maybe Proto.Karps.Proto.Types.SQLType)}
-                 deriving (Prelude.Show, Prelude.Eq, Prelude.Ord)
-
-instance (a ~ Proto.Karps.Proto.Graph.Locality,
-          b ~ Proto.Karps.Proto.Graph.Locality, Prelude.Functor f) =>
-         Lens.Labels.HasLens "locality" f Placeholder Placeholder a b where
-        lensOf _
+                               !(Prelude.Maybe Proto.Karps.Proto.Types.SQLType),
+                               _Placeholder'_unknownFields :: !Data.ProtoLens.FieldSet}
+                     deriving (Prelude.Show, Prelude.Eq, Prelude.Ord)
+instance (Lens.Labels.HasLens' f Placeholder x a, a ~ b) =>
+         Lens.Labels.HasLens f Placeholder Placeholder x a b
+         where
+        lensOf = Lens.Labels.lensOf'
+instance Prelude.Functor f =>
+         Lens.Labels.HasLens' f Placeholder "locality"
+           (Proto.Karps.Proto.Graph.Locality)
+         where
+        lensOf' _
           = (Prelude..)
               (Lens.Family2.Unchecked.lens _Placeholder'locality
                  (\ x__ y__ -> x__{_Placeholder'locality = y__}))
               Prelude.id
-
-instance (a ~ Proto.Karps.Proto.Types.SQLType,
-          b ~ Proto.Karps.Proto.Types.SQLType, Prelude.Functor f) =>
-         Lens.Labels.HasLens "dataType" f Placeholder Placeholder a b where
-        lensOf _
+instance Prelude.Functor f =>
+         Lens.Labels.HasLens' f Placeholder "dataType"
+           (Proto.Karps.Proto.Types.SQLType)
+         where
+        lensOf' _
           = (Prelude..)
               (Lens.Family2.Unchecked.lens _Placeholder'dataType
                  (\ x__ y__ -> x__{_Placeholder'dataType = y__}))
               (Data.ProtoLens.maybeLens Data.Default.Class.def)
-
-instance (a ~ Prelude.Maybe Proto.Karps.Proto.Types.SQLType,
-          b ~ Prelude.Maybe Proto.Karps.Proto.Types.SQLType,
-          Prelude.Functor f) =>
-         Lens.Labels.HasLens "maybe'dataType" f Placeholder Placeholder a b
+instance Prelude.Functor f =>
+         Lens.Labels.HasLens' f Placeholder "maybe'dataType"
+           (Prelude.Maybe Proto.Karps.Proto.Types.SQLType)
          where
-        lensOf _
+        lensOf' _
           = (Prelude..)
               (Lens.Family2.Unchecked.lens _Placeholder'dataType
                  (\ x__ y__ -> x__{_Placeholder'dataType = y__}))
               Prelude.id
-
 instance Data.Default.Class.Default Placeholder where
         def
           = Placeholder{_Placeholder'locality = Data.Default.Class.def,
-                        _Placeholder'dataType = Prelude.Nothing}
-
+                        _Placeholder'dataType = Prelude.Nothing,
+                        _Placeholder'_unknownFields = ([])}
 instance Data.ProtoLens.Message Placeholder where
-        descriptor
+        messageName _ = Data.Text.pack "karps.core.Placeholder"
+        fieldsByTag
           = let locality__field_descriptor
                   = Data.ProtoLens.FieldDescriptor "locality"
-                      (Data.ProtoLens.EnumField ::
+                      (Data.ProtoLens.ScalarField Data.ProtoLens.EnumField ::
                          Data.ProtoLens.FieldTypeDescriptor
                            Proto.Karps.Proto.Graph.Locality)
-                      (Data.ProtoLens.PlainField Data.ProtoLens.Optional locality)
+                      (Data.ProtoLens.PlainField Data.ProtoLens.Optional
+                         (Lens.Labels.lensOf
+                            ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "locality")))
                       :: Data.ProtoLens.FieldDescriptor Placeholder
                 dataType__field_descriptor
                   = Data.ProtoLens.FieldDescriptor "data_type"
-                      (Data.ProtoLens.MessageField ::
+                      (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
                          Data.ProtoLens.FieldTypeDescriptor Proto.Karps.Proto.Types.SQLType)
-                      (Data.ProtoLens.OptionalField maybe'dataType)
+                      (Data.ProtoLens.OptionalField
+                         (Lens.Labels.lensOf
+                            ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "maybe'dataType")))
                       :: Data.ProtoLens.FieldDescriptor Placeholder
               in
-              Data.ProtoLens.MessageDescriptor
-                (Data.Text.pack "karps.core.Placeholder")
-                (Data.Map.fromList
-                   [(Data.ProtoLens.Tag 1, locality__field_descriptor),
-                    (Data.ProtoLens.Tag 2, dataType__field_descriptor)])
-                (Data.Map.fromList
-                   [("locality", locality__field_descriptor),
-                    ("data_type", dataType__field_descriptor)])
+              Data.Map.fromList
+                [(Data.ProtoLens.Tag 1, locality__field_descriptor),
+                 (Data.ProtoLens.Tag 2, dataType__field_descriptor)]
+        unknownFields
+          = Lens.Family2.Unchecked.lens _Placeholder'_unknownFields
+              (\ x__ y__ -> x__{_Placeholder'_unknownFields = y__})
+{- | Fields :
 
+    * 'Proto.Karps.Proto.Std_Fields.aggOp' @:: Lens' Shuffle Proto.Karps.Proto.StructuredTransform.Aggregation@
+    * 'Proto.Karps.Proto.Std_Fields.maybe'aggOp' @:: Lens' Shuffle
+  (Prelude.Maybe Proto.Karps.Proto.StructuredTransform.Aggregation)@
+ -}
 data Shuffle = Shuffle{_Shuffle'aggOp ::
-                       !(Prelude.Maybe Proto.Karps.Proto.StructuredTransform.Aggregation)}
-             deriving (Prelude.Show, Prelude.Eq, Prelude.Ord)
-
-instance (a ~ Proto.Karps.Proto.StructuredTransform.Aggregation,
-          b ~ Proto.Karps.Proto.StructuredTransform.Aggregation,
-          Prelude.Functor f) =>
-         Lens.Labels.HasLens "aggOp" f Shuffle Shuffle a b where
-        lensOf _
+                       !(Prelude.Maybe Proto.Karps.Proto.StructuredTransform.Aggregation),
+                       _Shuffle'_unknownFields :: !Data.ProtoLens.FieldSet}
+                 deriving (Prelude.Show, Prelude.Eq, Prelude.Ord)
+instance (Lens.Labels.HasLens' f Shuffle x a, a ~ b) =>
+         Lens.Labels.HasLens f Shuffle Shuffle x a b
+         where
+        lensOf = Lens.Labels.lensOf'
+instance Prelude.Functor f =>
+         Lens.Labels.HasLens' f Shuffle "aggOp"
+           (Proto.Karps.Proto.StructuredTransform.Aggregation)
+         where
+        lensOf' _
           = (Prelude..)
               (Lens.Family2.Unchecked.lens _Shuffle'aggOp
                  (\ x__ y__ -> x__{_Shuffle'aggOp = y__}))
               (Data.ProtoLens.maybeLens Data.Default.Class.def)
-
-instance (a ~
-            Prelude.Maybe Proto.Karps.Proto.StructuredTransform.Aggregation,
-          b ~
-            Prelude.Maybe Proto.Karps.Proto.StructuredTransform.Aggregation,
-          Prelude.Functor f) =>
-         Lens.Labels.HasLens "maybe'aggOp" f Shuffle Shuffle a b where
-        lensOf _
+instance Prelude.Functor f =>
+         Lens.Labels.HasLens' f Shuffle "maybe'aggOp"
+           (Prelude.Maybe Proto.Karps.Proto.StructuredTransform.Aggregation)
+         where
+        lensOf' _
           = (Prelude..)
               (Lens.Family2.Unchecked.lens _Shuffle'aggOp
                  (\ x__ y__ -> x__{_Shuffle'aggOp = y__}))
               Prelude.id
-
 instance Data.Default.Class.Default Shuffle where
-        def = Shuffle{_Shuffle'aggOp = Prelude.Nothing}
-
+        def
+          = Shuffle{_Shuffle'aggOp = Prelude.Nothing,
+                    _Shuffle'_unknownFields = ([])}
 instance Data.ProtoLens.Message Shuffle where
-        descriptor
+        messageName _ = Data.Text.pack "karps.core.Shuffle"
+        fieldsByTag
           = let aggOp__field_descriptor
                   = Data.ProtoLens.FieldDescriptor "agg_op"
-                      (Data.ProtoLens.MessageField ::
+                      (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
                          Data.ProtoLens.FieldTypeDescriptor
                            Proto.Karps.Proto.StructuredTransform.Aggregation)
-                      (Data.ProtoLens.OptionalField maybe'aggOp)
+                      (Data.ProtoLens.OptionalField
+                         (Lens.Labels.lensOf
+                            ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "maybe'aggOp")))
                       :: Data.ProtoLens.FieldDescriptor Shuffle
               in
-              Data.ProtoLens.MessageDescriptor
-                (Data.Text.pack "karps.core.Shuffle")
-                (Data.Map.fromList
-                   [(Data.ProtoLens.Tag 1, aggOp__field_descriptor)])
-                (Data.Map.fromList [("agg_op", aggOp__field_descriptor)])
+              Data.Map.fromList [(Data.ProtoLens.Tag 1, aggOp__field_descriptor)]
+        unknownFields
+          = Lens.Family2.Unchecked.lens _Shuffle'_unknownFields
+              (\ x__ y__ -> x__{_Shuffle'_unknownFields = y__})
+{- | Fields :
 
+    * 'Proto.Karps.Proto.Std_Fields.aggOp' @:: Lens' StructuredReduce
+  Proto.Karps.Proto.StructuredTransform.Aggregation@
+    * 'Proto.Karps.Proto.Std_Fields.maybe'aggOp' @:: Lens' StructuredReduce
+  (Prelude.Maybe Proto.Karps.Proto.StructuredTransform.Aggregation)@
+ -}
 data StructuredReduce = StructuredReduce{_StructuredReduce'aggOp ::
                                          !(Prelude.Maybe
-                                             Proto.Karps.Proto.StructuredTransform.Aggregation)}
-                      deriving (Prelude.Show, Prelude.Eq, Prelude.Ord)
-
-instance (a ~ Proto.Karps.Proto.StructuredTransform.Aggregation,
-          b ~ Proto.Karps.Proto.StructuredTransform.Aggregation,
-          Prelude.Functor f) =>
-         Lens.Labels.HasLens "aggOp" f StructuredReduce StructuredReduce a b
+                                             Proto.Karps.Proto.StructuredTransform.Aggregation),
+                                         _StructuredReduce'_unknownFields ::
+                                         !Data.ProtoLens.FieldSet}
+                          deriving (Prelude.Show, Prelude.Eq, Prelude.Ord)
+instance (Lens.Labels.HasLens' f StructuredReduce x a, a ~ b) =>
+         Lens.Labels.HasLens f StructuredReduce StructuredReduce x a b
          where
-        lensOf _
+        lensOf = Lens.Labels.lensOf'
+instance Prelude.Functor f =>
+         Lens.Labels.HasLens' f StructuredReduce "aggOp"
+           (Proto.Karps.Proto.StructuredTransform.Aggregation)
+         where
+        lensOf' _
           = (Prelude..)
               (Lens.Family2.Unchecked.lens _StructuredReduce'aggOp
                  (\ x__ y__ -> x__{_StructuredReduce'aggOp = y__}))
               (Data.ProtoLens.maybeLens Data.Default.Class.def)
-
-instance (a ~
-            Prelude.Maybe Proto.Karps.Proto.StructuredTransform.Aggregation,
-          b ~
-            Prelude.Maybe Proto.Karps.Proto.StructuredTransform.Aggregation,
-          Prelude.Functor f) =>
-         Lens.Labels.HasLens "maybe'aggOp" f StructuredReduce
-         StructuredReduce a b where
-        lensOf _
+instance Prelude.Functor f =>
+         Lens.Labels.HasLens' f StructuredReduce "maybe'aggOp"
+           (Prelude.Maybe Proto.Karps.Proto.StructuredTransform.Aggregation)
+         where
+        lensOf' _
           = (Prelude..)
               (Lens.Family2.Unchecked.lens _StructuredReduce'aggOp
                  (\ x__ y__ -> x__{_StructuredReduce'aggOp = y__}))
               Prelude.id
-
 instance Data.Default.Class.Default StructuredReduce where
-        def = StructuredReduce{_StructuredReduce'aggOp = Prelude.Nothing}
-
+        def
+          = StructuredReduce{_StructuredReduce'aggOp = Prelude.Nothing,
+                             _StructuredReduce'_unknownFields = ([])}
 instance Data.ProtoLens.Message StructuredReduce where
-        descriptor
+        messageName _ = Data.Text.pack "karps.core.StructuredReduce"
+        fieldsByTag
           = let aggOp__field_descriptor
                   = Data.ProtoLens.FieldDescriptor "agg_op"
-                      (Data.ProtoLens.MessageField ::
+                      (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
                          Data.ProtoLens.FieldTypeDescriptor
                            Proto.Karps.Proto.StructuredTransform.Aggregation)
-                      (Data.ProtoLens.OptionalField maybe'aggOp)
+                      (Data.ProtoLens.OptionalField
+                         (Lens.Labels.lensOf
+                            ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "maybe'aggOp")))
                       :: Data.ProtoLens.FieldDescriptor StructuredReduce
               in
-              Data.ProtoLens.MessageDescriptor
-                (Data.Text.pack "karps.core.StructuredReduce")
-                (Data.Map.fromList
-                   [(Data.ProtoLens.Tag 1, aggOp__field_descriptor)])
-                (Data.Map.fromList [("agg_op", aggOp__field_descriptor)])
+              Data.Map.fromList [(Data.ProtoLens.Tag 1, aggOp__field_descriptor)]
+        unknownFields
+          = Lens.Family2.Unchecked.lens _StructuredReduce'_unknownFields
+              (\ x__ y__ -> x__{_StructuredReduce'_unknownFields = y__})
+{- | Fields :
 
+    * 'Proto.Karps.Proto.Std_Fields.colOp' @:: Lens' StructuredTransform
+  Proto.Karps.Proto.StructuredTransform.Column@
+    * 'Proto.Karps.Proto.Std_Fields.maybe'colOp' @:: Lens' StructuredTransform
+  (Prelude.Maybe Proto.Karps.Proto.StructuredTransform.Column)@
+ -}
 data StructuredTransform = StructuredTransform{_StructuredTransform'colOp
                                                ::
                                                !(Prelude.Maybe
-                                                   Proto.Karps.Proto.StructuredTransform.Column)}
-                         deriving (Prelude.Show, Prelude.Eq, Prelude.Ord)
-
-instance (a ~ Proto.Karps.Proto.StructuredTransform.Column,
-          b ~ Proto.Karps.Proto.StructuredTransform.Column,
-          Prelude.Functor f) =>
-         Lens.Labels.HasLens "colOp" f StructuredTransform
-         StructuredTransform a b where
-        lensOf _
+                                                   Proto.Karps.Proto.StructuredTransform.Column),
+                                               _StructuredTransform'_unknownFields ::
+                                               !Data.ProtoLens.FieldSet}
+                             deriving (Prelude.Show, Prelude.Eq, Prelude.Ord)
+instance (Lens.Labels.HasLens' f StructuredTransform x a, a ~ b) =>
+         Lens.Labels.HasLens f StructuredTransform StructuredTransform x a b
+         where
+        lensOf = Lens.Labels.lensOf'
+instance Prelude.Functor f =>
+         Lens.Labels.HasLens' f StructuredTransform "colOp"
+           (Proto.Karps.Proto.StructuredTransform.Column)
+         where
+        lensOf' _
           = (Prelude..)
               (Lens.Family2.Unchecked.lens _StructuredTransform'colOp
                  (\ x__ y__ -> x__{_StructuredTransform'colOp = y__}))
               (Data.ProtoLens.maybeLens Data.Default.Class.def)
-
-instance (a ~
-            Prelude.Maybe Proto.Karps.Proto.StructuredTransform.Column,
-          b ~ Prelude.Maybe Proto.Karps.Proto.StructuredTransform.Column,
-          Prelude.Functor f) =>
-         Lens.Labels.HasLens "maybe'colOp" f StructuredTransform
-         StructuredTransform a b where
-        lensOf _
+instance Prelude.Functor f =>
+         Lens.Labels.HasLens' f StructuredTransform "maybe'colOp"
+           (Prelude.Maybe Proto.Karps.Proto.StructuredTransform.Column)
+         where
+        lensOf' _
           = (Prelude..)
               (Lens.Family2.Unchecked.lens _StructuredTransform'colOp
                  (\ x__ y__ -> x__{_StructuredTransform'colOp = y__}))
               Prelude.id
-
 instance Data.Default.Class.Default StructuredTransform where
         def
-          = StructuredTransform{_StructuredTransform'colOp = Prelude.Nothing}
-
+          = StructuredTransform{_StructuredTransform'colOp = Prelude.Nothing,
+                                _StructuredTransform'_unknownFields = ([])}
 instance Data.ProtoLens.Message StructuredTransform where
-        descriptor
+        messageName _ = Data.Text.pack "karps.core.StructuredTransform"
+        fieldsByTag
           = let colOp__field_descriptor
                   = Data.ProtoLens.FieldDescriptor "col_op"
-                      (Data.ProtoLens.MessageField ::
+                      (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
                          Data.ProtoLens.FieldTypeDescriptor
                            Proto.Karps.Proto.StructuredTransform.Column)
-                      (Data.ProtoLens.OptionalField maybe'colOp)
+                      (Data.ProtoLens.OptionalField
+                         (Lens.Labels.lensOf
+                            ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "maybe'colOp")))
                       :: Data.ProtoLens.FieldDescriptor StructuredTransform
               in
-              Data.ProtoLens.MessageDescriptor
-                (Data.Text.pack "karps.core.StructuredTransform")
-                (Data.Map.fromList
-                   [(Data.ProtoLens.Tag 1, colOp__field_descriptor)])
-                (Data.Map.fromList [("col_op", colOp__field_descriptor)])
-
-aggOp ::
-      forall f s t a b . Lens.Labels.HasLens "aggOp" f s t a b =>
-        Lens.Family2.LensLike f s t a b
-aggOp
-  = Lens.Labels.lensOf
-      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "aggOp")
-
-colOp ::
-      forall f s t a b . Lens.Labels.HasLens "colOp" f s t a b =>
-        Lens.Family2.LensLike f s t a b
-colOp
-  = Lens.Labels.lensOf
-      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "colOp")
-
-computation ::
-            forall f s t a b . Lens.Labels.HasLens "computation" f s t a b =>
-              Lens.Family2.LensLike f s t a b
-computation
-  = Lens.Labels.lensOf
-      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "computation")
-
-dataType ::
-         forall f s t a b . Lens.Labels.HasLens "dataType" f s t a b =>
-           Lens.Family2.LensLike f s t a b
-dataType
-  = Lens.Labels.lensOf
-      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "dataType")
-
-jointType ::
-          forall f s t a b . Lens.Labels.HasLens "jointType" f s t a b =>
-            Lens.Family2.LensLike f s t a b
-jointType
-  = Lens.Labels.lensOf
-      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "jointType")
-
-localPath ::
-          forall f s t a b . Lens.Labels.HasLens "localPath" f s t a b =>
-            Lens.Family2.LensLike f s t a b
-localPath
-  = Lens.Labels.lensOf
-      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "localPath")
-
-locality ::
-         forall f s t a b . Lens.Labels.HasLens "locality" f s t a b =>
-           Lens.Family2.LensLike f s t a b
-locality
-  = Lens.Labels.lensOf
-      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "locality")
-
-maybe'aggOp ::
-            forall f s t a b . Lens.Labels.HasLens "maybe'aggOp" f s t a b =>
-              Lens.Family2.LensLike f s t a b
-maybe'aggOp
-  = Lens.Labels.lensOf
-      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "maybe'aggOp")
-
-maybe'colOp ::
-            forall f s t a b . Lens.Labels.HasLens "maybe'colOp" f s t a b =>
-              Lens.Family2.LensLike f s t a b
-maybe'colOp
-  = Lens.Labels.lensOf
-      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "maybe'colOp")
-
-maybe'computation ::
-                  forall f s t a b .
-                    Lens.Labels.HasLens "maybe'computation" f s t a b =>
-                    Lens.Family2.LensLike f s t a b
-maybe'computation
-  = Lens.Labels.lensOf
-      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "maybe'computation")
-
-maybe'dataType ::
-               forall f s t a b .
-                 Lens.Labels.HasLens "maybe'dataType" f s t a b =>
-                 Lens.Family2.LensLike f s t a b
-maybe'dataType
-  = Lens.Labels.lensOf
-      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "maybe'dataType")
-
-maybe'localPath ::
-                forall f s t a b .
-                  Lens.Labels.HasLens "maybe'localPath" f s t a b =>
-                  Lens.Family2.LensLike f s t a b
-maybe'localPath
-  = Lens.Labels.lensOf
-      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "maybe'localPath")
+              Data.Map.fromList [(Data.ProtoLens.Tag 1, colOp__field_descriptor)]
+        unknownFields
+          = Lens.Family2.Unchecked.lens _StructuredTransform'_unknownFields
+              (\ x__ y__ -> x__{_StructuredTransform'_unknownFields = y__})

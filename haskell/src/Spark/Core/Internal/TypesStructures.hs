@@ -24,7 +24,8 @@ import qualified Data.Vector as V
 import qualified Data.Text as T
 import GHC.Generics(Generic)
 import Test.QuickCheck
-import Lens.Family2 ((^.))
+import Data.ProtoLens(def)
+import Lens.Micro((^.), (&), (.~))
 import Formatting
 
 import Spark.Core.StructuresInternal(FieldName(..))
@@ -32,6 +33,7 @@ import Spark.Core.Internal.Utilities
 import Spark.Core.Internal.ProtoUtils
 import Spark.Core.Try
 import qualified Proto.Karps.Proto.Types as P
+import qualified Proto.Karps.Proto.Types_Fields as P
 
 
 -- The core type algebra
@@ -111,24 +113,29 @@ instance FromProto P.SQLType DataType where
     f = if sqlt ^. P.nullable then NullableType else StrictType
     sdt = case sqlt ^. P.maybe'strictType of
       Nothing -> tryError $ sformat ("dataTypeFromProto: missing strictType "%sh) sqlt
+      Just (P.SQLType'BasicType (P.SQLType'BasicType'Unrecognized _)) ->
+        tryError $ sformat ("dataTypeFromProto: basic type is UNUSED "%sh) sqlt
       Just (P.SQLType'BasicType P.SQLType'UNUSED) -> tryError $ sformat ("dataTypeFromProto: basic type is UNUSED "%sh) sqlt
       Just (P.SQLType'BasicType P.SQLType'INT) -> pure IntType
       Just (P.SQLType'BasicType P.SQLType'DOUBLE) -> pure DoubleType
       Just (P.SQLType'BasicType P.SQLType'STRING) -> pure StringType
       Just (P.SQLType'BasicType P.SQLType'BOOL) -> pure BoolType
       Just (P.SQLType'ArrayType sqlt') -> ArrayType <$> fromProto sqlt'
-      Just (P.SQLType'StructType (P.StructType l)) -> Struct . StructType <$> v where
-        f' (P.StructField fn (Just sqlt')) = StructField (FieldName fn) <$> fromProto sqlt'
-        f' (P.StructField fn Nothing) = tryError $ sformat ("dataTypeFromProto: missing field type for "%sh) fn
+      Just (P.SQLType'StructType p) -> Struct . StructType <$> v where -- (P.StructType l))
+        f' (P.StructField fn (Just sqlt') _) = StructField (FieldName fn) <$> fromProto sqlt'
+        f' (P.StructField fn Nothing _) = tryError $ sformat ("dataTypeFromProto: missing field type for "%sh) fn
+        l = p ^. P.fields
         v = V.fromList <$> sequence (f' <$> l)
 
 instance ToProto P.SQLType DataType where
-  toProto dt = P.SQLType nl (Just x) where
+  toProto dt = def & P.nullable .~ nl & P.maybe'strictType .~ (Just x) where
     nl = case dt of
       StrictType _ -> False
       NullableType _ -> True
-    _struct (StructType v) = P.StructType l where
-      f (StructField n dt') = P.StructField (unFieldName n) (Just (toProto dt'))
+    _struct :: StructType -> P.StructType
+    _struct (StructType v) = def & P.fields .~ l where
+      f :: StructField -> P.StructField
+      f (StructField n dt') = def & P.fieldName .~ (unFieldName n) & P.maybe'fieldType .~ (Just (toProto dt')) --P.StructField (unFieldName n) (Just (toProto dt'))
       l = f <$> V.toList v
     _st IntType = P.SQLType'BasicType P.SQLType'INT
     _st DoubleType = P.SQLType'BasicType P.SQLType'DOUBLE

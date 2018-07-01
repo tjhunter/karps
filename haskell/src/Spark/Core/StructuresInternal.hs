@@ -2,6 +2,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE OverloadedLabels #-}
 
 -- Some basic structures about nodes in a graph, etc.
 
@@ -27,23 +28,28 @@ module Spark.Core.StructuresInternal(
   emptyNodeId
 ) where
 
-import qualified Data.Text as T
 import Data.ByteString(ByteString)
-import GHC.Generics (Generic)
+import GHC.Generics(Generic)
 import Data.Hashable(Hashable)
 import Data.List(intercalate)
+import Data.ProtoLens(def)
 import Data.String(IsString(..))
 import Data.Vector(Vector)
+import Lens.Micro
 import qualified Data.Vector as V
 import Data.Text.Encoding as E
+import qualified Data.Text as T
 
 import Spark.Core.Internal.Utilities
 import Spark.Core.Internal.ProtoUtils
--- TODO: move elsewhere
 import qualified Proto.Karps.Proto.StructuredTransform as PST
+import qualified Proto.Karps.Proto.StructuredTransform_Fields as PST
 import qualified Proto.Karps.Proto.Computation as PC
+import qualified Proto.Karps.Proto.Computation_Fields as PC
 import qualified Proto.Karps.Proto.Graph as PG
+import qualified Proto.Karps.Proto.Graph_Fields as PG
 import qualified Proto.Karps.Proto.ApiInternal as PAI
+import qualified Proto.Karps.Proto.ApiInternal_Fields as PAI
 
 -- | The name of a node (without path information)
 newtype NodeName = NodeName { unNodeName :: T.Text } deriving (Eq, Ord)
@@ -151,30 +157,31 @@ instance IsString FieldName where
   fromString = FieldName . T.pack
 
 fieldPathToProto :: FieldPath -> PST.ColumnExtraction
-fieldPathToProto (FieldPath v) = PST.ColumnExtraction (unFieldName <$> V.toList v)
+fieldPathToProto (FieldPath v) = def & PST.path .~ (unFieldName <$> V.toList v)
 
 fieldPathFromProto :: PST.ColumnExtraction -> FieldPath
-fieldPathFromProto (PST.ColumnExtraction l) = FieldPath (FieldName <$> V.fromList l)
+fieldPathFromProto p = FieldPath (FieldName <$> V.fromList (p ^. PST.path))
 
 instance FromProto PC.ComputationId ComputationID where
-  fromProto (PC.ComputationId txt) = pure $ ComputationID txt
+  fromProto p = pure $ ComputationID (p ^. PC.id)
 
 instance ToProto PC.ComputationId ComputationID where
-  toProto (ComputationID txt) = PC.ComputationId txt
+  toProto (ComputationID txt) = def & PC.id .~ txt
 
 instance FromProto PG.Path NodePath where
   -- TODO: add more checks to the path, to make sure it respects some basic
   -- sanity checks.
-  fromProto (PG.Path l) = pure . NodePath . V.fromList $ (NodeName <$> l)
+  fromProto p = pure . NodePath . V.fromList $ (NodeName <$> (p ^. PG.path))
 
 instance ToProto PG.Path NodePath where
-  toProto (NodePath v) = PG.Path . V.toList $ (unNodeName <$> v)
+  toProto (NodePath v) = def & PG.path .~ (V.toList $ (unNodeName <$> v))
 
 instance FromProto PAI.NodeId NodeId where
-  fromProto (PAI.NodeId txt) = pure $ NodeId (E.encodeUtf8 txt)
+  -- TODO: check that value is not empty
+  fromProto p = pure $ NodeId (E.encodeUtf8 (p ^. PAI.value))
 
 instance ToProto PAI.NodeId NodeId where
-  toProto (NodeId bs) = PAI.NodeId (show' bs)
+  toProto (NodeId bs) = def & PAI.value .~ (show' bs)
 
 instance Ord FieldName where
   compare f1 f2 = compare (unFieldName f1) (unFieldName f2)

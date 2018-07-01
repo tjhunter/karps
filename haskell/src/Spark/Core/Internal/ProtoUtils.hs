@@ -4,12 +4,13 @@
 
 module Spark.Core.Internal.ProtoUtils(ToProto(..), FromProto(..), extractMaybe, extractMaybe') where
 
-import Data.ProtoLens.Message(Message(descriptor), MessageDescriptor(messageName))
+import Data.ProtoLens.Message(Message(messageName))
 import Lens.Family2 ((^.), FoldLike)
 import Data.ProtoLens.TextFormat(showMessageShort)
 import Formatting
 import GHC.Stack(HasCallStack)
 import Data.Text(Text)
+import Data.Proxy
 
 import Spark.Core.Try(Try, tryError)
 
@@ -26,8 +27,8 @@ extractMaybe msg fun ctx =
   case msg ^. fun of
     Just x' -> return x'
     Nothing -> tryError $ sformat ("extractMaybe: extraction failed in context "%shown%" for message of type:"%shown%" value:"%shown) ctx txt msg' where
-      d = descriptor :: MessageDescriptor m
-      txt = messageName d
+      p = Proxy :: Proxy m
+      txt = messageName p
       msg' = showMessageShort msg
 
 extractMaybe' :: (Message m, Message m1, FromProto m1 a1, HasCallStack) => m -> FoldLike (Maybe m1) m a' (Maybe m1) b -> Text -> Try a1
