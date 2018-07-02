@@ -36,6 +36,8 @@ import Data.Char(isSymbol)
 import Data.ProtoLens.Message(Message)
 import Data.ProtoLens.Encoding(encodeMessage, decodeMessage)
 import Data.ProtoLens.TextFormat(showMessage)
+import Data.ProtoLens(def)
+import Lens.Micro((^.), (&), (.~))
 
 import Spark.Core.Try
 import Spark.Core.Internal.OpStructures
@@ -44,6 +46,7 @@ import Spark.Core.Internal.ProtoUtils
 import Spark.Core.Internal.TypesFunctions(arrayType')
 import Spark.Core.Internal.RowUtils(cellWithTypeToProto, rowArray)
 import qualified Proto.Karps.Proto.Std as PS
+import qualified Proto.Karps.Proto.Std_Fields as PS
 
 -- (internal)
 -- The serialized type of a node operation, as written in
@@ -166,21 +169,21 @@ _prettyShowSGO (ColumnSemiGroupLaw sfn) = sfn
 extraNodeOpData :: NodeOp -> OpExtra
 extraNodeOpData (NodeLocalLit dt cell) = convertToExtra . forceRight $ cellWithTypeToProto dt cell
 extraNodeOpData (NodeStructuredTransform st) =
-  convertToExtra (PS.StructuredTransform (Just (toProto st)))
+  convertToExtra $ (def :: PS.StructuredTransform) & PS.colOp .~ (toProto st) --(PS.StructuredTransform (Just (toProto st)))
 extraNodeOpData (NodeLocalStructuredTransform st) =
-  convertToExtra (PS.LocalStructuredTransform (Just (toProto st)))
+  convertToExtra $ (def :: PS.LocalStructuredTransform) & PS.colOp .~ (toProto st)
 extraNodeOpData (NodeDistributedLit dt v) =
   convertToExtra . forceRight $ cellWithTypeToProto dt' l' where
     dt' = arrayType' dt
     l' = rowArray (V.toList v)
 extraNodeOpData (NodeDistributedOp so) = soExtra so
 extraNodeOpData (NodeGroupedReduction ao) =
-  convertToExtra (PS.Shuffle (Just (toProto ao)))
+  convertToExtra $ (def :: PS.Shuffle) & PS.aggOp .~ (toProto ao)
 extraNodeOpData (NodeOpaqueAggregator so) = soExtra so
 extraNodeOpData (NodeLocalOp so) = soExtra so
 extraNodeOpData NodeBroadcastJoin = emptyExtra
 extraNodeOpData (NodeReduction ao) =
-  convertToExtra (PS.StructuredReduce (Just (toProto ao)))
+  convertToExtra $ (def :: PS.StructuredReduce) & PS.aggOp .~ (toProto ao) --(PS.StructuredReduce (Just (toProto ao)))
 extraNodeOpData (NodeAggregatorLocalReduction _) =
   error "extraNodeOpData: NodeAggregatorLocalReduction"
 extraNodeOpData (NodePointer p) = convertToExtra' p

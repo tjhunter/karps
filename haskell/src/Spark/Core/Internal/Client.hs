@@ -19,7 +19,9 @@ import Spark.Core.Internal.BrainFunctions()
 import Spark.Core.Internal.BrainStructures(LocalSessionId, ComputeGraph)
 import Spark.Core.Try
 import qualified Proto.Karps.Proto.Computation as PC
+import qualified Proto.Karps.Proto.Computation_Fields as PC
 import qualified Proto.Karps.Proto.Interface as PI
+import qualified Proto.Karps.Proto.Interface_Fields as PI
 
 {-| The ID of an RDD in Spark.
 -}

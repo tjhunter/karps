@@ -60,7 +60,9 @@ import Spark.Core.Internal.DatasetStd(literalBuilderD)
 import Spark.Server.Registry(nodeRegistry)
 import Spark.Core.Types
 import qualified Proto.Karps.Proto.Graph as PG
+import qualified Proto.Karps.Proto.Graph_Fields as PG
 import qualified Proto.Karps.Proto.ApiInternal as PAI
+import qualified Proto.Karps.Proto.ApiInternal_Fields as PAI
 
 
 {-| This function deserializes the data, performs a few sanity checks, and then

@@ -40,8 +40,11 @@ import Spark.Core.Internal.DatasetStructures(StructureEdge(ParentEdge), Operator
 import Spark.Core.StructuresInternal(NodeId, ComputationID, NodePath, prettyNodePath)
 import Spark.Core.Try(NodeError, Try, nodeError, eMessage)
 import qualified Proto.Karps.Proto.Computation as PC
+import qualified Proto.Karps.Proto.Computation_Fields as PC
 import qualified Proto.Karps.Proto.ApiInternal as PAI
+import qualified Proto.Karps.Proto.ApiInternal_Fields as PAI
 import qualified Proto.Karps.Proto.Io as PI
+import qualified Proto.Karps.Proto.Io_Fields as PI
 
 {-| The configuration of the compiler. All these options change the
 output reported by the compiler. They are fixed at compile time or by the
@@ -162,22 +165,22 @@ instance IsString ResourcePath where
   fromString = ResourcePath . pack
 
 instance FromProto PC.SessionId LocalSessionId where
-  fromProto (PC.SessionId x) = pure $ LocalSessionId x
+  fromProto (PC.SessionId x _) = pure $ LocalSessionId x
 
 instance ToProto PC.SessionId LocalSessionId where
-  toProto = PC.SessionId . unLocalSession
+  toProto x = def & PC.id .~ (unLocalSession x)
 
 instance FromProto PI.ResourcePath ResourcePath where
-  fromProto (PI.ResourcePath x) = pure $ ResourcePath x
+  fromProto (PI.ResourcePath x _) = pure $ ResourcePath x
 
 instance ToProto PI.ResourcePath ResourcePath where
-  toProto (ResourcePath x) = PI.ResourcePath x
+  toProto (ResourcePath x) = def & PI.uri .~ x
 
 instance FromProto PI.ResourceStamp ResourceStamp where
-  fromProto (PI.ResourceStamp x) = pure $ ResourceStamp x
+  fromProto (PI.ResourceStamp x _) = pure $ ResourceStamp x
 
 instance ToProto PI.ResourceStamp ResourceStamp where
-  toProto (ResourceStamp x) = PI.ResourceStamp x
+  toProto (ResourceStamp x) = def & PI.data' .~ x
 
 instance FromProto PAI.AnalyzeResourceResponse'FailedStatus (ResourcePath, NodeError) where
   fromProto fs = do

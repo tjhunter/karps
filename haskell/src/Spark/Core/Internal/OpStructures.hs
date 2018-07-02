@@ -52,9 +52,13 @@ import Spark.Core.Try
 import Spark.Core.Internal.Utilities(sh)
 import Spark.Core.Internal.TypesStructures(DataType, SQLType, SQLType(unSQLType))
 import qualified Proto.Karps.Proto.Graph as PG
+import qualified Proto.Karps.Proto.Graph_Fields as PG
 import qualified Proto.Karps.Proto.Std as PS
+import qualified Proto.Karps.Proto.Std_Fields as PS
 import qualified Proto.Karps.Proto.Row as PR
+import qualified Proto.Karps.Proto.Row_Fields as PR
 import qualified Proto.Karps.Proto.StructuredTransform as PST
+import qualified Proto.Karps.Proto.StructuredTransform_Fields as PST
 
 {-| The name of a SQL function.
 
@@ -377,10 +381,10 @@ instance ToProto PG.Locality Locality where
   toProto Local = PG.LOCAL
 
 instance FromProto PG.OpExtra OpExtra where
-  fromProto (PG.OpExtra x txt b64) = pure (OpExtra x txt b64)
+  fromProto (PG.OpExtra x txt b64 _) = pure (OpExtra x txt b64)
 
 instance ToProto PG.OpExtra OpExtra where
-  toProto (OpExtra x txt b64) = PG.OpExtra x txt b64
+  toProto (OpExtra x txt b64) = def & PG.content .~ x & PG.contentDebug .~ txt & PG.contentBase64 .~ b64
 
 instance ToProto PST.Column ColOp where
   toProto = _colOpToProto Nothing
@@ -388,7 +392,7 @@ instance ToProto PST.Column ColOp where
 instance FromProto PST.Column ColOp where
   fromProto c = snd <$> _fromProto' c where
     _structFromProto :: PST.ColumnStructure -> Try ColOp
-    _structFromProto (PST.ColumnStructure l) =
+    _structFromProto (PST.ColumnStructure l _) =
       ColStruct . V.fromList <$> l2 where
         l' = sequence (_fromProto' <$> l)
         f (Nothing, _) = tryError $ sformat ("colOpFromProto: found a field with no name "%sh) l
@@ -397,7 +401,7 @@ instance FromProto PST.Column ColOp where
         l2 = join (sequence <$> l'')
     _funFromProto :: PST.ColumnFunction -> Try ColOp
     -- We drop the extra type info, but it should not be a problem here.
-    _funFromProto (PST.ColumnFunction fname l _) = (\x' -> ColFunction fname x' Nothing) <$> x where
+    _funFromProto (PST.ColumnFunction fname l _ _) = (\x' -> ColFunction fname x' Nothing) <$> x where
         l2 = _fromProto' <$> V.fromList l
         x = (snd <$>) <$> sequence l2
     _litFromProto :: PST.ColumnLiteral -> Try ColOp
@@ -405,7 +409,7 @@ instance FromProto PST.Column ColOp where
       (c', dt) <- extractMaybe' cl PST.maybe'content "cont"
       return $ ColLit dt c'
     _fromProto :: PST.Column'Content -> Try ColOp
-    _fromProto (PST.Column'Broadcast (PST.ColumnBroadcastObservable int')) = pure (ColBroadcast (fromIntegral int'))
+    _fromProto (PST.Column'Broadcast (PST.ColumnBroadcastObservable int' _)) = pure (ColBroadcast (fromIntegral int'))
     _fromProto (PST.Column'Struct cs) = _structFromProto cs
     _fromProto (PST.Column'Function f) = _funFromProto f
     _fromProto (PST.Column'Extraction ce) =
@@ -492,12 +496,12 @@ _aggOpFromProto a =  (f, y) where
 
 _aggFunFromProto :: PST.AggregationFunction -> Try AggOp
 -- We drop the expected type provided by the proto, this is recomputed internally.
-_aggFunFromProto (PST.AggregationFunction sfn [fpp] _) =
+_aggFunFromProto (PST.AggregationFunction sfn [fpp] _ _) =
   pure $ AggFunction sfn (fieldPathFromProto fpp) Nothing
 _aggFunFromProto x = tryError $ sformat ("_aggFunFromProto: deserialization failed on "%sh) x
 
 _aggStructFromProto :: PST.AggregationStructure -> Try AggOp
-_aggStructFromProto (PST.AggregationStructure l) = AggStruct . V.fromList <$> v where
+_aggStructFromProto (PST.AggregationStructure l _) = AggStruct . V.fromList <$> v where
     f (Just fn, x) = AggField <$> pure fn <*> x
     f x = tryError $ sformat ("_aggStructFromProto: deserialization failed on "%sh) x
     v = sequence (f . _aggOpFromProto <$> l)

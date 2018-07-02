@@ -27,6 +27,7 @@ import Spark.Core.Internal.OpStructures
 import Spark.Core.Internal.OpFunctions(decodeExtra', convertToExtra')
 import Spark.Core.Internal.ProtoUtils
 import qualified Proto.Karps.Proto.Io as PIO
+import qualified Proto.Karps.Proto.Io_Fields as PIO
 
 {-| A path to some data that can be read by Spark.
 -}

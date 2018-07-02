@@ -44,6 +44,7 @@ import Spark.Core.Internal.Utilities
 import Spark.Core.Try
 import Proto.Karps.Proto.Std(Shuffle(..), StructuredTransform(..), StructuredReduce(..))
 import qualified Proto.Karps.Proto.Std as PS
+import qualified Proto.Karps.Proto.Std_Fields as PS
 
 {-| The low-level shuffle.
 

@@ -44,7 +44,9 @@ import Spark.Core.StructuresInternal(NodeId, NodePath, FieldName(..), FieldPath(
 import Spark.Core.Internal.StructuredFlattening
 import Spark.Core.Try
 import qualified Proto.Karps.Proto.Graph as PG
+import qualified Proto.Karps.Proto.Graph_Fields as PG
 import qualified Proto.Karps.Proto.ApiInternal as PAI
+import qualified Proto.Karps.Proto.ApiInternal_Fields as PAI
 
 
 type TransformReturn = Either GraphTransformFailure GraphTransformSuccess

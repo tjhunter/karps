@@ -21,8 +21,11 @@ import Data.Text.Encoding(encodeUtf8)
 import Data.Functor.Identity(runIdentity, Identity)
 
 import qualified Proto.Tensorflow.Core.Framework.Graph as PG
+import qualified Proto.Tensorflow.Core.Framework.Graph_Fields as PG
 import qualified Proto.Tensorflow.Core.Framework.NodeDef as PN
+import qualified Proto.Tensorflow.Core.Framework.NodeDef_Fields as PN
 import qualified Proto.Tensorflow.Core.Framework.AttrValue as PAV
+import qualified Proto.Tensorflow.Core.Framework.AttrValue_Fields as PAV
 import Spark.Core.Internal.ContextStructures(ComputeGraph)
 import Spark.Core.Internal.ComputeDag(computeGraphMapVertices, cdVertices)
 import Spark.Core.Internal.DAGStructures(Vertex(vertexData))
@@ -35,7 +38,7 @@ import Spark.Core.Internal.Utilities(show')
 {-| Converts a compute graph to a form that can be displayed by TensorBoard.
 -}
 displayGraph :: ComputeGraph -> PG.GraphDef
-displayGraph cg = PG.GraphDef nodes where
+displayGraph cg = def & PG.node .~ nodes where
   f :: OperatorNode -> [(PN.NodeDef, StructureEdge)] -> Identity PN.NodeDef
   f on l = pure $ _displayNode on parents logical where
              f' edgeType = PN._NodeDef'name . fst <$> filter ((edgeType ==).snd) l

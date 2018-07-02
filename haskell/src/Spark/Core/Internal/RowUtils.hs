@@ -19,6 +19,8 @@ import Data.Maybe(catMaybes, listToMaybe)
 import Formatting
 import qualified Data.Vector as V
 import Control.Monad.Except
+import Data.ProtoLens(def)
+import Lens.Micro((^.), (&), (.~))
 
 import Spark.Core.Internal.TypesStructures
 import Spark.Core.Internal.RowStructures
@@ -26,6 +28,7 @@ import Spark.Core.Internal.Utilities
 import Spark.Core.Try
 import Spark.Core.Internal.ProtoUtils
 import qualified Proto.Karps.Proto.Row as P
+import qualified Proto.Karps.Proto.Row_Fields as P
 
 type TryCell = Either Text Cell
 
@@ -34,10 +37,10 @@ instance FromProto P.CellWithType (Cell, DataType) where
 
 
 cellFromProto :: DataType -> P.Cell -> TryCell
-cellFromProto (NullableType _) (P.Cell Nothing) = pure Empty
-cellFromProto (StrictType sdt) (P.Cell Nothing) =
+cellFromProto (NullableType _) (P.Cell Nothing _) = pure Empty
+cellFromProto (StrictType sdt) (P.Cell Nothing _) =
   throwError $ sformat ("cellFromProto: nothing given on a strict type: "%sh%", got null") sdt
-cellFromProto dt (P.Cell (Just ce)) = x where
+cellFromProto dt (P.Cell (Just ce) _) = x where
   sdt = case dt of
     StrictType sdt' -> sdt'
     NullableType sdt' -> sdt'
@@ -46,9 +49,9 @@ cellFromProto dt (P.Cell (Just ce)) = x where
     (DoubleType, P.Cell'DoubleValue d) -> pure $ DoubleElement d
     (StringType, P.Cell'StringValue s) -> pure $ StringElement s
     (BoolType, P.Cell'BoolValue b) -> pure $ BoolElement b
-    (ArrayType dt', P.Cell'ArrayValue (P.ArrayCell l)) ->
+    (ArrayType dt', P.Cell'ArrayValue (P.ArrayCell l _)) ->
       RowArray . V.fromList <$> sequence (cellFromProto dt' <$> l)
-    (Struct (StructType v), P.Cell'StructValue (P.Row l)) ->
+    (Struct (StructType v), P.Cell'StructValue (P.Row l _)) ->
       if length l /= V.length v
       then throwError $ sformat ("cellFromProto: struct: got "%sh%" values but structure has "%sh%" elements") (length l) (length v)
       else RowElement . Row <$> sequence (f <$> l') where
@@ -59,7 +62,7 @@ cellFromProto dt (P.Cell (Just ce)) = x where
 
 
 cellWithTypeFromProto :: P.CellWithType -> Either Text (Cell, DataType)
-cellWithTypeFromProto (P.CellWithType (Just c) (Just pdt)) = do
+cellWithTypeFromProto (P.CellWithType (Just c) (Just pdt) _) = do
   dt <- case fromProto pdt of
     Right x -> Right x
     Left s -> Left (show' s) -- TODO: this is bad.
@@ -71,7 +74,7 @@ cellWithTypeFromProto cwt =
 cellWithTypeToProto :: DataType -> Cell -> Either Text P.CellWithType
 cellWithTypeToProto dt c = do
   _ <- checkCell dt c
-  return $ P.CellWithType (Just (toProto c)) (Just (toProto dt))
+  return $ def & P.cell .~ (toProto c) & P.cellType .~ (toProto dt)
 
 
 {-| Given a datatype, ensures that the cell has the corresponding type.

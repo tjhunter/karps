@@ -50,7 +50,9 @@ import Spark.Core.StructuresInternal
 import Spark.Core.Try
 import Spark.Core.Internal.Utilities
 import qualified Proto.Karps.Proto.Interface as PI
+import qualified Proto.Karps.Proto.Interface_Fields as PI
 import qualified Proto.Karps.Proto.ApiInternal as PAI
+import qualified Proto.Karps.Proto.ApiInternal_Fields as PAI
 
 returnPure :: forall a. SparkStatePure a -> SparkState a
 returnPure p = lift $ mapStateT (return . runIdentity) p

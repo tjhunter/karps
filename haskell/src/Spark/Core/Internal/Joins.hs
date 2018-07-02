@@ -51,7 +51,7 @@ joinInner' key1 val1 key2 val2 = do
   df1 <- pack' (struct' [key1, val1])
   df2 <- pack' (struct' [key2, val2])
   _ <- _joinTypeInner key1 val1 val2
-  let extra = PStd.Join PStd.Join'INNER
+  let extra = PStd.Join PStd.Join'INNER undefined
   fromBuilder2Extra df1 df2 joinBuilder extra undefined undefined
   --
   -- let so = StandardOperator { soName = "org.spark.Join", soOutputType = dt, soExtra = p } where

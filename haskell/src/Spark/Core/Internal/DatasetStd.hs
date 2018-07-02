@@ -9,7 +9,8 @@ module Spark.Core.Internal.DatasetStd where
 
 import qualified Data.Vector as V
 import Formatting
-import Lens.Family2((^.))
+import Data.ProtoLens(def)
+import Lens.Micro((^.), (&), (.~))
 
 import Spark.Core.Try
 import Spark.Core.Row
@@ -24,8 +25,11 @@ import Spark.Core.Internal.NodeBuilder
 import Spark.Core.Internal.Utilities
 import Spark.Core.Internal.RowUtils
 import qualified Proto.Karps.Proto.Std as PStd
+import qualified Proto.Karps.Proto.Std_Fields as PStd
 import qualified Proto.Karps.Proto.Row as PRow
+import qualified Proto.Karps.Proto.Row_Fields as PRow
 import qualified Proto.Karps.Proto.Graph as PGraph
+import qualified Proto.Karps.Proto.Graph_Fields as PGraph
 
 {-| Returns the union of two datasets.
 
@@ -101,7 +105,7 @@ placeholder :: forall loc a. (IsLocality loc) => SQLType a -> ComputeNode loc a
 placeholder sqlt = forceRight $ fromBuilder0Extra placeholderBuilder p loct sqlt where
   loct = _getTypedLocality :: TypedLocality loc
   loc = unTypedLocality loct
-  p = PStd.Placeholder (localityToProto loc) (Just (toProto (unSQLType sqlt)))
+  p = (def :: PStd.Placeholder) & PStd.locality .~ (localityToProto loc) & PStd.dataType .~ (toProto (unSQLType sqlt))
 
 placeholderBuilder :: NodeBuilder
 placeholderBuilder = buildOpExtra "org.spark.Placeholder" f where
