@@ -47,14 +47,36 @@ library
                    Proto.Karps.Proto.Types
   
   -- Modules included in this library but not exported.
-  other-modules:   
+  other-modules:   Data.ProtoLens.Reexport.Text.Read
   
   -- LANGUAGE extensions used by modules in this package.
   -- other-extensions:    
   
   -- Other library packages from which modules are imported.
   build-depends:       base >=4.8 && <4.9,
-                       proto-lens >= 0.3 && < 0.4
+                       base16-bytestring,
+                       base64-bytestring,
+                       bytestring,
+                       containers,
+                       data-default,
+                       data-default-class,
+                       either,
+                       exceptions,
+                       formatting,
+                       hashable,
+                       lens-family,
+                       lens-labels,
+                       microlens,
+                       monad-logger,
+                       proto-lens >= 0.3 && < 0.4,
+                       random,
+                       scientific,
+                       semigroups,
+                       mtl,
+                       text,
+                       transformers,
+                       unordered-containers,
+                       vector
   
   -- Directories containing source files.
   hs-source-dirs:      src

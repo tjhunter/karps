@@ -39,3 +39,6 @@ python/notebooks/.ipynb_checkpoints/
 doc/paper/scratch.pdf
 doc/paper/test.pdf
 doc/paper/test.html
+
+# eta
+eta/dist
