@@ -6,7 +6,7 @@ karps-py:
 	echo "karps-py"
 	
 
-karps-spark:
+karps-spark: dist/karps-spark.jar
 	echo "karps-spark"
 
 dev-clean:
@@ -33,4 +33,5 @@ lib/karps-eta.jar:  haskell/src/Proto haskell/src
 
 dist/karps-spark.jar:
 	sbt ks_testing/assembly
+	cp target/testing/scala-2.11/ks_testing-assembly-0.2.0.jar dist/karps-spark.jar
 	
