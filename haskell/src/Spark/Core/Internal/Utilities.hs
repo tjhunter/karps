@@ -42,7 +42,7 @@ import Formatting
 import Debug.Trace(trace)
 import Data.Semigroup((<>))
 import  Data.List.NonEmpty( NonEmpty( (:|) ) )
-import GHC.Stack(HasCallStack, prettyCallStack, callStack)
+import Data.CallStack(HasCallStack, callStack)
 
 -- import qualified Spark.Core.Internal.LocatedBase as LB
 
@@ -65,7 +65,7 @@ myGroupBy' f l = l4 where
   l4 = sortBy (compare `on` fst) l3
 
 throwError' :: (HasCallStack, MonadError Text m) => Text -> m a
-throwError' txt = throwError (T.pack (prettyCallStack callStack) <> txt)
+throwError' txt = throwError (T.pack (show callStack) <> txt)
 
 -- | group by
 -- This implementation is not great, but it should respect the general contract.

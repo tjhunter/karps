@@ -43,20 +43,49 @@ cabal-version:       >=1.10
 
 library
   -- Modules exported by the library.
-  exposed-modules: Primes,
-                   Proto.Karps.Proto.Types
+  exposed-modules:  Primes,     
+                    Spark.Core.JavaExports,
+                    Spark.Core.Row,
+                    Spark.Core.Try,
+                    --Spark.Core.Types,
+                    Proto.Karps.Proto.ApiInternal,
+                    Proto.Karps.Proto.ApiInternal_Fields,
+                    Proto.Karps.Proto.Computation,
+                    Proto.Karps.Proto.Computation_Fields,
+                    Proto.Karps.Proto.Graph,
+                    Proto.Karps.Proto.Graph_Fields,
+                    Proto.Karps.Proto.Interface,
+                    Proto.Karps.Proto.Interface_Fields,
+                    Proto.Karps.Proto.Io,
+                    Proto.Karps.Proto.Io_Fields,
+                    Proto.Karps.Proto.Row,
+                    Proto.Karps.Proto.Row_Fields,
+                    Proto.Karps.Proto.Std,
+                    Proto.Karps.Proto.Std_Fields,
+                    Proto.Karps.Proto.StructuredTransform,
+                    Proto.Karps.Proto.StructuredTransform_Fields,
+                    Proto.Karps.Proto.Types,
+                    Proto.Karps.Proto.Types_Fields
   
   -- Modules included in this library but not exported.
-  other-modules:   Data.ProtoLens.Reexport.Text.Read
+  other-modules:    Data.ProtoLens.Reexport.Text.Read,
+                    Spark.Core.Internal.RowGenerics,
+                    Spark.Core.Internal.RowStructures,
+                    Spark.Core.Internal.RowUtils,
+                    Spark.Core.Internal.TypesGenerics,
+                    Spark.Core.Internal.Utilities,
+                    Spark.Core.StructuresInternal
   
   -- LANGUAGE extensions used by modules in this package.
-  -- other-extensions:    
+  -- other-extensions:    FlexibleContexts
+  default-extensions:          FlexibleContexts, ScopedTypeVariables
   
   -- Other library packages from which modules are imported.
   build-depends:       base >=4.8 && <4.9,
                        base16-bytestring,
                        base64-bytestring,
                        bytestring,
+                       call-stack,
                        containers,
                        data-default,
                        data-default-class,
@@ -88,6 +117,32 @@ library
 executable eta-first
   main-is:             Main.hs
   other-modules:       Primes
-  build-depends:       base >=4.8 && <4.9
+  build-depends:       base >=4.8 && <4.9,
+                       karps-eta,
+                       base16-bytestring,
+                       base64-bytestring,
+                       bytestring,
+                       call-stack,
+                       containers,
+                       data-default,
+                       data-default-class,
+                       either,
+                       exceptions,
+                       formatting,
+                       hashable,
+                       lens-family,
+                       lens-labels,
+                       microlens,
+                       monad-logger,
+                       proto-lens >= 0.3 && < 0.4,
+                       random,
+                       scientific,
+                       semigroups,
+                       mtl,
+                       text,
+                       transformers,
+                       unordered-containers,
+                       vector
   hs-source-dirs:      src
   default-language:    Haskell2010
+  default-extensions:          FlexibleContexts, ScopedTypeVariables

@@ -8,7 +8,7 @@ import Data.ProtoLens.Message(Message(messageName))
 import Lens.Family2 ((^.), FoldLike)
 import Data.ProtoLens.TextFormat(showMessageShort)
 import Formatting
-import GHC.Stack(HasCallStack)
+import Data.CallStack(HasCallStack)
 import Data.Text(Text)
 import Data.Proxy
 

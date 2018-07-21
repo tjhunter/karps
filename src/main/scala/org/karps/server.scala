@@ -25,6 +25,8 @@ import karps.core.interface.KarpsMainGrpc
 import karps.core.interface.KarpsMainGrpc.KarpsMain
 import karps.core.{api_internal => AI, interface => I}
 
+import spark.core.JavaExports
+
 
 object Boot extends App {
 

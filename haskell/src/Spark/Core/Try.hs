@@ -1,4 +1,4 @@
-
+{-# LANGUAGE OverloadedStrings #-}
 {-|
 Useful classes and functions to deal with failures
 within the Karps framework.
@@ -21,7 +21,7 @@ module Spark.Core.Try(
 import qualified Data.Text as T
 import Data.Function(on)
 import Control.Arrow((&&&))
-import GHC.Stack(CallStack, HasCallStack, callStack)
+import Data.CallStack(CallStack, HasCallStack, callStack)
 
 -- | An error associated to a particular node (an observable or a dataset).
 data NodeError = Error {
