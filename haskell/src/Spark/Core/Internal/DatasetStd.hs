@@ -20,10 +20,10 @@ import Spark.Core.Internal.OpStructures
 import Spark.Core.Internal.PathsUntyped()
 import Spark.Core.Internal.TypesStructures
 import Spark.Core.Internal.TypesFunctions
-import Spark.Core.Internal.ProtoUtils
+import Spark.Common.ProtoUtils
 import Spark.Core.Internal.NodeBuilder
 import Spark.Core.Internal.Utilities
-import Spark.Core.Internal.RowUtils
+import Spark.Common.RowUtils
 import qualified Proto.Karps.Proto.Std as PStd
 import qualified Proto.Karps.Proto.Std_Fields as PStd
 import qualified Proto.Karps.Proto.Row as PRow

@@ -33,7 +33,7 @@ import Data.Default
 import Lens.Family2 ((^.), (&), (.~))
 
 import Spark.Core.Internal.Utilities
-import Spark.Core.Internal.ProtoUtils
+import Spark.Common.ProtoUtils
 import Spark.Core.Internal.ComputeDag(ComputeDag)
 import Spark.Core.Internal.DAGStructures(Vertex(..), VertexId(..), Edge(..))
 import Spark.Core.Internal.DatasetStructures(StructureEdge(ParentEdge), OperatorNode, onPath)

@@ -19,14 +19,13 @@ import Control.Monad.Identity
 
 import qualified Spark.Common.DAGFunctions as DAG
 import Spark.Common.DAGStructures
--- import Spark.Common.DAGFunctions
 import Spark.Common.ComputeDag
-import Spark.Common.DatasetStructures
-import Spark.Common.DatasetFunctions
+import Spark.Common.NodeFunctions
+import Spark.Common.NodeStructures
 import Spark.Common.Paths
+import Spark.Common.StructuresInternal(unNodeId)
 import Spark.Common.Utilities
 import Spark.Common.Try
-import Spark.Common.StructuresInternal(unNodeId)
 
 instance GraphVertexOperations UntypedNode where
   vertexToId = VertexId . unNodeId . nodeId

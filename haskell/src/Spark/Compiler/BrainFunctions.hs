@@ -28,7 +28,7 @@ import Lens.Family2((&), (.~))
 
 import Spark.Core.Internal.BrainStructures
 import Spark.Core.Internal.Utilities
-import Spark.Core.Internal.ProtoUtils
+import Spark.Common.ProtoUtils
 import Spark.Core.Internal.ComputeDag
 import Spark.Core.Internal.DatasetStd(localityToProto)
 import Spark.Core.Internal.DAGStructures

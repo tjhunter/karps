@@ -10,8 +10,8 @@ import Lens.Family2((^.), (&), (.~))
 import Data.Default(def)
 
 import Spark.Common.StructuresInternal
-import Spark.Core.Internal.ProtoUtils
-import Spark.Core.Internal.RowUtils()
+import Spark.Common.ProtoUtils
+import Spark.Common.RowUtils()
 import Spark.Core.Internal.TypesStructures(DataType)
 import Spark.Core.Internal.TypesFunctions()
 import Spark.Core.Internal.RowStructures(Cell)

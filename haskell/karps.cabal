@@ -89,6 +89,8 @@ library
                      Proto.Karps.Proto.Interface_Fields,
                      Proto.Karps.Proto.Io,
                      Proto.Karps.Proto.Io_Fields,
+                     Proto.Karps.Proto.Profiling,
+                     Proto.Karps.Proto.Profiling_Fields,
                      Proto.Karps.Proto.Row,
                      Proto.Karps.Proto.Row_Fields,
                      Proto.Karps.Proto.Std,

@@ -36,7 +36,7 @@ import Spark.Core.Internal.OpStructures
 import Spark.Core.Internal.OpFunctions
 -- import Spark.Core.Internal.OpFunctions(aggOpFromProto, colOpFromProto)
 import Spark.Core.Internal.TypesStructures
-import Spark.Core.Internal.ProtoUtils
+import Spark.Common.ProtoUtils
 import Spark.Core.Internal.NodeBuilder
 
 import Spark.Core.Internal.StructuredBuilder

@@ -11,4 +11,4 @@ module Spark.Core.Row(
 import Spark.Core.Internal.RowStructures
 import Spark.Core.Internal.RowGenerics
 import Spark.Core.Internal.RowGenericsFrom
-import Spark.Core.Internal.RowUtils
+import Spark.Common.RowUtils
