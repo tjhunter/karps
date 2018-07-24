@@ -13,7 +13,7 @@ import Debug.Trace
 import Lens.Family2 ((&), (.~))
 
 import Spark.Server.Transform(transform)
-import Spark.Core.Internal.BrainStructures(CompilerConf)
+import Spark.Compiler.BrainStructures(CompilerConf)
 import qualified Proto.Karps.Proto.ApiInternal as PAI
 import qualified Proto.Karps.Proto.ApiInternal_Fields as PAI
 

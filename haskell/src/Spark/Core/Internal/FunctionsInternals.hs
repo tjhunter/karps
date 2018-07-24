@@ -47,7 +47,7 @@ import Spark.Core.Internal.TypesStructures
 import Spark.Core.Internal.Projections
 import Spark.Core.Internal.OpStructures
 import Spark.Core.Internal.TypesGenerics(SQLTypeable, buildType)
-import Spark.Core.StructuresInternal
+import Spark.Common.StructuresInternal
 import Spark.Common.Try
 
 {-| The class of pairs of types that express the fact that some type a can

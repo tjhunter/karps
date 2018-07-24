@@ -32,7 +32,7 @@ import Spark.Core.Internal.DAGStructures(Vertex(vertexData))
 import Spark.Core.Internal.OpStructures(OpExtra(opContentDebug))
 import Spark.Core.Internal.OpFunctions(simpleShowOp, extraNodeOpData)
 import Spark.Core.Internal.DatasetStructures(OperatorNode(..), StructureEdge(..), onOp, onType, onLocality)
-import Spark.Core.StructuresInternal(prettyNodePath)
+import Spark.Common.StructuresInternal(prettyNodePath)
 import Spark.Core.Internal.Utilities(show')
 
 {-| Converts a compute graph to a form that can be displayed by TensorBoard.

@@ -37,7 +37,7 @@ import Spark.Core.Internal.DAGFunctions
 import Spark.Core.Internal.DAGStructures
 import Spark.Core.Internal.DatasetStructures
 import Spark.Core.Internal.Utilities
--- import Spark.Core.StructuresInternal(NodeId)
+-- import Spark.Common.StructuresInternal(NodeId)
 
 data NodeCachingType =
     -- Hinted caching. Will be fullfilled by the algorithm below.

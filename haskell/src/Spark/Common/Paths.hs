@@ -30,7 +30,7 @@ import Formatting
 import Spark.Common.Try
 import Spark.Common.DAGStructures
 import Spark.Common.ComputeDag
-import Spark.Core.StructuresInternal
+import Spark.Common.StructuresInternal
 
 class HasNodeName v where
   -- Retrieves the name of the node

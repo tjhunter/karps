@@ -44,7 +44,7 @@ import Control.Monad(join)
 import Formatting
 import Lens.Family2 ((&), (.~), (^.))
 
-import Spark.Core.StructuresInternal
+import Spark.Common.StructuresInternal
 import Spark.Common.ProtoUtils
 import Spark.Common.RowUtils()
 import Spark.Common.RowStructures(Cell)

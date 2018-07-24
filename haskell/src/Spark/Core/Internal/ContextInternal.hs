@@ -44,7 +44,7 @@ import Spark.Core.Row
 import Spark.Core.Types
 import Spark.Core.Internal.BrainStructures
 import Spark.Core.Internal.BrainFunctions
-import Spark.Core.StructuresInternal(NodeId, NodePath, ComputationID(..))
+import Spark.Common.StructuresInternal(NodeId, NodePath, ComputationID(..))
 import Spark.Core.Internal.Caching
 import Spark.Core.Internal.CachingUntyped
 import Spark.Core.Internal.ContextStructures

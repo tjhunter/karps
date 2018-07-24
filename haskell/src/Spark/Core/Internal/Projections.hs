@@ -37,7 +37,7 @@ import Formatting
 import Data.Text(Text)
 
 import Spark.Common.Try
-import Spark.Core.StructuresInternal
+import Spark.Common.StructuresInternal
 import Spark.Core.Internal.TypesStructures
 import Spark.Core.Internal.ColumnFunctions
 import Spark.Core.Internal.ColumnStructures

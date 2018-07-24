@@ -30,7 +30,7 @@ import Spark.Core.Internal.FunctionsInternals
 import Spark.Core.Internal.OpStructures
 import Spark.Core.Internal.TypesStructures
 import Spark.Core.Internal.Utilities
-import Spark.Core.StructuresInternal(emptyFieldPath)
+import Spark.Common.StructuresInternal(emptyFieldPath)
 import Spark.Core.InternalStd.Aggregation
 import Spark.Core.Types
 import Spark.Common.Try

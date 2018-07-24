@@ -35,7 +35,7 @@ import Data.List(find)
 import Spark.Core.Internal.OpStructures
 import Spark.Core.Internal.TypesStructures(DataType(..), StructField(..), StrictDataType(..), StructType(..), Nullable(..))
 import Spark.Core.Internal.TypesFunctions(isNumber)
-import Spark.Core.StructuresInternal(FieldName(..), unFieldPath, FieldPath)
+import Spark.Common.StructuresInternal(FieldName(..), unFieldPath, FieldPath)
 import Spark.Core.Internal.Utilities
 import Spark.Common.Try(Try, tryError)
 

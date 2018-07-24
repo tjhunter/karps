@@ -32,7 +32,7 @@ import Spark.Core.Internal.TypesFunctions(extractFields, structType', extractFie
 import Spark.Core.Internal.DatasetStructures(OperatorNode(..), StructureEdge(ParentEdge), onOp, onPath, onType, onLocality)
 import Spark.Core.Internal.DatasetFunctions(filterParentNodes)
 import Spark.Core.InternalStd.Filter(filterBuilder)
-import Spark.Core.StructuresInternal(FieldName(..), FieldPath(..), NodePath, nodePathAppendSuffix)
+import Spark.Common.StructuresInternal(FieldName(..), FieldPath(..), NodePath, nodePathAppendSuffix)
 import Spark.Common.Try
 
 {-| Takes a graph that may contain some functional nodes, and attempts to

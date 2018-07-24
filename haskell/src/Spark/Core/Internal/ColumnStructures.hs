@@ -15,7 +15,7 @@ import Spark.Core.Internal.DatasetFunctions()
 import Spark.Core.Internal.RowStructures
 import Spark.Core.Internal.TypesStructures
 import Spark.Core.Internal.OpStructures
-import Spark.Core.StructuresInternal
+import Spark.Common.StructuresInternal
 import Spark.Common.Try
 
 {-| The data structure that implements the notion of data columns.

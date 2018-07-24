@@ -20,7 +20,7 @@ import Spark.Core.Internal.DatasetFunctions
 import Spark.Core.Internal.OpStructures
 import Spark.Core.Internal.PathsUntyped()
 import Spark.Core.Internal.DAGStructures
-import Spark.Core.StructuresInternal
+import Spark.Common.StructuresInternal
 
 
 {-| Uncaches the dataset.

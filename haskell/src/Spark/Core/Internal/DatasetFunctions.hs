@@ -75,7 +75,7 @@ import Control.Monad(when)
 import Formatting
 import Data.ProtoLens.Message(Message)
 
-import Spark.Core.StructuresInternal
+import Spark.Common.StructuresInternal
 import Spark.Common.Try
 import Spark.Core.Row
 import Spark.Core.Internal.TypesStructures

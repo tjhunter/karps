@@ -6,7 +6,7 @@
 
 -- Some basic structures about nodes in a graph, etc.
 
-module Spark.Core.StructuresInternal(
+module Spark.Common.StructuresInternal(
   NodeName(..),
   NodePath(..),
   NodeId(..),

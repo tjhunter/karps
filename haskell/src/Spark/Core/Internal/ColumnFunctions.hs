@@ -58,7 +58,7 @@ import Spark.Core.Internal.ColumnStructures
 import Spark.Core.Internal.DatasetFunctions
 import Spark.Core.Internal.DatasetStructures
 import Spark.Core.Internal.TypesStructures
-import Spark.Core.StructuresInternal
+import Spark.Common.StructuresInternal
 import Spark.Core.Internal.TypesFunctions
 import Spark.Core.Internal.OpStructures
 import Spark.Core.Internal.OpFunctions(prettyShowColOp, prettyShowColFun)

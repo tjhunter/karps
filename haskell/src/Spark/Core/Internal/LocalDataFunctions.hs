@@ -23,7 +23,7 @@ import Spark.Core.Internal.TypesStructures
 import Spark.Core.Internal.OpStructures
 import Spark.Core.Internal.Utilities
 import Spark.Core.Internal.TypesGenerics(SQLTypeable, buildType)
-import Spark.Core.StructuresInternal(emptyFieldPath)
+import Spark.Common.StructuresInternal(emptyFieldPath)
 import Spark.Core.Row
 
 constant :: (ToSQL a, SQLTypeable a) => a -> LocalData a

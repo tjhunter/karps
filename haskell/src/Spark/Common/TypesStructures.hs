@@ -27,7 +27,7 @@ import Data.ProtoLens(def)
 import Lens.Micro((^.), (&), (.~))
 import Formatting
 
-import Spark.Core.StructuresInternal(FieldName(..))
+import Spark.Common.StructuresInternal(FieldName(..))
 import Spark.Common.Utilities
 import Spark.Common.ProtoUtils
 import Spark.Common.Try

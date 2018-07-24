@@ -3,13 +3,13 @@
 {-# LANGUAGE FlexibleInstances #-}
 -- The communication protocol with the server
 
-module Spark.Core.Internal.Client where
+module Spark.Compiler.Client where
 
 import Data.Text(Text)
 import Lens.Family2((^.), (&), (.~))
 import Data.Default(def)
 
-import Spark.Core.StructuresInternal
+import Spark.Common.StructuresInternal
 import Spark.Core.Internal.ProtoUtils
 import Spark.Core.Internal.RowUtils()
 import Spark.Core.Internal.TypesStructures(DataType)

@@ -19,7 +19,7 @@ import Formatting
 import Spark.Common.TypesStructures
 import Spark.Common.TypesFunctions
 import Spark.Common.Utilities
-import Spark.Core.StructuresInternal(FieldName(..), unsafeFieldName)
+import Spark.Common.StructuresInternal(FieldName(..), unsafeFieldName)
 import Spark.Common.TypesStructuresRepr(DataTypeRepr, DataTypeElementRepr)
 
 -- The 3rd attempt to get generics conversions.

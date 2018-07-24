@@ -35,7 +35,7 @@ import Spark.Core.Internal.TypesStructures
 import Spark.Core.Internal.Utilities
 import Spark.Core.Internal.RowStructures(Cell)
 import Spark.Common.Try
-import Spark.Core.StructuresInternal
+import Spark.Common.StructuresInternal
 import Spark.Core.Internal.CanRename
 -- import Spark.Proto.Std(Shuffle(..))
 

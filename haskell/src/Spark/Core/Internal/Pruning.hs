@@ -15,7 +15,7 @@ module Spark.Core.Internal.Pruning(
 
 import Data.HashMap.Strict as HM
 
-import Spark.Core.StructuresInternal(NodeId, NodePath, ComputationID)
+import Spark.Common.StructuresInternal(NodeId, NodePath, ComputationID)
 import Spark.Core.Internal.DatasetStructures(StructureEdge, OperatorNode, onId, NodeContext(..))
 import Spark.Core.Internal.DAGFunctions
 import Spark.Core.Internal.DAGStructures

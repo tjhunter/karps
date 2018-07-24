@@ -38,7 +38,7 @@ import Spark.Core.Internal.DatasetFunctions(untypedLocalData, asObs')
 import Spark.Core.Internal.ContextIOInternal
 import Spark.Core.Internal.RowGenericsFrom(FromSQL, cellToValue)
 import Spark.Core.Internal.RowStructures(Cell)
-import Spark.Core.StructuresInternal
+import Spark.Common.StructuresInternal
 import Spark.Common.Try
 
 -- The global session reference. Should not be accessed outside

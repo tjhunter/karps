@@ -10,7 +10,7 @@
 This part of the computation is stateless and does not depend on the
 DSL or on the server.
 -}
-module Spark.Core.Internal.BrainFunctions(
+module Spark.Compiler.BrainFunctions(
   TransformReturn,
   performTransform) where
 
@@ -40,7 +40,7 @@ import Spark.Core.Internal.DatasetStructures(StructureEdge(..), OperatorNode(..)
 import Spark.Core.Internal.Display(displayGraph)
 import Spark.Core.InternalStd.Observable(localPackBuilder)
 import Spark.Core.Internal.TypesFunctions(structTypeTuple')
-import Spark.Core.StructuresInternal(NodeId, NodePath, FieldName(..), FieldPath(..), nodePathAppendSuffix, emptyFieldPath, fieldPath', unsafeFieldName, emptyNodeId)
+import Spark.Common.StructuresInternal(NodeId, NodePath, FieldName(..), FieldPath(..), nodePathAppendSuffix, emptyFieldPath, fieldPath', unsafeFieldName, emptyNodeId)
 import Spark.Core.Internal.StructuredFlattening
 import Spark.Common.Try
 import qualified Proto.Karps.Proto.Graph as PG

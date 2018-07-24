@@ -43,7 +43,7 @@ import Formatting
 
 
 import Spark.Common.TypesStructures
-import Spark.Core.StructuresInternal
+import Spark.Common.StructuresInternal
 import Spark.Common.RowGenericsFrom(FromSQL(..), TryS)
 import Spark.Common.Utilities
 import Spark.Common.TypesStructuresRepr(DataTypeRepr, DataTypeElementRepr)

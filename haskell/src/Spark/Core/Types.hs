@@ -29,7 +29,7 @@ module Spark.Core.Types(
 import Spark.Core.Internal.TypesStructures
 import Spark.Core.Internal.TypesGenerics
 import Spark.Core.Internal.TypesFunctions
-import Spark.Core.StructuresInternal
+import Spark.Common.StructuresInternal
 import Spark.Core.Internal.FunctionsInternals(TupleEquivalence(..), NameTuple(..))
 
 -- | Description of types supported in DataSets

@@ -46,7 +46,7 @@ import Spark.Core.Internal.DatasetStructures(UntypedLocalData, onShape, onId, on
 import Spark.Core.Internal.OpStructures(NodeShape(..))
 import Spark.Core.Internal.RowGenericsFrom(cellToValue)
 import Spark.Core.Row
-import Spark.Core.StructuresInternal
+import Spark.Common.StructuresInternal
 import Spark.Common.Try
 import Spark.Core.Internal.Utilities
 import qualified Proto.Karps.Proto.Interface as PI

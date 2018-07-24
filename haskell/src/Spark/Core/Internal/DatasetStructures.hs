@@ -10,7 +10,7 @@ import Data.Vector(Vector)
 import qualified Data.Vector as V
 import qualified Data.Text as T
 
-import Spark.Core.StructuresInternal
+import Spark.Common.StructuresInternal
 import Spark.Common.Try
 import Spark.Core.Row
 import Spark.Core.Internal.OpStructures
