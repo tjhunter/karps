@@ -39,7 +39,7 @@ import qualified Data.Map.Strict as M
 import qualified Data.HashMap.Strict as HM
 
 import Spark.Core.Dataset
-import Spark.Core.Try
+import Spark.Common.Try
 import Spark.Core.Row
 import Spark.Core.Types
 import Spark.Core.Internal.BrainStructures

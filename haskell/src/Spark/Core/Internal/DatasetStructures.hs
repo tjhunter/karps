@@ -11,7 +11,7 @@ import qualified Data.Vector as V
 import qualified Data.Text as T
 
 import Spark.Core.StructuresInternal
-import Spark.Core.Try
+import Spark.Common.Try
 import Spark.Core.Row
 import Spark.Core.Internal.OpStructures
 import Spark.Core.Internal.TypesStructures

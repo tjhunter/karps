@@ -65,7 +65,7 @@ import Spark.Core.Internal.OpFunctions(prettyShowColOp, prettyShowColFun)
 import Spark.Core.Internal.AlgebraStructures
 import Spark.Core.Internal.Utilities
 import Spark.Core.Internal.TypesGenerics(SQLTypeable, buildType)
-import Spark.Core.Try
+import Spark.Common.Try
 
 -- ********** Public methods ********
 

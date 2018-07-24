@@ -39,7 +39,7 @@ import Data.ProtoLens.TextFormat(showMessage)
 import Data.ProtoLens(def)
 import Lens.Micro((^.), (&), (.~))
 
-import Spark.Core.Try
+import Spark.Common.Try
 import Spark.Core.Internal.OpStructures
 import Spark.Core.Internal.Utilities
 import Spark.Core.Internal.ProtoUtils

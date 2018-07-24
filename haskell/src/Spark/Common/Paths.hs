@@ -27,7 +27,7 @@ import Data.Maybe(fromMaybe, catMaybes)
 import Data.Foldable(foldr', foldl', toList)
 import Formatting
 
-import Spark.Core.Try
+import Spark.Common.Try
 import Spark.Core.Internal.DAGStructures
 import Spark.Core.Internal.ComputeDag
 import Spark.Core.StructuresInternal

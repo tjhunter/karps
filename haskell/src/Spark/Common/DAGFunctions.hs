@@ -49,7 +49,7 @@ import Control.Monad.Identity
 
 import Spark.Core.Internal.DAGStructures
 import Spark.Core.Internal.Utilities
-import Spark.Core.Try
+import Spark.Common.Try
 
 {-| The different filter modes when pruning a graph.
 

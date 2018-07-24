@@ -30,7 +30,7 @@ import Formatting
 import Spark.Core.StructuresInternal(FieldName(..))
 import Spark.Core.Internal.Utilities
 import Spark.Core.Internal.ProtoUtils
-import Spark.Core.Try
+import Spark.Common.Try
 import qualified Proto.Karps.Proto.Types as P
 import qualified Proto.Karps.Proto.Types_Fields as P
 

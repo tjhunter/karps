@@ -18,7 +18,7 @@ module Spark.IO.Internal.OutputCommon(
   saveCol
 ) where
 
-import Spark.Core.Try
+import Spark.Common.Try
 import Spark.Core.Column
 import Spark.Core.Dataset
 

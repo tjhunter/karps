@@ -20,7 +20,7 @@ import GHC.Generics(Generic)
 import Formatting
 
 import Spark.Core.Internal.Utilities
-import Spark.Core.Try
+import Spark.Common.Try
 
 -- | Separate type of error to make it more general and easier
 -- to test.

@@ -33,7 +33,7 @@ import Spark.Core.Internal.Utilities
 import Spark.Core.StructuresInternal(emptyFieldPath)
 import Spark.Core.InternalStd.Aggregation
 import Spark.Core.Types
-import Spark.Core.Try
+import Spark.Common.Try
 
 
 {-| The sum of all the elements in a column.

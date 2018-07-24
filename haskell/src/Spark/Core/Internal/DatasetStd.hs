@@ -12,7 +12,7 @@ import Formatting
 import Data.ProtoLens(def)
 import Lens.Micro((^.), (&), (.~))
 
-import Spark.Core.Try
+import Spark.Common.Try
 import Spark.Core.Row
 import Spark.Core.Internal.DatasetStructures
 import Spark.Core.Internal.DatasetFunctions

@@ -23,7 +23,7 @@ import Spark.Core.Internal.OpStructures
 import Spark.Core.Internal.TypesStructures
 import Spark.Core.Internal.Utilities
 import Spark.Core.Internal.TypesFunctions(structTypeFromFields)
-import Spark.Core.Try
+import Spark.Common.Try
 import Spark.Core.StructuresInternal(unsafeFieldName)
 import Spark.Core.Internal.NodeBuilder(NodeBuilder, buildOpDDExtra, cniStandardOp)
 import qualified Proto.Karps.Proto.Std as PStd

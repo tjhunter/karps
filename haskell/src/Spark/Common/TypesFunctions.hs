@@ -48,7 +48,7 @@ import Spark.Core.Internal.RowGenericsFrom(FromSQL(..), TryS)
 import Spark.Core.Internal.Utilities
 import Spark.Core.Internal.TypesStructuresRepr(DataTypeRepr, DataTypeElementRepr)
 import qualified Spark.Core.Internal.TypesStructuresRepr as DTR
-import Spark.Core.Try
+import Spark.Common.Try
 
 -- Performs a cast of the type.
 -- This may throw an error if the required type b is not

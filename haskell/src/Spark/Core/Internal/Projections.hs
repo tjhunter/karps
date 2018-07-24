@@ -36,7 +36,7 @@ import Data.Maybe(fromMaybe)
 import Formatting
 import Data.Text(Text)
 
-import Spark.Core.Try
+import Spark.Common.Try
 import Spark.Core.StructuresInternal
 import Spark.Core.Internal.TypesStructures
 import Spark.Core.Internal.ColumnFunctions

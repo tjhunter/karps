@@ -25,7 +25,7 @@ import Spark.Core.Internal.DatasetStructures
 import Spark.Core.Internal.DatasetFunctions
 import Spark.Core.Internal.Paths
 import Spark.Core.Internal.Utilities
-import Spark.Core.Try
+import Spark.Common.Try
 import Spark.Core.StructuresInternal(unNodeId)
 
 instance GraphVertexOperations UntypedNode where

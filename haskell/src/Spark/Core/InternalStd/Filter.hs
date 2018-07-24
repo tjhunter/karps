@@ -11,7 +11,7 @@ import Spark.Core.Internal.OpStructures
 import Spark.Core.Internal.TypesStructures
 import Spark.Core.Internal.Utilities
 import Spark.Core.Internal.TypesFunctions(extractFields2)
-import Spark.Core.Try
+import Spark.Common.Try
 
 filterBuilder :: NodeBuilder
 filterBuilder = buildOpD "org.spark.Filter" $ \dt -> do

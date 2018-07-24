@@ -37,7 +37,7 @@ import Spark.Core.Internal.TypesStructures(DataType(..), StructField(..), Strict
 import Spark.Core.Internal.TypesFunctions(isNumber)
 import Spark.Core.StructuresInternal(FieldName(..), unFieldPath, FieldPath)
 import Spark.Core.Internal.Utilities
-import Spark.Core.Try(Try, tryError)
+import Spark.Common.Try(Try, tryError)
 
 {-| A column builder. No extra information required.
 

@@ -12,7 +12,7 @@ module Spark.IO.Internal.InputGeneric(
 ) where
 
 import Spark.Core.Types
-import Spark.Core.Try
+import Spark.Common.Try
 import Spark.Core.Dataset
 
 import Spark.Core.Internal.Utilities(forceRight)

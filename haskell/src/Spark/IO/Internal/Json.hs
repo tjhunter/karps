@@ -21,7 +21,7 @@ import Spark.Core.Dataset(DataFrame, Dataset, castType')
 import Spark.Core.Internal.BrainStructures(ResourcePath, resourcePath)
 import Spark.Core.Internal.Utilities(forceRight)
 import Spark.Core.Context
-import Spark.Core.Try
+import Spark.Common.Try
 
 import Spark.IO.Internal.InputGeneric
 import Spark.IO.Internal.InputStructures

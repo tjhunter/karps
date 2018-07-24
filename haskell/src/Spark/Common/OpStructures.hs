@@ -48,7 +48,7 @@ import Spark.Core.StructuresInternal
 import Spark.Core.Internal.ProtoUtils
 import Spark.Core.Internal.RowUtils()
 import Spark.Core.Internal.RowStructures(Cell)
-import Spark.Core.Try
+import Spark.Common.Try
 import Spark.Core.Internal.Utilities(sh)
 import Spark.Core.Internal.TypesStructures(DataType, SQLType, SQLType(unSQLType))
 import qualified Proto.Karps.Proto.Graph as PG

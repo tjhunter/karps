@@ -25,7 +25,7 @@ import Lens.Micro((^.), (&), (.~))
 import Spark.Core.Internal.TypesStructures
 import Spark.Core.Internal.RowStructures
 import Spark.Core.Internal.Utilities
-import Spark.Core.Try
+import Spark.Common.Try
 import Spark.Core.Internal.ProtoUtils
 import qualified Proto.Karps.Proto.Row as P
 import qualified Proto.Karps.Proto.Row_Fields as P

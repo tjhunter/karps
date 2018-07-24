@@ -47,7 +47,7 @@ import Formatting
 import qualified Spark.Core.Internal.DAGFunctions as DAG
 import Spark.Core.Internal.DAGStructures
 import Spark.Core.Internal.Utilities
-import Spark.Core.Try
+import Spark.Common.Try
 
 {-| A DAG of computation nodes.
 

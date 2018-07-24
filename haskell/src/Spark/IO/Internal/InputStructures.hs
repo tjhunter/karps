@@ -20,7 +20,7 @@ import Lens.Family2((^.), (&), (.~))
 import Data.ProtoLens.Message(def)
 
 import Spark.Core.Types
-import Spark.Core.Try
+import Spark.Common.Try
 
 import Spark.Core.Internal.BrainStructures(ResourcePath, resourcePath, unResourcePath)
 import Spark.Core.Internal.OpStructures

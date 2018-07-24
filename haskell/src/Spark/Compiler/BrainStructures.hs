@@ -38,7 +38,7 @@ import Spark.Core.Internal.ComputeDag(ComputeDag)
 import Spark.Core.Internal.DAGStructures(Vertex(..), VertexId(..), Edge(..))
 import Spark.Core.Internal.DatasetStructures(StructureEdge(ParentEdge), OperatorNode, onPath)
 import Spark.Core.StructuresInternal(NodeId, ComputationID, NodePath, prettyNodePath)
-import Spark.Core.Try(NodeError, Try, nodeError, eMessage)
+import Spark.Common.Try(NodeError, Try, nodeError, eMessage)
 import qualified Proto.Karps.Proto.Computation as PC
 import qualified Proto.Karps.Proto.Computation_Fields as PC
 import qualified Proto.Karps.Proto.ApiInternal as PAI

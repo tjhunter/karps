@@ -41,7 +41,7 @@ import Spark.Core.Internal.NodeBuilder
 
 import Spark.Core.Internal.StructuredBuilder
 import Spark.Core.Internal.Utilities
-import Spark.Core.Try
+import Spark.Common.Try
 import Proto.Karps.Proto.Std(Shuffle(..), StructuredTransform(..), StructuredReduce(..))
 import qualified Proto.Karps.Proto.Std as PS
 import qualified Proto.Karps.Proto.Std_Fields as PS

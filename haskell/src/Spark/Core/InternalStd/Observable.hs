@@ -13,7 +13,7 @@ import Spark.Core.Internal.OpStructures
 import Spark.Core.Internal.TypesStructures(DataType)
 import Spark.Core.Internal.TypesFunctions(structTypeTuple')
 import Spark.Core.Internal.Utilities
-import Spark.Core.Try
+import Spark.Common.Try
 
 {-| Casts a local data as a double.
 -}

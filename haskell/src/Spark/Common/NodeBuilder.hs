@@ -47,7 +47,7 @@ import Spark.Core.Internal.OpStructures
 import Spark.Core.Internal.OpFunctions(convertToExtra, decodeExtra)
 import Spark.Core.Internal.TypesStructures(DataType)
 import Spark.Core.Internal.Utilities
-import Spark.Core.Try
+import Spark.Common.Try
 
 {-| Function that describes how to build a node, given some extra
 data (which may be empty) and a context of all the parents' shapes.

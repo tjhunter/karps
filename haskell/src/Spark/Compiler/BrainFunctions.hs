@@ -42,7 +42,7 @@ import Spark.Core.InternalStd.Observable(localPackBuilder)
 import Spark.Core.Internal.TypesFunctions(structTypeTuple')
 import Spark.Core.StructuresInternal(NodeId, NodePath, FieldName(..), FieldPath(..), nodePathAppendSuffix, emptyFieldPath, fieldPath', unsafeFieldName, emptyNodeId)
 import Spark.Core.Internal.StructuredFlattening
-import Spark.Core.Try
+import Spark.Common.Try
 import qualified Proto.Karps.Proto.Graph as PG
 import qualified Proto.Karps.Proto.Graph_Fields as PG
 import qualified Proto.Karps.Proto.ApiInternal as PAI

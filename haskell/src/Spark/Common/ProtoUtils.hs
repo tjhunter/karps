@@ -12,7 +12,7 @@ import Data.CallStack(HasCallStack)
 import Data.Text(Text)
 import Data.Proxy
 
-import Spark.Core.Try(Try, tryError)
+import Spark.Common.Try(Try, tryError)
 
 {-| The class of types that can be read from a proto description. -}
 class FromProto p x | x -> p where

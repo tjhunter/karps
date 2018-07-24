@@ -20,7 +20,7 @@ module Spark.Core.Internal.CanRename where
 import qualified Data.Text as T
 import Formatting
 
-import Spark.Core.Try
+import Spark.Common.Try
 import Spark.Core.StructuresInternal
 import Spark.Core.Internal.ColumnFunctions()
 import Spark.Core.Internal.ColumnStructures

@@ -17,7 +17,7 @@ import Spark.Core.Internal.TypesFunctions()
 import Spark.Core.Internal.RowStructures(Cell)
 import Spark.Core.Internal.BrainFunctions()
 import Spark.Core.Internal.BrainStructures(LocalSessionId, ComputeGraph)
-import Spark.Core.Try
+import Spark.Common.Try
 import qualified Proto.Karps.Proto.Computation as PC
 import qualified Proto.Karps.Proto.Computation_Fields as PC
 import qualified Proto.Karps.Proto.Interface as PI

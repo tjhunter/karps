@@ -33,7 +33,7 @@ import Spark.Core.Internal.DatasetStructures(OperatorNode(..), StructureEdge(Par
 import Spark.Core.Internal.DatasetFunctions(filterParentNodes)
 import Spark.Core.InternalStd.Filter(filterBuilder)
 import Spark.Core.StructuresInternal(FieldName(..), FieldPath(..), NodePath, nodePathAppendSuffix)
-import Spark.Core.Try
+import Spark.Common.Try
 
 {-| Takes a graph that may contain some functional nodes, and attempts to
 apply these nodes as operands, flattening the inner functions and the groups

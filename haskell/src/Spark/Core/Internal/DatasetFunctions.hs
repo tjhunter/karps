@@ -76,7 +76,7 @@ import Formatting
 import Data.ProtoLens.Message(Message)
 
 import Spark.Core.StructuresInternal
-import Spark.Core.Try
+import Spark.Common.Try
 import Spark.Core.Row
 import Spark.Core.Internal.TypesStructures
 import Spark.Core.Internal.DatasetStructures
