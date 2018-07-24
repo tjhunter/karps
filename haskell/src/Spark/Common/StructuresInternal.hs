@@ -40,8 +40,8 @@ import qualified Data.Vector as V
 import Data.Text.Encoding as E
 import qualified Data.Text as T
 
-import Spark.Core.Internal.Utilities
-import Spark.Core.Internal.ProtoUtils
+import Spark.Common.Utilities
+import Spark.Common.ProtoUtils
 import qualified Proto.Karps.Proto.StructuredTransform as PST
 import qualified Proto.Karps.Proto.StructuredTransform_Fields as PST
 import qualified Proto.Karps.Proto.Computation as PC

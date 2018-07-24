@@ -44,9 +44,9 @@ import Control.Monad.Except
 import Control.Monad.Identity
 import Formatting
 
-import qualified Spark.Core.Internal.DAGFunctions as DAG
-import Spark.Core.Internal.DAGStructures
-import Spark.Core.Internal.Utilities
+import qualified Spark.Common.DAGFunctions as DAG
+import Spark.Common.DAGStructures
+import Spark.Common.Utilities
 import Spark.Common.Try
 
 {-| A DAG of computation nodes.

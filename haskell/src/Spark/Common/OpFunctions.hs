@@ -4,7 +4,7 @@
 -- {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE TupleSections #-}
 
-module Spark.Core.Internal.OpFunctions(
+module Spark.Common.OpFunctions(
   simpleShowOp,
   prettyShowOp,
   extraNodeOpData,
@@ -40,11 +40,11 @@ import Data.ProtoLens(def)
 import Lens.Micro((^.), (&), (.~))
 
 import Spark.Common.Try
-import Spark.Core.Internal.OpStructures
-import Spark.Core.Internal.Utilities
-import Spark.Core.Internal.ProtoUtils
-import Spark.Core.Internal.TypesFunctions(arrayType')
-import Spark.Core.Internal.RowUtils(cellWithTypeToProto, rowArray)
+import Spark.Common.OpStructures
+import Spark.Common.Utilities
+import Spark.Common.ProtoUtils
+import Spark.Common.TypesFunctions(arrayType')
+import Spark.Common.RowUtils(cellWithTypeToProto, rowArray)
 import qualified Proto.Karps.Proto.Std as PS
 import qualified Proto.Karps.Proto.Std_Fields as PS
 

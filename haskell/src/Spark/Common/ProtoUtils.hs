@@ -2,7 +2,7 @@
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Spark.Core.Internal.ProtoUtils(ToProto(..), FromProto(..), extractMaybe, extractMaybe') where
+module Spark.Common.ProtoUtils(ToProto(..), FromProto(..), extractMaybe, extractMaybe') where
 
 import Data.ProtoLens.Message(Message(messageName))
 import Lens.Family2 ((^.), FoldLike)

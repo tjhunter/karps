@@ -6,7 +6,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE FlexibleContexts #-}
 
-module Spark.Core.Internal.Paths(
+module Spark.Common.Paths(
   HasNodeName(..),
   PathEdge(..),
   computePaths,
@@ -28,8 +28,8 @@ import Data.Foldable(foldr', foldl', toList)
 import Formatting
 
 import Spark.Common.Try
-import Spark.Core.Internal.DAGStructures
-import Spark.Core.Internal.ComputeDag
+import Spark.Common.DAGStructures
+import Spark.Common.ComputeDag
 import Spark.Core.StructuresInternal
 
 class HasNodeName v where

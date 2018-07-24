@@ -3,7 +3,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-module Spark.Core.Internal.RowUtils(
+module Spark.Common.RowUtils(
   -- jsonToCell,
   checkCell,
   rowArray,
@@ -22,11 +22,11 @@ import Control.Monad.Except
 import Data.ProtoLens(def)
 import Lens.Micro((^.), (&), (.~))
 
-import Spark.Core.Internal.TypesStructures
-import Spark.Core.Internal.RowStructures
-import Spark.Core.Internal.Utilities
+import Spark.Common.TypesStructures
+import Spark.Common.RowStructures
+import Spark.Common.Utilities
 import Spark.Common.Try
-import Spark.Core.Internal.ProtoUtils
+import Spark.Common.ProtoUtils
 import qualified Proto.Karps.Proto.Row as P
 import qualified Proto.Karps.Proto.Row_Fields as P
 

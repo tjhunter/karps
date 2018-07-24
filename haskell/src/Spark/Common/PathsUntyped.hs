@@ -5,7 +5,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Spark.Core.Internal.PathsUntyped(
+module Spark.Common.PathsUntyped(
   assignPathsUntyped,
   tieNodes
 ) where
@@ -17,14 +17,14 @@ import Control.Arrow((&&&))
 import Formatting
 import Control.Monad.Identity
 
-import qualified Spark.Core.Internal.DAGFunctions as DAG
-import Spark.Core.Internal.DAGStructures
--- import Spark.Core.Internal.DAGFunctions
-import Spark.Core.Internal.ComputeDag
-import Spark.Core.Internal.DatasetStructures
-import Spark.Core.Internal.DatasetFunctions
-import Spark.Core.Internal.Paths
-import Spark.Core.Internal.Utilities
+import qualified Spark.Common.DAGFunctions as DAG
+import Spark.Common.DAGStructures
+-- import Spark.Common.DAGFunctions
+import Spark.Common.ComputeDag
+import Spark.Common.DatasetStructures
+import Spark.Common.DatasetFunctions
+import Spark.Common.Paths
+import Spark.Common.Utilities
 import Spark.Common.Try
 import Spark.Core.StructuresInternal(unNodeId)
 

@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-module Spark.Core.Internal.TypesFunctions(
+module Spark.Common.TypesFunctions(
   isNullable,
   iInnerStrictType,
   columnType,
@@ -42,12 +42,12 @@ import qualified Data.Vector as V
 import Formatting
 
 
-import Spark.Core.Internal.TypesStructures
+import Spark.Common.TypesStructures
 import Spark.Core.StructuresInternal
-import Spark.Core.Internal.RowGenericsFrom(FromSQL(..), TryS)
-import Spark.Core.Internal.Utilities
-import Spark.Core.Internal.TypesStructuresRepr(DataTypeRepr, DataTypeElementRepr)
-import qualified Spark.Core.Internal.TypesStructuresRepr as DTR
+import Spark.Common.RowGenericsFrom(FromSQL(..), TryS)
+import Spark.Common.Utilities
+import Spark.Common.TypesStructuresRepr(DataTypeRepr, DataTypeElementRepr)
+import qualified Spark.Common.TypesStructuresRepr as DTR
 import Spark.Common.Try
 
 -- Performs a cast of the type.

@@ -8,7 +8,7 @@ Because I could not find a public library for such transforms.
 
 Most Karps manipulations are converted into graph manipulations.
 -}
-module Spark.Core.Internal.DAGFunctions(
+module Spark.Common.DAGFunctions(
   FilterOp(..),
   -- Building
   buildGraph,
@@ -47,8 +47,8 @@ import Control.Monad.Except
 import Formatting
 import Control.Monad.Identity
 
-import Spark.Core.Internal.DAGStructures
-import Spark.Core.Internal.Utilities
+import Spark.Common.DAGStructures
+import Spark.Common.Utilities
 import Spark.Common.Try
 
 {-| The different filter modes when pruning a graph.

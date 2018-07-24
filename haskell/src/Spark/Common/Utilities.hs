@@ -6,7 +6,7 @@
 
 {-| A collection of small utility functions.
 -}
-module Spark.Core.Internal.Utilities(
+module Spark.Common.Utilities(
   HasCallStack,
   UnknownType,
   myGroupBy,
@@ -44,7 +44,7 @@ import Data.Semigroup((<>))
 import  Data.List.NonEmpty( NonEmpty( (:|) ) )
 import Data.CallStack(HasCallStack, callStack)
 
--- import qualified Spark.Core.Internal.LocatedBase as LB
+-- import qualified Spark.Common.LocatedBase as LB
 
 (<&>) :: Functor f => f a -> (a -> b) -> f b
 (<&>) = flip fmap

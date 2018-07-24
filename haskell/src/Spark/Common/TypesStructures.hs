@@ -15,7 +15,7 @@ mapped to the same DataType (either Strict or Nullable)
 Local data (or "blobs") are single elements whose type can be mapped to a
 DataType (either strict or nullable)
 -}
-module Spark.Core.Internal.TypesStructures where
+module Spark.Common.TypesStructures where
 
 -- import Data.Aeson
 import Data.Vector(Vector)
@@ -28,8 +28,8 @@ import Lens.Micro((^.), (&), (.~))
 import Formatting
 
 import Spark.Core.StructuresInternal(FieldName(..))
-import Spark.Core.Internal.Utilities
-import Spark.Core.Internal.ProtoUtils
+import Spark.Common.Utilities
+import Spark.Common.ProtoUtils
 import Spark.Common.Try
 import qualified Proto.Karps.Proto.Types as P
 import qualified Proto.Karps.Proto.Types_Fields as P

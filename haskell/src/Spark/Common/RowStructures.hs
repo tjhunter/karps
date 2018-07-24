@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 
-module Spark.Core.Internal.RowStructures where
+module Spark.Common.RowStructures where
 
 import Data.Vector(Vector)
 import qualified Data.Vector as V
@@ -9,7 +9,7 @@ import qualified Data.Text as T
 import Data.ProtoLens(def)
 import Lens.Micro((&), (.~))
 
-import Spark.Core.Internal.ProtoUtils
+import Spark.Common.ProtoUtils
 import qualified Proto.Karps.Proto.Row as P
 import qualified Proto.Karps.Proto.Row_Fields as P
 

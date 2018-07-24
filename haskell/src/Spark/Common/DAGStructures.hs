@@ -6,7 +6,7 @@
 {-| Data structures to represent Directed Acyclic Graphs (DAGs).
 
 -}
-module Spark.Core.Internal.DAGStructures where
+module Spark.Common.DAGStructures where
 
 import qualified Data.Map.Strict as M
 import qualified Data.Text as T
@@ -19,7 +19,7 @@ import Data.Hashable(Hashable)
 import GHC.Generics(Generic)
 import Formatting
 
-import Spark.Core.Internal.Utilities
+import Spark.Common.Utilities
 import Spark.Common.Try
 
 -- | Separate type of error to make it more general and easier

@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 
-module Spark.Core.Internal.TypesStructuresRepr(
+module Spark.Common.TypesStructuresRepr(
   DataTypeElementRepr(..),
   DataTypeRepr(..)
 ) where

@@ -7,7 +7,7 @@
 A description of the operations that can be performed on
 nodes and columns.
 -}
-module Spark.Core.Internal.OpStructures(
+module Spark.Common.OpStructures(
   SqlFunctionName,
   UdafClassName,
   UdfClassName,
@@ -45,12 +45,12 @@ import Formatting
 import Lens.Family2 ((&), (.~), (^.))
 
 import Spark.Core.StructuresInternal
-import Spark.Core.Internal.ProtoUtils
-import Spark.Core.Internal.RowUtils()
-import Spark.Core.Internal.RowStructures(Cell)
+import Spark.Common.ProtoUtils
+import Spark.Common.RowUtils()
+import Spark.Common.RowStructures(Cell)
 import Spark.Common.Try
-import Spark.Core.Internal.Utilities(sh)
-import Spark.Core.Internal.TypesStructures(DataType, SQLType, SQLType(unSQLType))
+import Spark.Common.Utilities(sh)
+import Spark.Common.TypesStructures(DataType, SQLType, SQLType(unSQLType))
 import qualified Proto.Karps.Proto.Graph as PG
 import qualified Proto.Karps.Proto.Graph_Fields as PG
 import qualified Proto.Karps.Proto.Std as PS

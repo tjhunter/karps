@@ -11,7 +11,7 @@
 
 -- The generic implementation for the protocol that converts to
 -- and from SQL cells.
-module Spark.Core.Internal.RowGenerics(
+module Spark.Common.RowGenerics(
   ToSQL,
   valueToCell,
 ) where
@@ -20,8 +20,8 @@ import GHC.Generics
 import qualified Data.Vector as V
 import Data.Text(pack, Text)
 
-import Spark.Core.Internal.RowStructures
-import Spark.Core.Internal.Utilities
+import Spark.Common.RowStructures
+import Spark.Common.Utilities
 
 -- We need to differentiate between the list built for the
 -- constructor and an inner object.

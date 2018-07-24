@@ -9,18 +9,18 @@
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 
-module Spark.Core.Internal.TypesGenerics where
+module Spark.Common.TypesGenerics where
 
 import qualified Data.Vector as V
 import qualified Data.Text as T
 import GHC.Generics
 import Formatting
 
-import Spark.Core.Internal.TypesStructures
-import Spark.Core.Internal.TypesFunctions
-import Spark.Core.Internal.Utilities
+import Spark.Common.TypesStructures
+import Spark.Common.TypesFunctions
+import Spark.Common.Utilities
 import Spark.Core.StructuresInternal(FieldName(..), unsafeFieldName)
-import Spark.Core.Internal.TypesStructuresRepr(DataTypeRepr, DataTypeElementRepr)
+import Spark.Common.TypesStructuresRepr(DataTypeRepr, DataTypeElementRepr)
 
 -- The 3rd attempt to get generics conversions.
 

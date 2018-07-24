@@ -11,7 +11,7 @@
 
 -- The generic implementation for the protocol that converts to
 -- and from SQL cells.
-module Spark.Core.Internal.RowGenericsFrom(
+module Spark.Common.RowGenericsFrom(
   FromSQL(_cellToValue),
   TryS,
   cellToValue,
@@ -24,9 +24,9 @@ import Control.Monad.Except
 import Formatting
 import qualified Data.Vector as V
 
-import Spark.Core.Internal.RowStructures
-import Spark.Core.Internal.Utilities
-import Spark.Core.Internal.TypesStructuresRepr(DataTypeRepr, DataTypeElementRepr)
+import Spark.Common.RowStructures
+import Spark.Common.Utilities
+import Spark.Common.TypesStructuresRepr(DataTypeRepr, DataTypeElementRepr)
 
 -- Convert a cell to a value (if possible)
 cellToValue :: (FromSQL a) => Cell -> Either Text a

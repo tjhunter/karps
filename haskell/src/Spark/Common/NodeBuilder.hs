@@ -4,7 +4,7 @@
 build operator nodes, both in the DSL and the context of loading
 and verifying graphs.
 -}
-module Spark.Core.Internal.NodeBuilder(
+module Spark.Common.NodeBuilder(
   BuilderFunction,
   NodeBuilder(..),
   NodeBuilderRegistry,
@@ -43,10 +43,10 @@ import Control.Arrow ((&&&))
 import Data.Text(Text)
 import Data.ProtoLens.Message(Message)
 
-import Spark.Core.Internal.OpStructures
-import Spark.Core.Internal.OpFunctions(convertToExtra, decodeExtra)
-import Spark.Core.Internal.TypesStructures(DataType)
-import Spark.Core.Internal.Utilities
+import Spark.Common.OpStructures
+import Spark.Common.OpFunctions(convertToExtra, decodeExtra)
+import Spark.Common.TypesStructures(DataType)
+import Spark.Common.Utilities
 import Spark.Common.Try
 
 {-| Function that describes how to build a node, given some extra
