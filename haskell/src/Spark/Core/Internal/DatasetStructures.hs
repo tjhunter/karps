@@ -14,7 +14,7 @@ import Spark.Common.StructuresInternal
 import Spark.Common.Try
 import Spark.Core.Row
 import Spark.Core.Internal.OpStructures
-import Spark.Core.Internal.TypesStructures
+import Spark.Common.TypesStructures
 
 {-| (internal) The main data structure that represents a data node in the
 computation graph.

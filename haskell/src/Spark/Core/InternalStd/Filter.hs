@@ -8,9 +8,9 @@ import Formatting
 import Spark.Core.Internal.LocalDataFunctions()
 import Spark.Core.Internal.NodeBuilder(cniStandardOp', NodeBuilder, buildOpD)
 import Spark.Core.Internal.OpStructures
-import Spark.Core.Internal.TypesStructures
-import Spark.Core.Internal.Utilities
-import Spark.Core.Internal.TypesFunctions(extractFields2)
+import Spark.Common.TypesStructures
+import Spark.Common.Utilities
+import Spark.Common.TypesFunctions(extractFields2)
 import Spark.Common.Try
 
 filterBuilder :: NodeBuilder

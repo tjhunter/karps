@@ -29,11 +29,11 @@ import Spark.Core.Internal.ColumnFunctions(untypedCol, colType, colOp, iUntypedC
 import Spark.Core.Internal.DatasetFunctions
 import Spark.Core.Internal.LocalDataFunctions()
 import Spark.Core.Internal.FunctionsInternals
-import Spark.Core.Internal.TypesFunctions(tupleType, structTypeFromFields)
+import Spark.Common.TypesFunctions(tupleType, structTypeFromFields)
 import Spark.Core.Internal.OpStructures
-import Spark.Core.Internal.TypesStructures
-import Spark.Core.Internal.Utilities
-import Spark.Core.Internal.RowStructures(Cell)
+import Spark.Common.TypesStructures
+import Spark.Common.Utilities
+import Spark.Common.RowStructures(Cell)
 import Spark.Common.Try
 import Spark.Common.StructuresInternal
 import Spark.Core.Internal.CanRename

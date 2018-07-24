@@ -26,20 +26,20 @@ import Formatting
 import GHC.Stack(prettyCallStack)
 import Lens.Family2((&), (.~))
 
-import Spark.Core.Internal.BrainStructures
-import Spark.Core.Internal.Utilities
+import Spark.Compiler.BrainStructures
+import Spark.Common.Utilities
 import Spark.Common.ProtoUtils
-import Spark.Core.Internal.ComputeDag
+import Spark.Common.ComputeDag
 import Spark.Core.Internal.DatasetStd(localityToProto)
-import Spark.Core.Internal.DAGStructures
+import Spark.Common.DAGStructures
 import Spark.Core.Internal.DatasetFunctions(buildOpNode', filterParentNodes)
-import Spark.Core.Internal.OpFunctions(simpleShowOp, extraNodeOpData)
+import Spark.Common.OpFunctions(simpleShowOp, extraNodeOpData)
 import Spark.Core.Internal.OpStructures
 import Spark.Core.Internal.Caching(opnameAutocache)
 import Spark.Core.Internal.DatasetStructures(StructureEdge(..), OperatorNode(..), onLocality, onType, onOp, onShape)
 import Spark.Core.Internal.Display(displayGraph)
 import Spark.Core.InternalStd.Observable(localPackBuilder)
-import Spark.Core.Internal.TypesFunctions(structTypeTuple')
+import Spark.Common.TypesFunctions(structTypeTuple')
 import Spark.Common.StructuresInternal(NodeId, NodePath, FieldName(..), FieldPath(..), nodePathAppendSuffix, emptyFieldPath, fieldPath', unsafeFieldName, emptyNodeId)
 import Spark.Core.Internal.StructuredFlattening
 import Spark.Common.Try

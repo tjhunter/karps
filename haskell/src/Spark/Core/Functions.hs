@@ -41,12 +41,12 @@ import Spark.Core.Internal.DatasetFunctions
 import Spark.Core.Internal.DatasetStd
 import Spark.Core.Internal.Joins
 import Spark.Core.Internal.CachingUntyped(uncache)
-import Spark.Core.Internal.Utilities
+import Spark.Common.Utilities
 import Spark.Core.Internal.LocalDataFunctions
 import Spark.Core.Internal.FunctionsInternals()
 import Spark.Core.Internal.OpStructures
 import Spark.Core.Internal.AggregationFunctions
-import Spark.Core.Internal.TypesStructures(SQLType(..))
+import Spark.Common.TypesStructures(SQLType(..))
 import Spark.Core.Internal.Projections
 import Spark.Core.Internal.CanRename
 import Spark.Core.InternalStd.Observable

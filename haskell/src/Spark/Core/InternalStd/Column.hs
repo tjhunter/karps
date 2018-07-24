@@ -36,9 +36,9 @@ import Data.Text(Text)
 import Spark.Core.Internal.ColumnStructures
 import Spark.Core.Internal.ColumnFunctions
 import Spark.Core.Internal.TypesGenerics(buildType)
-import Spark.Core.Internal.TypesStructures(StrictDataType(DoubleType, BoolType))
+import Spark.Common.TypesStructures(StrictDataType(DoubleType, BoolType))
 import Spark.Core.Internal.StructuredBuilder
-import Spark.Core.Internal.TypesFunctions(mapDataType)
+import Spark.Common.TypesFunctions(mapDataType)
 
 {-| Converts a numeric column to a column of doubles.
 

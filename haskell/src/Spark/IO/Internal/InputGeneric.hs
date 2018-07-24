@@ -15,12 +15,12 @@ import Spark.Core.Types
 import Spark.Common.Try
 import Spark.Core.Dataset
 
-import Spark.Core.Internal.Utilities(forceRight)
+import Spark.Common.Utilities(forceRight)
 import Spark.Core.Internal.DatasetFunctions(asDF, emptyDataset, emptyLocalData)
-import Spark.Core.Internal.TypesStructures(SQLType(..))
+import Spark.Common.TypesStructures(SQLType(..))
 import Spark.Core.Internal.ContextStructures(SparkState)
 import Spark.Core.Internal.OpStructures
-import Spark.Core.Internal.OpFunctions(convertToExtra')
+import Spark.Common.OpFunctions(convertToExtra')
 import Spark.Core.Internal.ContextIOInternal(executeCommand1)
 import Spark.IO.Internal.InputStructures
 

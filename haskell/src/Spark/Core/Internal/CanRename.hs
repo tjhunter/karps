@@ -25,7 +25,7 @@ import Spark.Common.StructuresInternal
 import Spark.Core.Internal.ColumnFunctions()
 import Spark.Core.Internal.ColumnStructures
 import Spark.Core.Internal.DatasetStructures
-import Spark.Core.Internal.Utilities
+import Spark.Common.Utilities
 
 -- | The class of types that can be renamed.
 -- It is made generic because it covers 2 notions:

@@ -48,7 +48,7 @@ import Spark.Core.Internal.RowGenericsFrom(cellToValue)
 import Spark.Core.Row
 import Spark.Common.StructuresInternal
 import Spark.Common.Try
-import Spark.Core.Internal.Utilities
+import Spark.Common.Utilities
 import qualified Proto.Karps.Proto.Interface as PI
 import qualified Proto.Karps.Proto.Interface_Fields as PI
 import qualified Proto.Karps.Proto.ApiInternal as PAI

@@ -25,7 +25,7 @@ import Spark.Core.Dataset
 import Spark.Core.Internal.ColumnStructures(UnknownReference, UntypedColumnData)
 import Spark.Core.Internal.ColumnFunctions(dropColReference)
 import Spark.Core.Internal.OpStructures(HdfsPath)
-import Spark.Core.Internal.Utilities
+import Spark.Common.Utilities
 import Spark.IO.Internal.InputStructures
 
 {-| The mode when saving the data.

@@ -49,17 +49,17 @@ import Spark.Core.Internal.Caching
 import Spark.Core.Internal.CachingUntyped
 import Spark.Core.Internal.ContextStructures
 import Spark.Core.Internal.Client
-import Spark.Core.Internal.ComputeDag
+import Spark.Common.ComputeDag
 import Spark.Core.Internal.PathsUntyped
 import Spark.Core.Internal.Pruning
 import Spark.Core.Internal.OpStructures(NodeShape(..), Locality(..))
 -- Required to import the instances.
 import Spark.Core.Internal.Paths()
 import Spark.Core.Internal.DAGFunctions(buildVertexList, graphMapVertices)
-import Spark.Core.Internal.DAGStructures
+import Spark.Common.DAGStructures
 import Spark.Core.Internal.DatasetFunctions
 import Spark.Core.Internal.DatasetStructures
-import Spark.Core.Internal.Utilities
+import Spark.Common.Utilities
 import Spark.IO.Internal.InputStructures(extractResourcePath)
 
 -- The result from querying the status of a computation

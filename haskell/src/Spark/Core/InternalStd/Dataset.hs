@@ -10,7 +10,7 @@ module Spark.Core.InternalStd.Dataset where
 import Spark.Core.Internal.DatasetStructures
 import Spark.Core.Internal.NodeBuilder(cniStandardOp', NodeBuilder, buildOpD)
 import Spark.Core.Internal.OpStructures
-import Spark.Core.Internal.Utilities
+import Spark.Common.Utilities
 import Spark.Core.Internal.DatasetFunctions
 import Spark.Core.Internal.Caching
 

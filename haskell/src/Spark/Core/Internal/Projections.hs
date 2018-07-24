@@ -38,12 +38,12 @@ import Data.Text(Text)
 
 import Spark.Common.Try
 import Spark.Common.StructuresInternal
-import Spark.Core.Internal.TypesStructures
+import Spark.Common.TypesStructures
 import Spark.Core.Internal.ColumnFunctions
 import Spark.Core.Internal.ColumnStructures
 import Spark.Core.Internal.DatasetFunctions
 import Spark.Core.Internal.DatasetStructures
-import Spark.Core.Internal.Utilities
+import Spark.Common.Utilities
 
 
 {-| The class of static projections that are guaranteed to succeed

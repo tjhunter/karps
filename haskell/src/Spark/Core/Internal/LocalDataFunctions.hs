@@ -18,10 +18,10 @@ import Control.Exception.Base(assert)
 
 import Spark.Core.Internal.DatasetFunctions
 import Spark.Core.Internal.DatasetStructures
-import Spark.Core.Internal.TypesFunctions
-import Spark.Core.Internal.TypesStructures
+import Spark.Common.TypesFunctions
+import Spark.Common.TypesStructures
 import Spark.Core.Internal.OpStructures
-import Spark.Core.Internal.Utilities
+import Spark.Common.Utilities
 import Spark.Core.Internal.TypesGenerics(SQLTypeable, buildType)
 import Spark.Common.StructuresInternal(emptyFieldPath)
 import Spark.Core.Row

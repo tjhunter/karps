@@ -20,9 +20,9 @@ import Spark.Core.Internal.DatasetStructures
 import Spark.Core.Internal.DatasetFunctions
 import Spark.Core.Internal.FunctionsInternals
 import Spark.Core.Internal.OpStructures
-import Spark.Core.Internal.TypesStructures
-import Spark.Core.Internal.Utilities
-import Spark.Core.Internal.TypesFunctions(structTypeFromFields)
+import Spark.Common.TypesStructures
+import Spark.Common.Utilities
+import Spark.Common.TypesFunctions(structTypeFromFields)
 import Spark.Common.Try
 import Spark.Common.StructuresInternal(unsafeFieldName)
 import Spark.Core.Internal.NodeBuilder(NodeBuilder, buildOpDDExtra, cniStandardOp)

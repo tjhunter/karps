@@ -78,14 +78,14 @@ import Data.ProtoLens.Message(Message)
 import Spark.Common.StructuresInternal
 import Spark.Common.Try
 import Spark.Core.Row
-import Spark.Core.Internal.TypesStructures
+import Spark.Common.TypesStructures
 import Spark.Core.Internal.DatasetStructures
 import Spark.Core.Internal.NodeBuilder
 import Spark.Core.Internal.OpStructures
-import Spark.Core.Internal.OpFunctions
-import Spark.Core.Internal.Utilities
+import Spark.Common.OpFunctions
+import Spark.Common.Utilities
 import Spark.Core.Internal.TypesGenerics
-import Spark.Core.Internal.TypesFunctions
+import Spark.Common.TypesFunctions
 
 -- | (developer) The operation performed by this node.
 nodeOp :: ComputeNode loc a -> NodeOp

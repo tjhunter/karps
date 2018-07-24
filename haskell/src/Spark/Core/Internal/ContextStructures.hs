@@ -21,7 +21,7 @@ import Control.Monad.State(StateT, State)
 import Control.Monad.Logger(LoggingT)
 
 import Spark.Core.Internal.BrainStructures(LocalSessionId, ComputeGraph, CompilerConf)
-import Spark.Core.Internal.DAGStructures(Graph)
+import Spark.Common.DAGStructures(Graph)
 import Spark.Core.Internal.OpStructures(HdfsPath(..))
 import Spark.Core.Internal.Pruning
 import Spark.Core.Internal.DatasetStructures(UntypedNode, StructureEdge,)

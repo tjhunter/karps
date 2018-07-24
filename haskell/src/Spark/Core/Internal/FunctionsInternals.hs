@@ -40,10 +40,10 @@ import Spark.Core.Internal.ColumnFunctions
 import Spark.Core.Internal.DatasetFunctions
 import Spark.Core.Internal.DatasetStd(broadcastPair)
 import Spark.Core.Internal.DatasetStructures
-import Spark.Core.Internal.Utilities
-import Spark.Core.Internal.TypesFunctions
+import Spark.Common.Utilities
+import Spark.Common.TypesFunctions
 import Spark.Core.Internal.LocalDataFunctions
-import Spark.Core.Internal.TypesStructures
+import Spark.Common.TypesStructures
 import Spark.Core.Internal.Projections
 import Spark.Core.Internal.OpStructures
 import Spark.Core.Internal.TypesGenerics(SQLTypeable, buildType)

@@ -28,8 +28,8 @@ import Spark.Core.Internal.StructuredBuilder(AggSQLBuilder(..))
 import Spark.Core.Internal.LocalDataFunctions()
 import Spark.Core.Internal.FunctionsInternals
 import Spark.Core.Internal.OpStructures
-import Spark.Core.Internal.TypesStructures
-import Spark.Core.Internal.Utilities
+import Spark.Common.TypesStructures
+import Spark.Common.Utilities
 import Spark.Common.StructuresInternal(emptyFieldPath)
 import Spark.Core.InternalStd.Aggregation
 import Spark.Core.Types

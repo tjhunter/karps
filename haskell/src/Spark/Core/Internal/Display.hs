@@ -27,13 +27,13 @@ import qualified Proto.Tensorflow.Core.Framework.NodeDef_Fields as PN
 import qualified Proto.Tensorflow.Core.Framework.AttrValue as PAV
 import qualified Proto.Tensorflow.Core.Framework.AttrValue_Fields as PAV
 import Spark.Core.Internal.ContextStructures(ComputeGraph)
-import Spark.Core.Internal.ComputeDag(computeGraphMapVertices, cdVertices)
-import Spark.Core.Internal.DAGStructures(Vertex(vertexData))
+import Spark.Common.ComputeDag(computeGraphMapVertices, cdVertices)
+import Spark.Common.DAGStructures(Vertex(vertexData))
 import Spark.Core.Internal.OpStructures(OpExtra(opContentDebug))
-import Spark.Core.Internal.OpFunctions(simpleShowOp, extraNodeOpData)
+import Spark.Common.OpFunctions(simpleShowOp, extraNodeOpData)
 import Spark.Core.Internal.DatasetStructures(OperatorNode(..), StructureEdge(..), onOp, onType, onLocality)
 import Spark.Common.StructuresInternal(prettyNodePath)
-import Spark.Core.Internal.Utilities(show')
+import Spark.Common.Utilities(show')
 
 {-| Converts a compute graph to a form that can be displayed by TensorBoard.
 -}

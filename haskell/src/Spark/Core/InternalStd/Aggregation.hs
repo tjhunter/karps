@@ -18,7 +18,7 @@ module Spark.Core.InternalStd.Aggregation(
 ) where
 
 import Spark.Core.Internal.StructuredBuilder
-import Spark.Core.Internal.TypesFunctions(arrayType', intType)
+import Spark.Common.TypesFunctions(arrayType', intType)
 
 
 -- TODO: there should be a collect_sorted instead, since we have stronger

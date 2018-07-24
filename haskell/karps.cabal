@@ -24,6 +24,8 @@ library
                      Spark.Common.DAGFunctions,
                      Spark.Common.DAGStructures,
                      Spark.Common.NodeBuilder,
+                     Spark.Common.NodeFunctions,
+                     Spark.Common.NodeStructures,
                      Spark.Common.OpFunctions,
                      Spark.Common.OpStructures,
                      Spark.Common.Paths,

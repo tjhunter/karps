@@ -9,8 +9,8 @@ import Data.Text(Text)
 import Data.String(IsString(..))
 
 import Spark.Common.Try
-import Spark.Core.Internal.Utilities(forceRight)
+import Spark.Common.Utilities(forceRight)
 -- import Spark.Core.Internal.DatasetFunctions(asDF, emptyDataset, emptyLocalData)
-import Spark.Core.Internal.TypesStructures(SQLType(..))
+import Spark.Common.TypesStructures(SQLType(..))
 import Spark.Core.Internal.OpStructures
 import qualified Proto.Karps.Proto.Io as PIO

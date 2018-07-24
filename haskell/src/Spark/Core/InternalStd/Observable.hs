@@ -10,9 +10,9 @@ import Spark.Core.Internal.FunctionsInternals
 import Spark.Core.Internal.TypesGenerics(SQLTypeable)
 import Spark.Core.Internal.NodeBuilder
 import Spark.Core.Internal.OpStructures
-import Spark.Core.Internal.TypesStructures(DataType)
-import Spark.Core.Internal.TypesFunctions(structTypeTuple')
-import Spark.Core.Internal.Utilities
+import Spark.Common.TypesStructures(DataType)
+import Spark.Common.TypesFunctions(structTypeTuple')
+import Spark.Common.Utilities
 import Spark.Common.Try
 
 {-| Casts a local data as a double.

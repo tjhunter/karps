@@ -26,9 +26,9 @@ module Spark.Core.Types(
   unSQLType
 ) where
 
-import Spark.Core.Internal.TypesStructures
+import Spark.Common.TypesStructures
 import Spark.Core.Internal.TypesGenerics
-import Spark.Core.Internal.TypesFunctions
+import Spark.Common.TypesFunctions
 import Spark.Common.StructuresInternal
 import Spark.Core.Internal.FunctionsInternals(TupleEquivalence(..), NameTuple(..))
 

@@ -19,7 +19,7 @@ import Spark.Core.Internal.ColumnFunctions
 import Spark.Core.Internal.ColumnStructures
 import Spark.Core.Internal.DatasetStructures
 import Spark.Core.Internal.FunctionsInternals(projectColFunction2')
-import Spark.Core.Internal.Utilities
+import Spark.Common.Utilities
 
 {-| All the automatic conversions supported when lifting a -}
 type family GeneralizedHomoReturn x1 x2 where

@@ -31,16 +31,16 @@ import Control.Monad(when)
 import Formatting
 
 import Spark.Core.Internal.LocalDataFunctions()
-import Spark.Core.Internal.TypesFunctions(structTypeFromFields, extractFields)
+import Spark.Common.TypesFunctions(structTypeFromFields, extractFields)
 import Spark.Core.Internal.OpStructures
-import Spark.Core.Internal.OpFunctions
--- import Spark.Core.Internal.OpFunctions(aggOpFromProto, colOpFromProto)
-import Spark.Core.Internal.TypesStructures
+import Spark.Common.OpFunctions
+-- import Spark.Common.OpFunctions(aggOpFromProto, colOpFromProto)
+import Spark.Common.TypesStructures
 import Spark.Common.ProtoUtils
 import Spark.Core.Internal.NodeBuilder
 
 import Spark.Core.Internal.StructuredBuilder
-import Spark.Core.Internal.Utilities
+import Spark.Common.Utilities
 import Spark.Common.Try
 import Proto.Karps.Proto.Std(Shuffle(..), StructuredTransform(..), StructuredReduce(..))
 import qualified Proto.Karps.Proto.Std as PS

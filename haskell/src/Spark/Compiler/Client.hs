@@ -12,12 +12,12 @@ import Data.Default(def)
 import Spark.Common.StructuresInternal
 import Spark.Common.ProtoUtils
 import Spark.Common.RowUtils()
-import Spark.Core.Internal.TypesStructures(DataType)
-import Spark.Core.Internal.TypesFunctions()
-import Spark.Core.Internal.RowStructures(Cell)
-import Spark.Core.Internal.BrainFunctions()
-import Spark.Core.Internal.BrainStructures(LocalSessionId, ComputeGraph)
+import Spark.Common.TypesStructures(DataType)
+import Spark.Common.TypesFunctions()
+import Spark.Common.RowStructures(Cell)
 import Spark.Common.Try
+import Spark.Compiler.BrainFunctions()
+import Spark.Compiler.BrainStructures(LocalSessionId, ComputeGraph)
 import qualified Proto.Karps.Proto.Computation as PC
 import qualified Proto.Karps.Proto.Computation_Fields as PC
 import qualified Proto.Karps.Proto.Interface as PI

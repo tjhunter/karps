@@ -12,8 +12,8 @@ import Data.Vector(Vector)
 
 import Spark.Core.Internal.DatasetStructures
 import Spark.Core.Internal.DatasetFunctions()
-import Spark.Core.Internal.RowStructures
-import Spark.Core.Internal.TypesStructures
+import Spark.Common.RowStructures
+import Spark.Common.TypesStructures
 import Spark.Core.Internal.OpStructures
 import Spark.Common.StructuresInternal
 import Spark.Common.Try

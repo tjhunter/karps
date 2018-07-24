@@ -1,5 +1,5 @@
 module Spark.Core.Row(
-  module Spark.Core.Internal.RowStructures,
+  module Spark.Common.RowStructures,
   ToSQL,
   FromSQL,
   valueToCell,
@@ -8,7 +8,7 @@ module Spark.Core.Row(
   rowCell
   ) where
 
-import Spark.Core.Internal.RowStructures
+import Spark.Common.RowStructures
 import Spark.Core.Internal.RowGenerics
 import Spark.Core.Internal.RowGenericsFrom
 import Spark.Common.RowUtils

@@ -12,7 +12,7 @@ module Spark.Core.Internal.StructuredFlattening(
 ) where
 
 import Formatting
-import Spark.Core.Internal.Utilities
+import Spark.Common.Utilities
 import Data.List(nub)
 import Data.Maybe(mapMaybe)
 import qualified Data.Vector as V
@@ -23,12 +23,12 @@ import Data.List.NonEmpty(NonEmpty(..))
 import Spark.Core.Internal.StructureFunctions
 import Spark.Core.Internal.OpStructures
 import Spark.Core.Internal.NodeBuilder(nbName)
-import Spark.Core.Internal.ComputeDag
+import Spark.Common.ComputeDag
 import Spark.Core.Internal.ContextStructures(ComputeGraph)
-import Spark.Core.Internal.DAGStructures(Vertex(..), Edge(..), IndexedEdge(..), gIndexedEdges)
+import Spark.Common.DAGStructures(Vertex(..), Edge(..), IndexedEdge(..), gIndexedEdges)
 import Spark.Core.Internal.BrainStructures(makeParentEdge, nodeAsVertex)
-import Spark.Core.Internal.TypesStructures(DataType(..), StrictDataType(Struct), StructType(..), StructField(..))
-import Spark.Core.Internal.TypesFunctions(extractFields, structType', extractFields2)
+import Spark.Common.TypesStructures(DataType(..), StrictDataType(Struct), StructType(..), StructField(..))
+import Spark.Common.TypesFunctions(extractFields, structType', extractFields2)
 import Spark.Core.Internal.DatasetStructures(OperatorNode(..), StructureEdge(ParentEdge), onOp, onPath, onType, onLocality)
 import Spark.Core.Internal.DatasetFunctions(filterParentNodes)
 import Spark.Core.InternalStd.Filter(filterBuilder)

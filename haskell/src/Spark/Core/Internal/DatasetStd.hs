@@ -18,11 +18,11 @@ import Spark.Core.Internal.DatasetStructures
 import Spark.Core.Internal.DatasetFunctions
 import Spark.Core.Internal.OpStructures
 import Spark.Core.Internal.PathsUntyped()
-import Spark.Core.Internal.TypesStructures
-import Spark.Core.Internal.TypesFunctions
+import Spark.Common.TypesStructures
+import Spark.Common.TypesFunctions
 import Spark.Common.ProtoUtils
 import Spark.Core.Internal.NodeBuilder
-import Spark.Core.Internal.Utilities
+import Spark.Common.Utilities
 import Spark.Common.RowUtils
 import qualified Proto.Karps.Proto.Std as PStd
 import qualified Proto.Karps.Proto.Std_Fields as PStd

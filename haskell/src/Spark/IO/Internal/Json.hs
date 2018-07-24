@@ -19,7 +19,7 @@ import Data.Text(pack)
 import Spark.Core.Types
 import Spark.Core.Dataset(DataFrame, Dataset, castType')
 import Spark.Core.Internal.BrainStructures(ResourcePath, resourcePath)
-import Spark.Core.Internal.Utilities(forceRight)
+import Spark.Common.Utilities(forceRight)
 import Spark.Core.Context
 import Spark.Common.Try
 

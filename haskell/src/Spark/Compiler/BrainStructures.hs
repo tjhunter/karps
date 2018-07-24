@@ -32,11 +32,11 @@ import Data.String(IsString(..))
 import Data.Default
 import Lens.Family2 ((^.), (&), (.~))
 
-import Spark.Core.Internal.Utilities
+import Spark.Common.Utilities
 import Spark.Common.ProtoUtils
-import Spark.Core.Internal.ComputeDag(ComputeDag)
-import Spark.Core.Internal.DAGStructures(Vertex(..), VertexId(..), Edge(..))
-import Spark.Core.Internal.DatasetStructures(StructureEdge(ParentEdge), OperatorNode, onPath)
+import Spark.Common.ComputeDag(ComputeDag)
+import Spark.Common.DAGStructures(Vertex(..), VertexId(..), Edge(..))
+import Spark.Common.NodeStructures(StructureEdge(ParentEdge), OperatorNode, onPath)
 import Spark.Common.StructuresInternal(NodeId, ComputationID, NodePath, prettyNodePath)
 import Spark.Common.Try(NodeError, Try, nodeError, eMessage)
 import qualified Proto.Karps.Proto.Computation as PC
