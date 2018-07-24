@@ -589,7 +589,7 @@ _traceGraph txt cg = traceHint (txt <> txt') cg where
 instance ToProto PAI.AnalysisMessage NodeError where
   toProto ne = (def :: PAI.AnalysisMessage)
       & PAI.content .~ eMessage ne
-      & PAI.stackTracePretty .~ (T.pack . prettyCallStack . eCallStack $ ne)
+      & PAI.stackTracePretty .~ (T.pack . show . eCallStack $ ne)
 
 instance FromProto PAI.NodeMapItem (NodeId, GlobalPath) where
   fromProto nmi = do

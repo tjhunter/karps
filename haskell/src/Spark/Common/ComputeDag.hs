@@ -8,7 +8,7 @@ computations.
 The difference with a generic DAG lies in the tables of inputs and outputs
 of the graph, which express the idea of inputs and outputs.
 -}
-module Spark.Core.Internal.ComputeDag(
+module Spark.Common.Internal.ComputeDag(
   -- TODO: hide the constructor.
   ComputeDag(cdInputs, cdOutputs),
   cdEdges,
