@@ -29,9 +29,9 @@ import qualified Proto.Tensorflow.Core.Framework.AttrValue_Fields as PAV
 import Spark.Core.Internal.ContextStructures(ComputeGraph)
 import Spark.Common.ComputeDag(computeGraphMapVertices, cdVertices)
 import Spark.Common.DAGStructures(Vertex(vertexData))
-import Spark.Core.Internal.OpStructures(OpExtra(opContentDebug))
+import Spark.Common.OpStructures(OpExtra(opContentDebug))
 import Spark.Common.OpFunctions(simpleShowOp, extraNodeOpData)
-import Spark.Core.Internal.DatasetStructures(OperatorNode(..), StructureEdge(..), onOp, onType, onLocality)
+import Spark.Common.NodeStructures(OperatorNode(..), StructureEdge(..), onOp, onType, onLocality)
 import Spark.Common.StructuresInternal(prettyNodePath)
 import Spark.Common.Utilities(show')
 

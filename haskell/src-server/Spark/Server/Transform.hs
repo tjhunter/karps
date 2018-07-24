@@ -25,37 +25,37 @@ import Lens.Family2 ((&), (.~), (^.), FoldLike)
 import Formatting
 import Debug.Trace
 
-import Spark.Core.Internal.TypesFunctions()
-import Spark.Core.Try
+import Spark.Common.TypesFunctions()
+import Spark.Common.Try
+import Spark.Common.NodeStructures
 import Spark.Core.Internal.ContextInternal
 import Spark.Core.Context(defaultConf)
 import Spark.Core.Internal.ContextStructures
-import Spark.Core.Internal.Utilities(show')
-import Spark.Core.Internal.DAGStructures
+import Spark.Common.Utilities(show')
+import Spark.Common.DAGStructures
 -- Required to import the instances.
-import Spark.Core.Internal.Paths()
+import Spark.Common.Paths()
 -- import Spark.Server.StructureParsing(parseInput, protoResponse)
-import Spark.Core.Internal.BrainStructures
-import Spark.Core.Internal.BrainFunctions
+import Spark.Compiler.BrainStructures
+import Spark.Compiler.BrainFunctions
 import Spark.Core.Internal.StructuredBuilder
-import Spark.Core.Internal.NodeBuilder
-import Spark.Core.Try
+import Spark.Common.NodeBuilder
+import Spark.Common.Try
 import qualified Proto.Karps.Proto.ApiInternal as PAI
 import qualified Proto.Karps.Proto.Graph as PG
-import Spark.Core.StructuresInternal
+import Spark.Common.StructuresInternal
 import Spark.Core.Dataset(UntypedNode)
-import Spark.Core.Internal.TypesFunctions()
-import Spark.Core.Try
-import Spark.Core.Internal.BrainStructures
-import Spark.Core.Internal.Utilities(myGroupBy, sh, traceHint)
+import Spark.Common.TypesFunctions()
+import Spark.Common.Try
+import Spark.Compiler.BrainStructures
+import Spark.Common.Utilities(myGroupBy, sh, traceHint)
 import Spark.Core.Internal.DatasetFunctions
-import Spark.Core.Internal.DatasetStructures(ComputeNode(..), NodeContext(..), unTypedLocality, StructureEdge(..), OperatorNode(..), onShape)
-import Spark.Core.Internal.OpStructures
-import Spark.Core.Internal.OpFunctions
-import Spark.Core.Internal.ComputeDag
-import Spark.Core.Internal.DAGStructures
-import Spark.Core.Internal.ProtoUtils
-import Spark.Core.Internal.NodeBuilder
+import Spark.Common.NodeStructures(ComputeNode(..), NodeContext(..), unTypedLocality, StructureEdge(..), OperatorNode(..), onShape)
+import Spark.Common.OpStructures
+import Spark.Common.OpFunctions
+import Spark.Common.ComputeDag
+import Spark.Common.DAGStructures
+import Spark.Common.ProtoUtils
 import Spark.Core.Internal.DatasetStd(literalBuilderD)
 import Spark.Server.Registry(nodeRegistry)
 import Spark.Core.Types

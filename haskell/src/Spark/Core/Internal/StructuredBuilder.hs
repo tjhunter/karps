@@ -32,7 +32,7 @@ import Control.Arrow ((&&&))
 import Formatting
 import Data.List(find)
 
-import Spark.Core.Internal.OpStructures
+import Spark.Common.OpStructures
 import Spark.Common.TypesStructures(DataType(..), StructField(..), StrictDataType(..), StructType(..), Nullable(..))
 import Spark.Common.TypesFunctions(isNumber)
 import Spark.Common.StructuresInternal(FieldName(..), unFieldPath, FieldPath)

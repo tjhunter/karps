@@ -19,13 +19,14 @@ import Spark.Core.Internal.ColumnFunctions
 import Spark.Core.Internal.DatasetStructures
 import Spark.Core.Internal.DatasetFunctions
 import Spark.Core.Internal.FunctionsInternals
-import Spark.Core.Internal.OpStructures
+import Spark.Common.NodeStructures
+import Spark.Common.OpStructures
 import Spark.Common.TypesStructures
 import Spark.Common.Utilities
 import Spark.Common.TypesFunctions(structTypeFromFields)
 import Spark.Common.Try
 import Spark.Common.StructuresInternal(unsafeFieldName)
-import Spark.Core.Internal.NodeBuilder(NodeBuilder, buildOpDDExtra, cniStandardOp)
+import Spark.Common.NodeBuilder(NodeBuilder, buildOpDDExtra, cniStandardOp)
 import qualified Proto.Karps.Proto.Std as PStd
 
 {-| Standard (inner) join on two sets of data.

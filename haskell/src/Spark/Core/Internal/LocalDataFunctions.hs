@@ -16,15 +16,16 @@ import qualified Data.List.NonEmpty as N
 import qualified Data.Vector as V
 import Control.Exception.Base(assert)
 
-import Spark.Core.Internal.DatasetFunctions
-import Spark.Core.Internal.DatasetStructures
 import Spark.Common.TypesFunctions
 import Spark.Common.TypesStructures
-import Spark.Core.Internal.OpStructures
-import Spark.Common.Utilities
-import Spark.Core.Internal.TypesGenerics(SQLTypeable, buildType)
+import Spark.Common.NodeStructures
+import Spark.Common.OpStructures
 import Spark.Common.StructuresInternal(emptyFieldPath)
+import Spark.Common.TypesGenerics(SQLTypeable, buildType)
+import Spark.Common.Utilities
 import Spark.Core.Row
+import Spark.Core.Internal.DatasetFunctions
+import Spark.Core.Internal.DatasetStructures
 
 constant :: (ToSQL a, SQLTypeable a) => a -> LocalData a
 constant cst =

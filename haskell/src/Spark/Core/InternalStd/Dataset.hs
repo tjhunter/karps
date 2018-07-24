@@ -8,9 +8,10 @@ This file contains all the operations that are then refered to by more
 module Spark.Core.InternalStd.Dataset where
 
 import Spark.Core.Internal.DatasetStructures
-import Spark.Core.Internal.NodeBuilder(cniStandardOp', NodeBuilder, buildOpD)
-import Spark.Core.Internal.OpStructures
+import Spark.Common.NodeBuilder(cniStandardOp', NodeBuilder, buildOpD)
+import Spark.Common.OpStructures
 import Spark.Common.Utilities
+import Spark.Common.NodeStructures
 import Spark.Core.Internal.DatasetFunctions
 import Spark.Core.Internal.Caching
 

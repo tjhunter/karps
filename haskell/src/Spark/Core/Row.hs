@@ -9,6 +9,6 @@ module Spark.Core.Row(
   ) where
 
 import Spark.Common.RowStructures
-import Spark.Core.Internal.RowGenerics
-import Spark.Core.Internal.RowGenericsFrom
+import Spark.Common.RowGenerics
+import Spark.Common.RowGenericsFrom
 import Spark.Common.RowUtils

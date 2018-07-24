@@ -31,11 +31,11 @@ module Spark.Core.Context(
 
 import Data.Text(pack)
 
-import Spark.Core.Internal.BrainStructures
+import Spark.Compiler.BrainStructures
 import Spark.Core.Internal.ContextStructures
 import Spark.Core.Internal.ContextIOInternal
 import Spark.Core.Internal.ContextInteractive
-import Spark.Core.Internal.RowGenericsFrom(FromSQL)
+import Spark.Common.RowGenericsFrom(FromSQL)
 
 
 -- | The default configuration if the Karps server is being run locally.

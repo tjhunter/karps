@@ -12,5 +12,5 @@ import Spark.Common.Try
 import Spark.Common.Utilities(forceRight)
 -- import Spark.Core.Internal.DatasetFunctions(asDF, emptyDataset, emptyLocalData)
 import Spark.Common.TypesStructures(SQLType(..))
-import Spark.Core.Internal.OpStructures
+import Spark.Common.OpStructures
 import qualified Proto.Karps.Proto.Io as PIO

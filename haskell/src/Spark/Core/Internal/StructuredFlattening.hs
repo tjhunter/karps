@@ -1,6 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TupleSections #-}
 
+-- TODO: move to Compiler
+
 {-| This module implements the core algebra of Karps with respect to
 structured transforms. It takes functional structured transforms and flattens
 them into simpler, flat projections.
@@ -21,15 +23,15 @@ import qualified Data.Map.Strict as M
 import Data.List.NonEmpty(NonEmpty(..))
 
 import Spark.Core.Internal.StructureFunctions
-import Spark.Core.Internal.OpStructures
-import Spark.Core.Internal.NodeBuilder(nbName)
+import Spark.Common.OpStructures
+import Spark.Common.NodeBuilder(nbName)
 import Spark.Common.ComputeDag
 import Spark.Core.Internal.ContextStructures(ComputeGraph)
 import Spark.Common.DAGStructures(Vertex(..), Edge(..), IndexedEdge(..), gIndexedEdges)
-import Spark.Core.Internal.BrainStructures(makeParentEdge, nodeAsVertex)
+import Spark.Compiler.BrainStructures(makeParentEdge, nodeAsVertex)
 import Spark.Common.TypesStructures(DataType(..), StrictDataType(Struct), StructType(..), StructField(..))
 import Spark.Common.TypesFunctions(extractFields, structType', extractFields2)
-import Spark.Core.Internal.DatasetStructures(OperatorNode(..), StructureEdge(ParentEdge), onOp, onPath, onType, onLocality)
+import Spark.Common.NodeStructures(OperatorNode(..), StructureEdge(ParentEdge), onOp, onPath, onType, onLocality)
 import Spark.Core.Internal.DatasetFunctions(filterParentNodes)
 import Spark.Core.InternalStd.Filter(filterBuilder)
 import Spark.Common.StructuresInternal(FieldName(..), FieldPath(..), NodePath, nodePathAppendSuffix)

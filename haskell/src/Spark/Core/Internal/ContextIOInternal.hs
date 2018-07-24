@@ -36,16 +36,17 @@ import Network.Wreq(responseBody)
 import System.Random(randomIO)
 
 import Spark.Core.Dataset
-import Spark.Core.Internal.BrainStructures
-import Spark.Core.Internal.Client
+import Spark.Compiler.BrainStructures
+import Spark.Compiler.Client
 import Spark.Core.Internal.ContextInternal
 import Spark.Common.ProtoUtils
 import Spark.Core.Internal.ContextStructures
 import Spark.Core.Internal.DatasetFunctions(untypedLocalData)
-import Spark.Core.Internal.DatasetStructures(UntypedLocalData, onShape, onId, onPath)
-import Spark.Core.Internal.OpStructures(NodeShape(..))
-import Spark.Core.Internal.RowGenericsFrom(cellToValue)
+import Spark.Common.NodeStructures(UntypedLocalData, onShape, onId, onPath)
+import Spark.Common.OpStructures(NodeShape(..))
+import Spark.Common.RowGenericsFrom(cellToValue)
 import Spark.Core.Row
+import Spark.Common.NodeStructures
 import Spark.Common.StructuresInternal
 import Spark.Common.Try
 import Spark.Common.Utilities

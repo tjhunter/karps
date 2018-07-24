@@ -44,7 +44,7 @@ import Spark.Core.Internal.CachingUntyped(uncache)
 import Spark.Common.Utilities
 import Spark.Core.Internal.LocalDataFunctions
 import Spark.Core.Internal.FunctionsInternals()
-import Spark.Core.Internal.OpStructures
+import Spark.Common.OpStructures
 import Spark.Core.Internal.AggregationFunctions
 import Spark.Common.TypesStructures(SQLType(..))
 import Spark.Core.Internal.Projections

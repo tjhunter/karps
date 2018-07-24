@@ -6,8 +6,8 @@ filterBuilder) where
 import Formatting
 
 import Spark.Core.Internal.LocalDataFunctions()
-import Spark.Core.Internal.NodeBuilder(cniStandardOp', NodeBuilder, buildOpD)
-import Spark.Core.Internal.OpStructures
+import Spark.Common.NodeBuilder(cniStandardOp', NodeBuilder, buildOpD)
+import Spark.Common.OpStructures
 import Spark.Common.TypesStructures
 import Spark.Common.Utilities
 import Spark.Common.TypesFunctions(extractFields2)

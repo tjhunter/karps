@@ -16,12 +16,13 @@ import Spark.Common.Try
 import Spark.Core.Row
 import Spark.Core.Internal.DatasetStructures
 import Spark.Core.Internal.DatasetFunctions
-import Spark.Core.Internal.OpStructures
-import Spark.Core.Internal.PathsUntyped()
+import Spark.Common.NodeStructures
+import Spark.Common.OpStructures
+import Spark.Common.PathsUntyped()
 import Spark.Common.TypesStructures
 import Spark.Common.TypesFunctions
 import Spark.Common.ProtoUtils
-import Spark.Core.Internal.NodeBuilder
+import Spark.Common.NodeBuilder
 import Spark.Common.Utilities
 import Spark.Common.RowUtils
 import qualified Proto.Karps.Proto.Std as PStd

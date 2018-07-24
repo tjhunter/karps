@@ -58,13 +58,14 @@ import Spark.Core.Internal.ColumnStructures
 import Spark.Core.Internal.DatasetFunctions
 import Spark.Core.Internal.DatasetStructures
 import Spark.Common.TypesStructures
+import Spark.Common.NodeStructures
 import Spark.Common.StructuresInternal
 import Spark.Common.TypesFunctions
-import Spark.Core.Internal.OpStructures
+import Spark.Common.OpStructures
 import Spark.Common.OpFunctions(prettyShowColOp, prettyShowColFun)
 import Spark.Core.Internal.AlgebraStructures
 import Spark.Common.Utilities
-import Spark.Core.Internal.TypesGenerics(SQLTypeable, buildType)
+import Spark.Common.TypesGenerics(SQLTypeable, buildType)
 import Spark.Common.Try
 
 -- ********** Public methods ********

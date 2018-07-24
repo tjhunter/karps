@@ -30,12 +30,13 @@ import Spark.Core.Internal.DatasetFunctions
 import Spark.Core.Internal.LocalDataFunctions()
 import Spark.Core.Internal.FunctionsInternals
 import Spark.Common.TypesFunctions(tupleType, structTypeFromFields)
-import Spark.Core.Internal.OpStructures
+import Spark.Common.OpStructures
 import Spark.Common.TypesStructures
 import Spark.Common.Utilities
 import Spark.Common.RowStructures(Cell)
 import Spark.Common.Try
 import Spark.Common.StructuresInternal
+import Spark.Common.NodeStructures
 import Spark.Core.Internal.CanRename
 -- import Spark.Proto.Std(Shuffle(..))
 

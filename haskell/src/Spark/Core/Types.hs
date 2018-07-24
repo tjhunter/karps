@@ -27,7 +27,7 @@ module Spark.Core.Types(
 ) where
 
 import Spark.Common.TypesStructures
-import Spark.Core.Internal.TypesGenerics
+import Spark.Common.TypesGenerics
 import Spark.Common.TypesFunctions
 import Spark.Common.StructuresInternal
 import Spark.Core.Internal.FunctionsInternals(TupleEquivalence(..), NameTuple(..))

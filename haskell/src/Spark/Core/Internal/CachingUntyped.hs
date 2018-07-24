@@ -17,8 +17,9 @@ import Spark.Core.Internal.Caching
 import Spark.Core.Internal.DatasetStructures
 import Spark.Core.Internal.DatasetStd
 import Spark.Core.Internal.DatasetFunctions
-import Spark.Core.Internal.OpStructures
-import Spark.Core.Internal.PathsUntyped()
+import Spark.Common.NodeStructures
+import Spark.Common.OpStructures
+import Spark.Common.PathsUntyped()
 import Spark.Common.DAGStructures
 import Spark.Common.StructuresInternal
 

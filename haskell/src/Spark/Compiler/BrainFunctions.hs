@@ -34,9 +34,9 @@ import Spark.Core.Internal.DatasetStd(localityToProto)
 import Spark.Common.DAGStructures
 import Spark.Core.Internal.DatasetFunctions(buildOpNode', filterParentNodes)
 import Spark.Common.OpFunctions(simpleShowOp, extraNodeOpData)
-import Spark.Core.Internal.OpStructures
+import Spark.Common.OpStructures
 import Spark.Core.Internal.Caching(opnameAutocache)
-import Spark.Core.Internal.DatasetStructures(StructureEdge(..), OperatorNode(..), onLocality, onType, onOp, onShape)
+import Spark.Common.NodeStructures(StructureEdge(..), OperatorNode(..), onLocality, onType, onOp, onShape)
 import Spark.Core.Internal.Display(displayGraph)
 import Spark.Core.InternalStd.Observable(localPackBuilder)
 import Spark.Common.TypesFunctions(structTypeTuple')

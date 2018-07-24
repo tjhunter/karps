@@ -35,7 +35,7 @@ import Data.Text(Text)
 
 import Spark.Core.Internal.ColumnStructures
 import Spark.Core.Internal.ColumnFunctions
-import Spark.Core.Internal.TypesGenerics(buildType)
+import Spark.Common.TypesGenerics(buildType)
 import Spark.Common.TypesStructures(StrictDataType(DoubleType, BoolType))
 import Spark.Core.Internal.StructuredBuilder
 import Spark.Common.TypesFunctions(mapDataType)

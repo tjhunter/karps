@@ -11,7 +11,7 @@ import Spark.Core.InternalStd.Filter
 import Spark.Core.InternalStd.Dataset
 import Spark.Core.InternalStd.Observable
 import Spark.Core.Internal.StructuredBuilder
-import Spark.Core.Internal.NodeBuilder
+import Spark.Common.NodeBuilder
 import Spark.Core.Internal.DatasetStd
 import Spark.Core.Internal.Joins
 import Spark.Core.Internal.StructureFunctions

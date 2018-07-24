@@ -12,11 +12,12 @@ import Data.Vector(Vector)
 
 import Spark.Core.Internal.DatasetStructures
 import Spark.Core.Internal.DatasetFunctions()
+import Spark.Common.NodeStructures
+import Spark.Common.OpStructures
 import Spark.Common.RowStructures
-import Spark.Common.TypesStructures
-import Spark.Core.Internal.OpStructures
 import Spark.Common.StructuresInternal
 import Spark.Common.Try
+import Spark.Common.TypesStructures
 
 {-| The data structure that implements the notion of data columns.
 

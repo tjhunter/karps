@@ -33,10 +33,11 @@ import Data.Text(Text)
 import Formatting
 -- import Debug.Trace
 
-import Spark.Core.Internal.DAGFunctions
+import Spark.Common.DAGFunctions
 import Spark.Common.DAGStructures
-import Spark.Core.Internal.DatasetStructures
+import Spark.Common.NodeStructures
 import Spark.Common.Utilities
+import Spark.Core.Internal.DatasetStructures
 -- import Spark.Common.StructuresInternal(NodeId)
 
 data NodeCachingType =

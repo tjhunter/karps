@@ -10,6 +10,6 @@ module Spark.IO.Inputs(
   jsonInfer
 ) where
 
-import Spark.Core.Internal.BrainStructures
+import Spark.Compiler.BrainStructures
 import Spark.IO.Internal.Json
 import Spark.IO.Internal.InputStructures

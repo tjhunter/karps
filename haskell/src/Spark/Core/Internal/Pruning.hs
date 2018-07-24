@@ -16,11 +16,12 @@ module Spark.Core.Internal.Pruning(
 import Data.HashMap.Strict as HM
 
 import Spark.Common.StructuresInternal(NodeId, NodePath, ComputationID)
-import Spark.Core.Internal.DatasetStructures(StructureEdge, OperatorNode, onId, NodeContext(..))
-import Spark.Core.Internal.DAGFunctions
+import Spark.Common.DAGFunctions
 import Spark.Common.DAGStructures
+import Spark.Common.NodeStructures(StructureEdge, OperatorNode, onId, NodeContext(..))
+import Spark.Common.OpStructures
 import Spark.Core.Internal.DatasetFunctions
-import Spark.Core.Internal.OpStructures
+
 
 
 {-| The status of a node being computed.

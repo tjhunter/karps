@@ -23,11 +23,12 @@ import Spark.Core.Internal.DatasetStructures
 import Spark.Core.Internal.ColumnStructures
 import Spark.Core.Internal.ColumnFunctions(unColumn')
 import Spark.Core.Internal.DatasetFunctions
-import Spark.Core.Internal.RowGenerics(ToSQL)
+import Spark.Common.RowGenerics(ToSQL)
 import Spark.Core.Internal.StructuredBuilder(AggSQLBuilder(..))
 import Spark.Core.Internal.LocalDataFunctions()
 import Spark.Core.Internal.FunctionsInternals
-import Spark.Core.Internal.OpStructures
+import Spark.Common.OpStructures
+import Spark.Common.NodeStructures
 import Spark.Common.TypesStructures
 import Spark.Common.Utilities
 import Spark.Common.StructuresInternal(emptyFieldPath)

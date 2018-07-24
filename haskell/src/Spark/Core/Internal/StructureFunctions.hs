@@ -32,12 +32,12 @@ import Formatting
 
 import Spark.Core.Internal.LocalDataFunctions()
 import Spark.Common.TypesFunctions(structTypeFromFields, extractFields)
-import Spark.Core.Internal.OpStructures
+import Spark.Common.OpStructures
 import Spark.Common.OpFunctions
 -- import Spark.Common.OpFunctions(aggOpFromProto, colOpFromProto)
 import Spark.Common.TypesStructures
 import Spark.Common.ProtoUtils
-import Spark.Core.Internal.NodeBuilder
+import Spark.Common.NodeBuilder
 
 import Spark.Core.Internal.StructuredBuilder
 import Spark.Common.Utilities

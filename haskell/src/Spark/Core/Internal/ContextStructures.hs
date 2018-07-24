@@ -20,11 +20,11 @@ import Data.Text(Text)
 import Control.Monad.State(StateT, State)
 import Control.Monad.Logger(LoggingT)
 
-import Spark.Core.Internal.BrainStructures(LocalSessionId, ComputeGraph, CompilerConf)
+import Spark.Compiler.BrainStructures(LocalSessionId, ComputeGraph, CompilerConf)
 import Spark.Common.DAGStructures(Graph)
-import Spark.Core.Internal.OpStructures(HdfsPath(..))
+import Spark.Common.OpStructures(HdfsPath(..))
+import Spark.Common.NodeStructures
 import Spark.Core.Internal.Pruning
-import Spark.Core.Internal.DatasetStructures(UntypedNode, StructureEdge,)
 
 -- | The configuration of a remote spark session in Karps.
 data SparkSessionConf = SparkSessionConf {

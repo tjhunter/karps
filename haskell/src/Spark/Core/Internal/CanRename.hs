@@ -21,6 +21,7 @@ import qualified Data.Text as T
 import Formatting
 
 import Spark.Common.Try
+import Spark.Common.NodeStructures
 import Spark.Common.StructuresInternal
 import Spark.Core.Internal.ColumnFunctions()
 import Spark.Core.Internal.ColumnStructures

@@ -39,6 +39,7 @@ import Data.Text(Text)
 import Spark.Common.Try
 import Spark.Common.StructuresInternal
 import Spark.Common.TypesStructures
+import Spark.Common.NodeStructures
 import Spark.Core.Internal.ColumnFunctions
 import Spark.Core.Internal.ColumnStructures
 import Spark.Core.Internal.DatasetFunctions
