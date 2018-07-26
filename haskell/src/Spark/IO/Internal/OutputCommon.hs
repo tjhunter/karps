@@ -24,7 +24,6 @@ import Spark.Core.Dataset
 
 import Spark.Core.Internal.ColumnStructures(UnknownReference, UntypedColumnData)
 import Spark.Core.Internal.ColumnFunctions(dropColReference)
-import Spark.Common.NodeStructures
 import Spark.Common.OpStructures(HdfsPath)
 import Spark.Common.Utilities
 import Spark.IO.Internal.InputStructures

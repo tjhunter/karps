@@ -11,7 +11,6 @@ import Spark.Core.Internal.DatasetStructures
 import Spark.Common.NodeBuilder(cniStandardOp', NodeBuilder, buildOpD)
 import Spark.Common.OpStructures
 import Spark.Common.Utilities
-import Spark.Common.NodeStructures
 import Spark.Core.Internal.DatasetFunctions
 import Spark.Core.Internal.Caching
 

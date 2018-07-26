@@ -59,7 +59,6 @@ import Spark.Common.Paths()
 import Spark.Common.DAGFunctions(buildVertexList, graphMapVertices)
 import Spark.Common.DAGStructures
 import Spark.Core.Internal.DatasetFunctions
-import Spark.Core.Internal.DatasetStructures
 import Spark.Common.Utilities
 import Spark.IO.Internal.InputStructures(extractResourcePath)
 

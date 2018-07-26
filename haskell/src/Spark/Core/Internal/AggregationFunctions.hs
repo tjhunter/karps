@@ -28,7 +28,6 @@ import Spark.Core.Internal.StructuredBuilder(AggSQLBuilder(..))
 import Spark.Core.Internal.LocalDataFunctions()
 import Spark.Core.Internal.FunctionsInternals
 import Spark.Common.OpStructures
-import Spark.Common.NodeStructures
 import Spark.Common.TypesStructures
 import Spark.Common.Utilities
 import Spark.Common.StructuresInternal(emptyFieldPath)

@@ -18,7 +18,6 @@ import Control.Exception.Base(assert)
 
 import Spark.Common.TypesFunctions
 import Spark.Common.TypesStructures
-import Spark.Common.NodeStructures
 import Spark.Common.OpStructures
 import Spark.Common.StructuresInternal(emptyFieldPath)
 import Spark.Common.TypesGenerics(SQLTypeable, buildType)

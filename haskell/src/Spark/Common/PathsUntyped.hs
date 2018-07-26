@@ -22,8 +22,6 @@ import Spark.Common.DAGStructures
 import Spark.Common.ComputeDag
 import Spark.Common.NodeFunctions
 import Spark.Common.NodeStructures
-import Spark.Core.Internal.DatasetStructures
-import Spark.Core.Internal.DatasetFunctions
 import Spark.Common.Paths
 import Spark.Common.StructuresInternal(unNodeId)
 import Spark.Common.Utilities

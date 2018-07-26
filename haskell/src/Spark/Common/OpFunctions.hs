@@ -37,7 +37,7 @@ import Data.ProtoLens.Message(Message)
 import Data.ProtoLens.Encoding(encodeMessage, decodeMessage)
 import Data.ProtoLens.TextFormat(showMessage)
 import Data.ProtoLens(def)
-import Lens.Micro((^.), (&), (.~))
+import Lens.Micro((&), (.~))
 
 import Spark.Common.Try
 import Spark.Common.OpStructures

@@ -20,7 +20,7 @@ import Formatting
 import qualified Data.Vector as V
 import Control.Monad.Except
 import Data.ProtoLens(def)
-import Lens.Micro((^.), (&), (.~))
+import Lens.Micro((&), (.~))
 
 import Spark.Common.TypesStructures
 import Spark.Common.RowStructures

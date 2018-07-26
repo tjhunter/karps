@@ -18,7 +18,6 @@ import Debug.Trace(trace)
 import Spark.Core.Internal.ColumnFunctions
 import Spark.Core.Internal.ColumnStructures
 import Spark.Core.Internal.DatasetStructures
-import Spark.Common.NodeStructures
 import Spark.Core.Internal.FunctionsInternals(projectColFunction2')
 import Spark.Common.Utilities
 

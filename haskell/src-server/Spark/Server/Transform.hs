@@ -50,7 +50,8 @@ import Spark.Common.Try
 import Spark.Compiler.BrainStructures
 import Spark.Common.Utilities(myGroupBy, sh, traceHint)
 import Spark.Core.Internal.DatasetFunctions
-import Spark.Common.NodeStructures(ComputeNode(..), NodeContext(..), unTypedLocality, StructureEdge(..), OperatorNode(..), onShape)
+import Spark.Core.Internal.DatasetStructures
+import Spark.Common.NodeStructures(ComputeNode(..), NodeContext(..), StructureEdge(..), OperatorNode(..), onShape)
 import Spark.Common.OpStructures
 import Spark.Common.OpFunctions
 import Spark.Common.ComputeDag

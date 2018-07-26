@@ -23,7 +23,6 @@ import Data.List(elemIndex)
 import Data.Maybe(catMaybes)
 import Data.Default
 import Formatting
-import GHC.Stack(prettyCallStack)
 import Lens.Family2((&), (.~))
 
 import Spark.Compiler.BrainStructures

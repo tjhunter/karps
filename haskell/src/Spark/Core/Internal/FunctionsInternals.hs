@@ -35,21 +35,20 @@ import qualified Data.Text as T
 import Control.Arrow
 import Formatting
 
+import Spark.Common.Utilities
+import Spark.Common.OpStructures
+import Spark.Common.Try
+import Spark.Common.TypesFunctions
+import Spark.Common.TypesGenerics(SQLTypeable, buildType)
+import Spark.Common.TypesStructures
+import Spark.Common.StructuresInternal
 import Spark.Core.Internal.ColumnStructures
 import Spark.Core.Internal.ColumnFunctions
 import Spark.Core.Internal.DatasetFunctions
 import Spark.Core.Internal.DatasetStd(broadcastPair)
 import Spark.Core.Internal.DatasetStructures
-import Spark.Common.NodeStructures
-import Spark.Common.Utilities
-import Spark.Common.TypesFunctions
 import Spark.Core.Internal.LocalDataFunctions
-import Spark.Common.TypesStructures
 import Spark.Core.Internal.Projections
-import Spark.Common.OpStructures
-import Spark.Common.TypesGenerics(SQLTypeable, buildType)
-import Spark.Common.StructuresInternal
-import Spark.Common.Try
 
 {-| The class of pairs of types that express the fact that some type a can
 be converted to a dataset of type b.

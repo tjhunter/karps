@@ -58,7 +58,6 @@ import Spark.Core.Internal.ColumnStructures
 import Spark.Core.Internal.DatasetFunctions
 import Spark.Core.Internal.DatasetStructures
 import Spark.Common.TypesStructures
-import Spark.Common.NodeStructures
 import Spark.Common.StructuresInternal
 import Spark.Common.TypesFunctions
 import Spark.Common.OpStructures

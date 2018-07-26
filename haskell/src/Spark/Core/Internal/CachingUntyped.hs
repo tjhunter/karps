@@ -14,7 +14,6 @@ module Spark.Core.Internal.CachingUntyped(
 import Control.Monad.Except
 
 import Spark.Core.Internal.Caching
-import Spark.Core.Internal.DatasetStructures
 import Spark.Core.Internal.DatasetStd
 import Spark.Core.Internal.DatasetFunctions
 import Spark.Common.NodeStructures

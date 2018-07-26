@@ -24,7 +24,6 @@ import Spark.Common.Try
 
 import Spark.Compiler.BrainStructures(ResourcePath, resourcePath, unResourcePath)
 import Spark.Common.OpStructures
-import Spark.Common.NodeStructures
 import Spark.Common.OpFunctions(decodeExtra', convertToExtra')
 import Spark.Common.ProtoUtils
 import qualified Proto.Karps.Proto.Io as PIO

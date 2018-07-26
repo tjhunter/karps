@@ -20,7 +20,6 @@ import Spark.Core.Internal.DatasetFunctions(asDF, emptyDataset, emptyLocalData)
 import Spark.Common.TypesStructures(SQLType(..))
 import Spark.Core.Internal.ContextStructures(SparkState)
 import Spark.Common.OpStructures
-import Spark.Common.NodeStructures
 import Spark.Common.OpFunctions(convertToExtra')
 import Spark.Core.Internal.ContextIOInternal(executeCommand1)
 import Spark.IO.Internal.InputStructures

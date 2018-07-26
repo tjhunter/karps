@@ -10,10 +10,9 @@ import Data.Vector(Vector)
 import qualified Data.Vector as V
 import qualified Data.Text as T
 
-import Spark.Core.Row
+import Spark.Common.RowStructures
 import Spark.Common.OpStructures
 import Spark.Common.StructuresInternal
-import Spark.Common.Try
 import Spark.Common.TypesStructures
 
 {-| (internal) The main data structure that represents a data node in the
@@ -96,11 +95,7 @@ nodeContext cn = NodeContext {
   }
 
 -- (internal) Phantom type tags for the locality
-data TypedLocality loc = TypedLocality { unTypedLocality :: !Locality } deriving (Eq, Show)
 data LocUnknown
--- TODO: move outside
-data LocLocal
-data LocDistributed
 
 {-| (internal/developer)
 The core data structure that represents an operator.
@@ -149,47 +144,12 @@ data NodeContext = NodeContext {
   ncLogicalDeps :: ![OperatorNode]
 }
 
-
-{-| A typed collection of distributed data.
-
-Most operations on datasets are type-checked by the Haskell
-compiler: the type tag associated to this dataset is guaranteed
-to be convertible to a proper Haskell type. In particular, building
-a Dataset of dynamic cells is guaranteed to never happen.
-
-If you want to do untyped operations and gain
-some flexibility, consider using UDataFrames instead.
-
-Computations with Datasets and observables are generally checked for
-correctness using the type system of Haskell.
--}
-type Dataset a = ComputeNode LocDistributed a
-
-
-{-|
-A unit of data that can be accessed by the user.
-
-This is a typed unit of data. The type is guaranteed to be a proper
-type accessible by the Haskell compiler (instead of simply a Cell
-type, which represents types only accessible at runtime).
-
-TODO(kps) rename to Observable
--}
-type LocalData a = ComputeNode LocLocal a
-
 -- (developer) The type for which we drop all the information expressed in
 -- types.
 --
 -- This is useful to express parent dependencies (pending a more type-safe
 -- interface)
 type UntypedNode = ComputeNode LocUnknown Cell
-
--- (internal) A dataset for which we have dropped type information.
--- Used internally by columns.
-type UntypedDataset = Dataset Cell
-
-{-| (internal) An observable which has no associated type information. -}
-type UntypedLocalData = LocalData Cell
 
 
 {-| The different paths of edges in the compute DAG of nodes, at the
@@ -210,6 +170,11 @@ the checks and computations are being done)
   ordering of the nodes. They are included in the id.
 -}
 data StructureEdge = ParentEdge | LogicalEdge deriving (Show, Eq)
+
+{-| A typed wrapper around the locality.
+-}
+data TypedLocality loc = TypedLocality { unTypedLocality :: !Locality } deriving (Eq, Show)
+
 
 instance Show OperatorNode where
   show (OperatorNode _ np _) = "OperatorNode[" ++ T.unpack (prettyNodePath np) ++ "]"

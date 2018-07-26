@@ -42,11 +42,11 @@ import Spark.Core.Internal.ContextInternal
 import Spark.Common.ProtoUtils
 import Spark.Core.Internal.ContextStructures
 import Spark.Core.Internal.DatasetFunctions(untypedLocalData)
-import Spark.Common.NodeStructures(UntypedLocalData, onShape, onId, onPath)
+import Spark.Core.Internal.DatasetStructures(UntypedLocalData)
+import Spark.Common.NodeStructures(onShape, onId, onPath)
 import Spark.Common.OpStructures(NodeShape(..))
 import Spark.Common.RowGenericsFrom(cellToValue)
 import Spark.Core.Row
-import Spark.Common.NodeStructures
 import Spark.Common.StructuresInternal
 import Spark.Common.Try
 import Spark.Common.Utilities

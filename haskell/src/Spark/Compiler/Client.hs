@@ -5,17 +5,19 @@
 
 module Spark.Compiler.Client where
 
-import Data.Text(Text)
-import Lens.Family2((^.), (&), (.~))
 import Data.Default(def)
+import Data.Text(Text)
+import Formatting
+import Lens.Family2((^.), (&), (.~))
 
 import Spark.Common.StructuresInternal
 import Spark.Common.ProtoUtils
+import Spark.Common.RowStructures(Cell)
 import Spark.Common.RowUtils()
+import Spark.Common.Try
 import Spark.Common.TypesStructures(DataType)
 import Spark.Common.TypesFunctions()
-import Spark.Common.RowStructures(Cell)
-import Spark.Common.Try
+import Spark.Common.Utilities
 import Spark.Compiler.BrainFunctions()
 import Spark.Compiler.BrainStructures(LocalSessionId, ComputeGraph)
 import qualified Proto.Karps.Proto.Computation as PC
@@ -87,6 +89,8 @@ instance FromProto PC.ComputationResult (NodePath, PossibleNodeStatus) where
   fromProto cr = do
     np <- extractMaybe' cr PC.maybe'localPath "local_path"
     case cr ^. PC.status of
+      PC.ResultStatus'Unrecognized x ->
+        tryError $ sformat ("FromProto PC.ComputationResult: unknwon result status: "%sh) x
       PC.UNUSED -> tryError "FromProto PC.ComputationResult: missing status"
       PC.SCHEDULED ->
         return (np, NodeQueued)

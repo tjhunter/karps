@@ -31,16 +31,15 @@ import System.IO.Unsafe(unsafePerformIO)
 import Control.Monad.Logger(runStdoutLoggingT)
 
 
-import Spark.Compiler.Client(BatchComputationResult)
-import Spark.Common.NodeStructures
-import Spark.Core.Internal.ContextStructures
-import Spark.Core.Internal.DatasetStructures
-import Spark.Core.Internal.DatasetFunctions(untypedLocalData, asObs')
-import Spark.Core.Internal.ContextIOInternal
 import Spark.Common.RowGenericsFrom(FromSQL, cellToValue)
 import Spark.Common.RowStructures(Cell)
 import Spark.Common.StructuresInternal
 import Spark.Common.Try
+import Spark.Compiler.Client(BatchComputationResult)
+import Spark.Core.Internal.ContextStructures
+import Spark.Core.Internal.DatasetStructures
+import Spark.Core.Internal.DatasetFunctions(untypedLocalData, asObs')
+import Spark.Core.Internal.ContextIOInternal
 
 -- The global session reference. Should not be accessed outside
 -- this file.

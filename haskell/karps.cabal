@@ -201,7 +201,7 @@ test-suite karps-test
                      , data-default
                      , formatting
                      , karps
-                     , hspec >= 2.0 && < 2.3
+                     , hspec >= 2.0 && < 2.5
                      , text
                      , raw-strings-qq
                      , QuickCheck
@@ -232,7 +232,7 @@ test-suite karps-test-integration
                      , data-default
                      , formatting
                      , karps
-                     , hspec >= 2.0 && < 2.4
+                     , hspec >= 2.0 && < 2.5
                      , text
                      , raw-strings-qq
                      , QuickCheck

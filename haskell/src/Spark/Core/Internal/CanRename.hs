@@ -25,7 +25,6 @@ import Spark.Common.NodeStructures
 import Spark.Common.StructuresInternal
 import Spark.Core.Internal.ColumnFunctions()
 import Spark.Core.Internal.ColumnStructures
-import Spark.Core.Internal.DatasetStructures
 import Spark.Common.Utilities
 
 -- | The class of types that can be renamed.

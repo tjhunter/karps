@@ -28,9 +28,7 @@ import Spark.Common.RowUtils
 import qualified Proto.Karps.Proto.Std as PStd
 import qualified Proto.Karps.Proto.Std_Fields as PStd
 import qualified Proto.Karps.Proto.Row as PRow
-import qualified Proto.Karps.Proto.Row_Fields as PRow
 import qualified Proto.Karps.Proto.Graph as PGraph
-import qualified Proto.Karps.Proto.Graph_Fields as PGraph
 
 {-| Returns the union of two datasets.
 

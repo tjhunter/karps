@@ -7,10 +7,9 @@ module Spark.Core.InternalStd.Observable(
 import qualified Spark.Core.InternalStd.Column as C
 import Spark.Core.Internal.DatasetStructures
 import Spark.Core.Internal.FunctionsInternals
-import Spark.Common.TypesGenerics(SQLTypeable)
 import Spark.Common.NodeBuilder
 import Spark.Common.OpStructures
-import Spark.Common.NodeStructures
+import Spark.Common.TypesGenerics(SQLTypeable)
 import Spark.Common.TypesStructures(DataType)
 import Spark.Common.TypesFunctions(structTypeTuple')
 import Spark.Common.Utilities

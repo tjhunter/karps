@@ -31,14 +31,11 @@ import Data.Maybe(mapMaybe)
 import Debug.Trace(trace)
 import Data.Text(Text)
 import Formatting
--- import Debug.Trace
 
 import Spark.Common.DAGFunctions
 import Spark.Common.DAGStructures
 import Spark.Common.NodeStructures
 import Spark.Common.Utilities
-import Spark.Core.Internal.DatasetStructures
--- import Spark.Common.StructuresInternal(NodeId)
 
 data NodeCachingType =
     -- Hinted caching. Will be fullfilled by the algorithm below.

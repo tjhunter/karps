@@ -6,18 +6,52 @@
 
 module Spark.Core.Internal.DatasetStructures where
 
-import Data.Vector(Vector)
-import qualified Data.Vector as V
-import qualified Data.Text as T
-
-import Spark.Common.StructuresInternal
 import Spark.Common.Try
 import Spark.Core.Row
 import Spark.Common.NodeStructures
 import Spark.Common.OpStructures
-import Spark.Common.TypesStructures
+
+{-| Phantom type for locality.
+-}
+data LocLocal
+data LocDistributed
+
+
+{-| A typed collection of distributed data.
+
+Most operations on datasets are type-checked by the Haskell
+compiler: the type tag associated to this dataset is guaranteed
+to be convertible to a proper Haskell type. In particular, building
+a Dataset of dynamic cells is guaranteed to never happen.
+
+If you want to do untyped operations and gain
+some flexibility, consider using UDataFrames instead.
+
+Computations with Datasets and observables are generally checked for
+correctness using the type system of Haskell.
+-}
+type Dataset a = ComputeNode LocDistributed a
+
+{-|
+A unit of data that can be accessed by the user.
+
+This is a typed unit of data. The type is guaranteed to be a proper
+type accessible by the Haskell compiler (instead of simply a Cell
+type, which represents types only accessible at runtime).
+
+TODO(kps) rename to Observable
+-}
+type LocalData a = ComputeNode LocLocal a
 
 type Observable a = LocalData a
+
+-- (internal) A dataset for which we have dropped type information.
+-- Used internally by columns.
+type UntypedDataset = Dataset Cell
+
+{-| (internal) An observable which has no associated type information. -}
+type UntypedLocalData = LocalData Cell
+
 
 
 {-|

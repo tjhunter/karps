@@ -12,7 +12,6 @@ import Data.Vector(Vector)
 
 import Spark.Core.Internal.DatasetStructures
 import Spark.Core.Internal.DatasetFunctions()
-import Spark.Common.NodeStructures
 import Spark.Common.OpStructures
 import Spark.Common.RowStructures
 import Spark.Common.StructuresInternal

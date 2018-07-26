@@ -1,6 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# OPTIONS_GHC -Wno-unused-top-binds #-}
+{-# OPTIONS_GHC -Wno-unused-matches #-}
 {-| Exposes some of Spark's joining algorithms.
 -}
 module Spark.Core.Internal.Joins(
@@ -14,19 +15,18 @@ module Spark.Core.Internal.Joins(
 
 import Control.Arrow
 
+import Spark.Common.NodeBuilder(NodeBuilder, buildOpDDExtra, cniStandardOp)
+import Spark.Common.OpStructures
+import Spark.Common.StructuresInternal(unsafeFieldName)
+import Spark.Common.Try
+import Spark.Common.TypesFunctions(structTypeFromFields)
+import Spark.Common.TypesStructures
+import Spark.Common.Utilities
 import Spark.Core.Internal.ColumnStructures
 import Spark.Core.Internal.ColumnFunctions
 import Spark.Core.Internal.DatasetStructures
 import Spark.Core.Internal.DatasetFunctions
 import Spark.Core.Internal.FunctionsInternals
-import Spark.Common.NodeStructures
-import Spark.Common.OpStructures
-import Spark.Common.TypesStructures
-import Spark.Common.Utilities
-import Spark.Common.TypesFunctions(structTypeFromFields)
-import Spark.Common.Try
-import Spark.Common.StructuresInternal(unsafeFieldName)
-import Spark.Common.NodeBuilder(NodeBuilder, buildOpDDExtra, cniStandardOp)
 import qualified Proto.Karps.Proto.Std as PStd
 
 {-| Standard (inner) join on two sets of data.
@@ -42,8 +42,8 @@ join' = joinInner'
 {-| Explicit inner join.
 -}
 joinInner :: Column ref1 key -> Column ref1 value1 -> Column ref2 key -> Column ref2 value2 -> Dataset (key, value1, value2)
-joinInner key1 val1 key2 val2 = unsafeCastDataset (forceRight df) where
-  df = joinInner' (untypedCol key1) (untypedCol val1) (untypedCol key2) (untypedCol val2)
+joinInner key1 val1 key2 val2 = undefined --unsafeCastDataset (forceRight df) where
+  --df = joinInner' (untypedCol key1) (untypedCol val1) (untypedCol key2) (untypedCol val2)
 
 {-| Untyped version of the inner join.
 -}
@@ -74,10 +74,10 @@ extra column.
 -- This is the low-level operation that is used to implement the other
 -- broadcast operations.
 joinObs :: (HasCallStack) => Column ref val -> LocalData val' -> Dataset (val, val')
-joinObs c ld =
+joinObs c ld = undefined
   -- TODO: has a forcing at the last moment so that we can at least
   -- have stronger guarantees in the type coercion.
-  unsafeCastDataset $ forceRight $ joinObs' (untypedCol c) (asObs' . pure . untypedLocalData $ ld)
+  --unsafeCastDataset $ forceRight $ joinObs' (untypedCol c) (asObs' . pure . untypedLocalData $ ld)
 
 {-| Broadcasts an observable along side a dataset to make it available as
 an extra column.
