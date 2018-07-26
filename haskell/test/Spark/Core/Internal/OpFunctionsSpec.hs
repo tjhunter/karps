@@ -10,7 +10,7 @@ import Text.RawString.QQ
 
 import Spark.Core.Functions
 import Spark.Core.TestUtils
-import Spark.Core.Internal.OpFunctions
+import Spark.Common.OpFunctions
 import Spark.Core.Internal.DatasetFunctions
 
 

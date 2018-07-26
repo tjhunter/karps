@@ -27,7 +27,7 @@ import Spark.Core.Internal.DatasetFunctions
 {-| The status of a node being computed.
 
 On purpose, it does not store data. This is meant to be
-only the control plane of the compuations.
+only the control plane of the computations.
 -}
 data NodeCacheStatus =
     NodeCacheRunning

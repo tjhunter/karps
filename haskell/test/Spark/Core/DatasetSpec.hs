@@ -6,14 +6,14 @@ import qualified Data.Text as T
 import Test.Hspec
 import qualified Data.Vector as V
 
+import Spark.Common.Utilities
+import Spark.Common.DAGStructures
+import Spark.Common.ComputeDag
+import Spark.Common.StructuresInternal
 import Spark.Core.Dataset
 import Spark.Core.Functions
 import Spark.Core.Column
-import Spark.Core.StructuresInternal
 import Spark.Core.Internal.ContextInternal
-import Spark.Core.Internal.Utilities
-import Spark.Core.Internal.DAGStructures
-import Spark.Core.Internal.ComputeDag
 
 nName :: String -> NodeName
 nName = NodeName . T.pack

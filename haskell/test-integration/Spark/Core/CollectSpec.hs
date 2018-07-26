@@ -13,7 +13,7 @@ import Spark.Core.Row
 import Spark.Core.Functions
 import Spark.Core.Column
 import Spark.Core.IntegrationUtilities
-import Spark.Core.Internal.Utilities
+import Spark.Common.Utilities
 import Spark.Core.SimpleAddSpec(xrun)
 
 -- Collecting a dataset made from a list should yield the same list (modulo

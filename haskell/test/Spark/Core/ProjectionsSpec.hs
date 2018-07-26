@@ -20,9 +20,9 @@ import Spark.Core.Dataset
 import Spark.Core.Column
 import Spark.Core.Row
 import Spark.Core.Types
-import Spark.Core.Try
-import Spark.Core.Internal.Utilities
-import Spark.Core.Internal.TypesFunctions
+import Spark.Common.Try
+import Spark.Common.Utilities
+import Spark.Common.TypesFunctions
 import Spark.Core.Internal.ColumnFunctions(unColumn')
 
 

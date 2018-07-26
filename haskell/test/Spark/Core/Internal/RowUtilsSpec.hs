@@ -12,9 +12,9 @@ import Data.Either(isRight)
 
 import Spark.Core.Types
 import Spark.Core.Row
-import Spark.Core.Internal.TypesFunctions
-import Spark.Core.Internal.RowGenericsFrom
-import Spark.Core.Internal.TypesStructuresRepr(DataTypeElementRepr)
+import Spark.Common.TypesFunctions
+import Spark.Common.RowGenericsFrom
+import Spark.Common.TypesStructuresRepr(DataTypeElementRepr)
 
 spec :: Spec
 spec = do

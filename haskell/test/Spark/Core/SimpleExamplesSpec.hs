@@ -17,7 +17,8 @@ import Spark.Core.Column
 import Spark.Core.TestUtils
 import qualified Spark.Core.ColumnFunctions as C
 import Spark.Core.Internal.DatasetStructures
-import Spark.Core.Internal.OpFunctions(extraNodeOpData)
+import Spark.Common.NodeStructures
+import Spark.Common.OpFunctions(extraNodeOpData)
 
 ds1 :: Dataset Int
 ds1 = dataset [1,2,3]
@@ -53,7 +54,7 @@ spec = do
       let ds1' = pack' . asCol $ ds1
       (nodeType <$> (asDF ds1)) `shouldBe` (nodeType <$> ds1')
   describe "simple json example" $ do
-    xit "packing and unpacking one column" $ do
+    xit2 "packing and unpacking one column" $ do
       let ds1' = pack' . asCol $ ds1
       return ()
       -- let d' = pretty . extraNodeOpData . nodeOp <$> ds1'

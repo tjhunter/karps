@@ -7,10 +7,49 @@ module Spark.Core.TypesSpec where
 import GHC.Generics (Generic)
 import Test.Hspec
 import Test.Hspec.QuickCheck
+import Test.QuickCheck
+import qualified Data.Text as T
+import qualified Data.Vector as V
 
+import Spark.Common.Utilities(failure)
 import Spark.Core.Types
-import Spark.Core.Internal.TypesFunctions
-import Spark.Core.Internal.TypesGenerics()
+import Spark.Common.TypesFunctions
+import Spark.Common.TypesStructures
+import Spark.Common.StructuresInternal(unsafeFieldName)
+import Spark.Common.TypesGenerics()
+
+
+-- QUICKCHECK INSTANCES
+-- TODO: move these outside to testing
+
+instance Arbitrary StructField where
+  arbitrary = do
+    name <- elements ["_1", "a", "b", "abc"]
+    dt <- arbitrary :: Gen DataType
+    return $ StructField (unsafeFieldName $ T.pack name) dt
+
+instance Arbitrary StructType where
+  arbitrary = do
+    fields <- listOf arbitrary
+    return . StructType . V.fromList $ fields
+
+instance Arbitrary StrictDataType where
+  arbitrary = do
+    idx <- elements [1,2] :: Gen Int
+    return $ case idx of
+      1 -> StringType
+      2 -> IntType
+      _ -> failure "Arbitrary StrictDataType"
+
+instance Arbitrary DataType where
+  arbitrary = do
+    x <- arbitrary
+    u <- arbitrary
+    return $ if x then
+      StrictType u
+    else
+      NullableType u
+
 
 data TestStruct1 = TestStruct1 {
   ts1f1 :: Int,

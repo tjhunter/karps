@@ -13,18 +13,19 @@ import Data.Default(def)
 import Data.Foldable(toList)
 import Formatting
 
-import Spark.Core.Try
+import Spark.Common.Try
 import Spark.Core.Functions
 import Spark.Core.Column
 import qualified Spark.Core.ColumnFunctions as C
 import Spark.Core.Internal.Caching
 -- Required for instance resolution
-import Spark.Core.StructuresInternal()
-import Spark.Core.Internal.BrainStructures(LocalSessionId, makeSessionId)
-import Spark.Core.Internal.DAGStructures
-import Spark.Core.Internal.DAGFunctions
+import Spark.Common.StructuresInternal()
+import Spark.Compiler.BrainStructures(LocalSessionId, makeSessionId)
+import Spark.Common.DAGStructures
+import Spark.Common.NodeStructures
+import Spark.Common.DAGFunctions
 import Spark.Core.Internal.DatasetStructures
-import Spark.Core.Internal.Utilities
+import Spark.Common.Utilities
 import Spark.Core.Internal.ContextStructures
 import Spark.Core.Internal.ContextInternal
 import Spark.Core.TestUtils

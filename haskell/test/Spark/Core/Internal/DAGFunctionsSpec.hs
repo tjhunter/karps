@@ -12,9 +12,9 @@ import qualified Data.ByteString.Char8 as C8
 import Control.Arrow((&&&))
 import Data.Foldable(toList)
 
-import Spark.Core.Internal.DAGStructures
-import Spark.Core.Internal.DAGFunctions
-import Spark.Core.Internal.Utilities
+import Spark.Common.DAGStructures
+import Spark.Common.DAGFunctions
+import Spark.Common.Utilities
 
 data MyV = MyV {
   mvId :: VertexId,

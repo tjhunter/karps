@@ -11,17 +11,18 @@ import qualified Data.Set as S
 import qualified Data.ByteString.Char8 as C8
 import qualified Data.Text as T
 
-import Spark.Core.StructuresInternal
+import Spark.Common.StructuresInternal
 import Spark.Core.Functions
 import Spark.Core.Column
 import Spark.Core.Dataset
 import Spark.Core.TestUtils
-import Spark.Core.Internal.Paths
-import Spark.Core.Internal.DAGStructures
-import Spark.Core.Internal.DAGFunctions
-import Spark.Core.Internal.ComputeDag
-import Spark.Core.Internal.PathsUntyped
-import Spark.Core.Internal.Utilities
+import Spark.Common.Paths
+import Spark.Common.DAGStructures
+import Spark.Common.DAGFunctions
+import Spark.Common.ComputeDag
+import Spark.Common.PathsUntyped
+import Spark.Common.Utilities
+import Spark.Common.NodeStructures
 import Spark.Core.Internal.DatasetFunctions
 import Spark.Core.Internal.DatasetStructures
 

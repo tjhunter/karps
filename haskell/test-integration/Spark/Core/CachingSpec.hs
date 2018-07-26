@@ -10,7 +10,7 @@ import Spark.Core.Context
 import Spark.Core.Functions
 import Spark.Core.Column
 import qualified Spark.Core.ColumnFunctions as C
-import Spark.Core.StructuresInternal(ComputationID(..))
+import Spark.Common.StructuresInternal(ComputationID(..))
 
 
 -- Collecting a dataset made from a list should yield the same list (modulo

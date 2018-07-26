@@ -10,7 +10,7 @@ import Spark.Core.Column
 import Spark.Core.Dataset
 import Spark.Core.Functions
 import Spark.Core.Types
-import Spark.Core.Internal.Utilities
+import Spark.Common.Utilities
 
 data Z
 data Y

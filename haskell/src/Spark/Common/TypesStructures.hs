@@ -145,34 +145,3 @@ instance ToProto P.SQLType DataType where
     x = case dt of
       (StrictType x') -> _st x'
       (NullableType x') -> _st x'
-
--- -- QUICKCHECK INSTANCES
--- -- TODO: move these outside to testing
--- 
--- instance Arbitrary StructField where
---   arbitrary = do
---     name <- elements ["_1", "a", "b", "abc"]
---     dt <- arbitrary :: Gen DataType
---     return $ StructField (FieldName $ T.pack name) dt
--- 
--- instance Arbitrary StructType where
---   arbitrary = do
---     fields <- listOf arbitrary
---     return . StructType . V.fromList $ fields
--- 
--- instance Arbitrary StrictDataType where
---   arbitrary = do
---     idx <- elements [1,2] :: Gen Int
---     return $ case idx of
---       1 -> StringType
---       2 -> IntType
---       _ -> failure "Arbitrary StrictDataType"
--- 
--- instance Arbitrary DataType where
---   arbitrary = do
---     x <- arbitrary
---     u <- arbitrary
---     return $ if x then
---       StrictType u
---     else
---       NullableType u
