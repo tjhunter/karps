@@ -45,7 +45,7 @@ import Spark.Core.Types
 import Spark.Compiler.BrainStructures
 import Spark.Compiler.BrainFunctions
 import Spark.Common.StructuresInternal(NodeId, NodePath, ComputationID(..))
-import Spark.Core.Internal.Caching
+import Spark.Compiler.Units.Caching
 import Spark.Core.Internal.CachingUntyped
 import Spark.Core.Internal.ContextStructures
 import Spark.Compiler.Client

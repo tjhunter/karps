@@ -12,7 +12,7 @@ import Spark.Common.NodeBuilder(cniStandardOp', NodeBuilder, buildOpD)
 import Spark.Common.OpStructures
 import Spark.Common.Utilities
 import Spark.Core.Internal.DatasetFunctions
-import Spark.Core.Internal.Caching
+import Spark.Compiler.Units.Caching
 
 {-| Automatically caches the dataset on a need basis, and performs deallocation
 when the dataset is not required.

@@ -17,7 +17,7 @@ import Spark.Common.Try
 import Spark.Core.Functions
 import Spark.Core.Column
 import qualified Spark.Core.ColumnFunctions as C
-import Spark.Core.Internal.Caching
+import Spark.Compiler.Units.Caching
 -- Required for instance resolution
 import Spark.Common.StructuresInternal()
 import Spark.Compiler.BrainStructures(LocalSessionId, makeSessionId)
