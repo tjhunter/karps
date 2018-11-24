@@ -19,6 +19,7 @@ project/plugins/project/
 
 # Specific
 haskell/.stack-work/
+haskell2/.stack-work/
 build/
 .DS_Store
 
