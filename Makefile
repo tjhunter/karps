@@ -2,7 +2,7 @@
 
 # The main targets for the users
 
-karps-py: haskell2/src/Proto python/karps2/proto python/karps2/c_core/karps_c.so
+karps-py: haskell2/src/Proto python/karps2/proto/karps python/karps2/c_core/karps_c.so
 	echo "karps-py"
 	
 
@@ -17,6 +17,8 @@ dev-clean: clean
 	rm -rf haskell2/src/Proto
 	rm -rf python/karps2/proto/karps
 	rm -rf python/karps2/proto/tensorflow
+	touch python/karps2/proto/__init__.py
+	touch Makefile
 
 # The development targets
 
@@ -26,7 +28,7 @@ protos:
 haskell2/src/Proto:
 	protoc --plugin=protoc-gen-haskell=`which proto-lens-protoc`     --haskell_out=./haskell2/src -I ./protobuf ./protobuf/karps/proto/*.proto ./protobuf/tensorflow/core/framework/*.proto
 
-python/karps2/proto:
+python/karps2/proto/karps:
 	mkdir -p python/karps2/proto/
 	protoc --python_out=python/karps2/proto/ --proto_path=./protobuf -I ./protobuf ./protobuf/karps/proto/*.proto ./protobuf/tensorflow/core/framework/*.proto
 

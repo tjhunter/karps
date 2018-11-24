@@ -672,6 +672,99 @@ instance Prelude.Bounded CompilingPhase where
         minBound = INITIAL
         maxBound = FINAL
 
+data CoreResponse = CoreResponse{_CoreResponse'error ::
+                                 !(Prelude.Maybe ErrorMessage),
+                                 _CoreResponse'succes :: !Data.ByteString.ByteString}
+                  deriving (Prelude.Show, Prelude.Eq, Prelude.Ord)
+
+instance (a ~ ErrorMessage, b ~ ErrorMessage, Prelude.Functor f) =>
+         Lens.Labels.HasLens "error" f CoreResponse CoreResponse a b where
+        lensOf _
+          = (Prelude..)
+              (Lens.Family2.Unchecked.lens _CoreResponse'error
+                 (\ x__ y__ -> x__{_CoreResponse'error = y__}))
+              (Data.ProtoLens.maybeLens Data.Default.Class.def)
+
+instance (a ~ Prelude.Maybe ErrorMessage,
+          b ~ Prelude.Maybe ErrorMessage, Prelude.Functor f) =>
+         Lens.Labels.HasLens "maybe'error" f CoreResponse CoreResponse a b
+         where
+        lensOf _
+          = (Prelude..)
+              (Lens.Family2.Unchecked.lens _CoreResponse'error
+                 (\ x__ y__ -> x__{_CoreResponse'error = y__}))
+              Prelude.id
+
+instance (a ~ Data.ByteString.ByteString,
+          b ~ Data.ByteString.ByteString, Prelude.Functor f) =>
+         Lens.Labels.HasLens "succes" f CoreResponse CoreResponse a b where
+        lensOf _
+          = (Prelude..)
+              (Lens.Family2.Unchecked.lens _CoreResponse'succes
+                 (\ x__ y__ -> x__{_CoreResponse'succes = y__}))
+              Prelude.id
+
+instance Data.Default.Class.Default CoreResponse where
+        def
+          = CoreResponse{_CoreResponse'error = Prelude.Nothing,
+                         _CoreResponse'succes = Data.ProtoLens.fieldDefault}
+
+instance Data.ProtoLens.Message CoreResponse where
+        descriptor
+          = let error__field_descriptor
+                  = Data.ProtoLens.FieldDescriptor "error"
+                      (Data.ProtoLens.MessageField ::
+                         Data.ProtoLens.FieldTypeDescriptor ErrorMessage)
+                      (Data.ProtoLens.OptionalField maybe'error)
+                      :: Data.ProtoLens.FieldDescriptor CoreResponse
+                succes__field_descriptor
+                  = Data.ProtoLens.FieldDescriptor "succes"
+                      (Data.ProtoLens.BytesField ::
+                         Data.ProtoLens.FieldTypeDescriptor Data.ByteString.ByteString)
+                      (Data.ProtoLens.PlainField Data.ProtoLens.Optional succes)
+                      :: Data.ProtoLens.FieldDescriptor CoreResponse
+              in
+              Data.ProtoLens.MessageDescriptor
+                (Data.Text.pack "karps.core.CoreResponse")
+                (Data.Map.fromList
+                   [(Data.ProtoLens.Tag 1, error__field_descriptor),
+                    (Data.ProtoLens.Tag 2, succes__field_descriptor)])
+                (Data.Map.fromList
+                   [("error", error__field_descriptor),
+                    ("succes", succes__field_descriptor)])
+
+data ErrorMessage = ErrorMessage{_ErrorMessage'message ::
+                                 !Data.Text.Text}
+                  deriving (Prelude.Show, Prelude.Eq, Prelude.Ord)
+
+instance (a ~ Data.Text.Text, b ~ Data.Text.Text,
+          Prelude.Functor f) =>
+         Lens.Labels.HasLens "message" f ErrorMessage ErrorMessage a b where
+        lensOf _
+          = (Prelude..)
+              (Lens.Family2.Unchecked.lens _ErrorMessage'message
+                 (\ x__ y__ -> x__{_ErrorMessage'message = y__}))
+              Prelude.id
+
+instance Data.Default.Class.Default ErrorMessage where
+        def
+          = ErrorMessage{_ErrorMessage'message = Data.ProtoLens.fieldDefault}
+
+instance Data.ProtoLens.Message ErrorMessage where
+        descriptor
+          = let message__field_descriptor
+                  = Data.ProtoLens.FieldDescriptor "message"
+                      (Data.ProtoLens.StringField ::
+                         Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+                      (Data.ProtoLens.PlainField Data.ProtoLens.Optional message)
+                      :: Data.ProtoLens.FieldDescriptor ErrorMessage
+              in
+              Data.ProtoLens.MessageDescriptor
+                (Data.Text.pack "karps.core.ErrorMessage")
+                (Data.Map.fromList
+                   [(Data.ProtoLens.Tag 1, message__field_descriptor)])
+                (Data.Map.fromList [("message", message__field_descriptor)])
+
 data GraphTransformResponse = GraphTransformResponse{_GraphTransformResponse'pinnedGraph
                                                      ::
                                                      !(Prelude.Maybe Proto.Karps.Proto.Graph.Graph),
@@ -835,6 +928,169 @@ instance Prelude.Enum MessageSeverity where
 instance Prelude.Bounded MessageSeverity where
         minBound = INFO
         maxBound = FATAL
+
+data NodeBuilderRequest = NodeBuilderRequest{_NodeBuilderRequest'opName
+                                             :: !Data.Text.Text,
+                                             _NodeBuilderRequest'extra ::
+                                             !(Prelude.Maybe Proto.Karps.Proto.Graph.OpExtra),
+                                             _NodeBuilderRequest'parents ::
+                                             ![Proto.Karps.Proto.Graph.Node]}
+                        deriving (Prelude.Show, Prelude.Eq, Prelude.Ord)
+
+instance (a ~ Data.Text.Text, b ~ Data.Text.Text,
+          Prelude.Functor f) =>
+         Lens.Labels.HasLens "opName" f NodeBuilderRequest
+         NodeBuilderRequest a b where
+        lensOf _
+          = (Prelude..)
+              (Lens.Family2.Unchecked.lens _NodeBuilderRequest'opName
+                 (\ x__ y__ -> x__{_NodeBuilderRequest'opName = y__}))
+              Prelude.id
+
+instance (a ~ Proto.Karps.Proto.Graph.OpExtra,
+          b ~ Proto.Karps.Proto.Graph.OpExtra, Prelude.Functor f) =>
+         Lens.Labels.HasLens "extra" f NodeBuilderRequest NodeBuilderRequest
+         a b where
+        lensOf _
+          = (Prelude..)
+              (Lens.Family2.Unchecked.lens _NodeBuilderRequest'extra
+                 (\ x__ y__ -> x__{_NodeBuilderRequest'extra = y__}))
+              (Data.ProtoLens.maybeLens Data.Default.Class.def)
+
+instance (a ~ Prelude.Maybe Proto.Karps.Proto.Graph.OpExtra,
+          b ~ Prelude.Maybe Proto.Karps.Proto.Graph.OpExtra,
+          Prelude.Functor f) =>
+         Lens.Labels.HasLens "maybe'extra" f NodeBuilderRequest
+         NodeBuilderRequest a b where
+        lensOf _
+          = (Prelude..)
+              (Lens.Family2.Unchecked.lens _NodeBuilderRequest'extra
+                 (\ x__ y__ -> x__{_NodeBuilderRequest'extra = y__}))
+              Prelude.id
+
+instance (a ~ [Proto.Karps.Proto.Graph.Node],
+          b ~ [Proto.Karps.Proto.Graph.Node], Prelude.Functor f) =>
+         Lens.Labels.HasLens "parents" f NodeBuilderRequest
+         NodeBuilderRequest a b where
+        lensOf _
+          = (Prelude..)
+              (Lens.Family2.Unchecked.lens _NodeBuilderRequest'parents
+                 (\ x__ y__ -> x__{_NodeBuilderRequest'parents = y__}))
+              Prelude.id
+
+instance Data.Default.Class.Default NodeBuilderRequest where
+        def
+          = NodeBuilderRequest{_NodeBuilderRequest'opName =
+                                 Data.ProtoLens.fieldDefault,
+                               _NodeBuilderRequest'extra = Prelude.Nothing,
+                               _NodeBuilderRequest'parents = []}
+
+instance Data.ProtoLens.Message NodeBuilderRequest where
+        descriptor
+          = let opName__field_descriptor
+                  = Data.ProtoLens.FieldDescriptor "op_name"
+                      (Data.ProtoLens.StringField ::
+                         Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+                      (Data.ProtoLens.PlainField Data.ProtoLens.Optional opName)
+                      :: Data.ProtoLens.FieldDescriptor NodeBuilderRequest
+                extra__field_descriptor
+                  = Data.ProtoLens.FieldDescriptor "extra"
+                      (Data.ProtoLens.MessageField ::
+                         Data.ProtoLens.FieldTypeDescriptor Proto.Karps.Proto.Graph.OpExtra)
+                      (Data.ProtoLens.OptionalField maybe'extra)
+                      :: Data.ProtoLens.FieldDescriptor NodeBuilderRequest
+                parents__field_descriptor
+                  = Data.ProtoLens.FieldDescriptor "parents"
+                      (Data.ProtoLens.MessageField ::
+                         Data.ProtoLens.FieldTypeDescriptor Proto.Karps.Proto.Graph.Node)
+                      (Data.ProtoLens.RepeatedField Data.ProtoLens.Unpacked parents)
+                      :: Data.ProtoLens.FieldDescriptor NodeBuilderRequest
+              in
+              Data.ProtoLens.MessageDescriptor
+                (Data.Text.pack "karps.core.NodeBuilderRequest")
+                (Data.Map.fromList
+                   [(Data.ProtoLens.Tag 1, opName__field_descriptor),
+                    (Data.ProtoLens.Tag 2, extra__field_descriptor),
+                    (Data.ProtoLens.Tag 3, parents__field_descriptor)])
+                (Data.Map.fromList
+                   [("op_name", opName__field_descriptor),
+                    ("extra", extra__field_descriptor),
+                    ("parents", parents__field_descriptor)])
+
+data NodeBuilderResponse = NodeBuilderResponse{_NodeBuilderResponse'error
+                                               :: !(Prelude.Maybe ErrorMessage),
+                                               _NodeBuilderResponse'success ::
+                                               !(Prelude.Maybe Proto.Karps.Proto.Graph.Node)}
+                         deriving (Prelude.Show, Prelude.Eq, Prelude.Ord)
+
+instance (a ~ ErrorMessage, b ~ ErrorMessage, Prelude.Functor f) =>
+         Lens.Labels.HasLens "error" f NodeBuilderResponse
+         NodeBuilderResponse a b where
+        lensOf _
+          = (Prelude..)
+              (Lens.Family2.Unchecked.lens _NodeBuilderResponse'error
+                 (\ x__ y__ -> x__{_NodeBuilderResponse'error = y__}))
+              (Data.ProtoLens.maybeLens Data.Default.Class.def)
+
+instance (a ~ Prelude.Maybe ErrorMessage,
+          b ~ Prelude.Maybe ErrorMessage, Prelude.Functor f) =>
+         Lens.Labels.HasLens "maybe'error" f NodeBuilderResponse
+         NodeBuilderResponse a b where
+        lensOf _
+          = (Prelude..)
+              (Lens.Family2.Unchecked.lens _NodeBuilderResponse'error
+                 (\ x__ y__ -> x__{_NodeBuilderResponse'error = y__}))
+              Prelude.id
+
+instance (a ~ Proto.Karps.Proto.Graph.Node,
+          b ~ Proto.Karps.Proto.Graph.Node, Prelude.Functor f) =>
+         Lens.Labels.HasLens "success" f NodeBuilderResponse
+         NodeBuilderResponse a b where
+        lensOf _
+          = (Prelude..)
+              (Lens.Family2.Unchecked.lens _NodeBuilderResponse'success
+                 (\ x__ y__ -> x__{_NodeBuilderResponse'success = y__}))
+              (Data.ProtoLens.maybeLens Data.Default.Class.def)
+
+instance (a ~ Prelude.Maybe Proto.Karps.Proto.Graph.Node,
+          b ~ Prelude.Maybe Proto.Karps.Proto.Graph.Node,
+          Prelude.Functor f) =>
+         Lens.Labels.HasLens "maybe'success" f NodeBuilderResponse
+         NodeBuilderResponse a b where
+        lensOf _
+          = (Prelude..)
+              (Lens.Family2.Unchecked.lens _NodeBuilderResponse'success
+                 (\ x__ y__ -> x__{_NodeBuilderResponse'success = y__}))
+              Prelude.id
+
+instance Data.Default.Class.Default NodeBuilderResponse where
+        def
+          = NodeBuilderResponse{_NodeBuilderResponse'error = Prelude.Nothing,
+                                _NodeBuilderResponse'success = Prelude.Nothing}
+
+instance Data.ProtoLens.Message NodeBuilderResponse where
+        descriptor
+          = let error__field_descriptor
+                  = Data.ProtoLens.FieldDescriptor "error"
+                      (Data.ProtoLens.MessageField ::
+                         Data.ProtoLens.FieldTypeDescriptor ErrorMessage)
+                      (Data.ProtoLens.OptionalField maybe'error)
+                      :: Data.ProtoLens.FieldDescriptor NodeBuilderResponse
+                success__field_descriptor
+                  = Data.ProtoLens.FieldDescriptor "success"
+                      (Data.ProtoLens.MessageField ::
+                         Data.ProtoLens.FieldTypeDescriptor Proto.Karps.Proto.Graph.Node)
+                      (Data.ProtoLens.OptionalField maybe'success)
+                      :: Data.ProtoLens.FieldDescriptor NodeBuilderResponse
+              in
+              Data.ProtoLens.MessageDescriptor
+                (Data.Text.pack "karps.core.NodeBuilderResponse")
+                (Data.Map.fromList
+                   [(Data.ProtoLens.Tag 1, error__field_descriptor),
+                    (Data.ProtoLens.Tag 2, success__field_descriptor)])
+                (Data.Map.fromList
+                   [("error", error__field_descriptor),
+                    ("success", success__field_descriptor)])
 
 data NodeId = NodeId{_NodeId'value :: !Data.Text.Text}
             deriving (Prelude.Show, Prelude.Eq, Prelude.Ord)
@@ -1298,6 +1554,13 @@ error
   = Lens.Labels.lensOf
       ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "error")
 
+extra ::
+      forall f s t a b . Lens.Labels.HasLens "extra" f s t a b =>
+        Lens.Family2.LensLike f s t a b
+extra
+  = Lens.Labels.lensOf
+      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "extra")
+
 failures ::
          forall f s t a b . Lens.Labels.HasLens "failures" f s t a b =>
            Lens.Family2.LensLike f s t a b
@@ -1349,6 +1612,20 @@ maybe'computation ::
 maybe'computation
   = Lens.Labels.lensOf
       ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "maybe'computation")
+
+maybe'error ::
+            forall f s t a b . Lens.Labels.HasLens "maybe'error" f s t a b =>
+              Lens.Family2.LensLike f s t a b
+maybe'error
+  = Lens.Labels.lensOf
+      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "maybe'error")
+
+maybe'extra ::
+            forall f s t a b . Lens.Labels.HasLens "maybe'extra" f s t a b =>
+              Lens.Family2.LensLike f s t a b
+maybe'extra
+  = Lens.Labels.lensOf
+      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "maybe'extra")
 
 maybe'functionalGraph ::
                       forall f s t a b .
@@ -1426,6 +1703,20 @@ maybe'stamp
   = Lens.Labels.lensOf
       ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "maybe'stamp")
 
+maybe'success ::
+              forall f s t a b . Lens.Labels.HasLens "maybe'success" f s t a b =>
+                Lens.Family2.LensLike f s t a b
+maybe'success
+  = Lens.Labels.lensOf
+      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "maybe'success")
+
+message ::
+        forall f s t a b . Lens.Labels.HasLens "message" f s t a b =>
+          Lens.Family2.LensLike f s t a b
+message
+  = Lens.Labels.lensOf
+      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "message")
+
 messages ::
          forall f s t a b . Lens.Labels.HasLens "messages" f s t a b =>
            Lens.Family2.LensLike f s t a b
@@ -1446,6 +1737,20 @@ nodeMap ::
 nodeMap
   = Lens.Labels.lensOf
       ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "nodeMap")
+
+opName ::
+       forall f s t a b . Lens.Labels.HasLens "opName" f s t a b =>
+         Lens.Family2.LensLike f s t a b
+opName
+  = Lens.Labels.lensOf
+      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "opName")
+
+parents ::
+        forall f s t a b . Lens.Labels.HasLens "parents" f s t a b =>
+          Lens.Family2.LensLike f s t a b
+parents
+  = Lens.Labels.lensOf
+      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "parents")
 
 path ::
      forall f s t a b . Lens.Labels.HasLens "path" f s t a b =>
@@ -1525,6 +1830,20 @@ steps ::
 steps
   = Lens.Labels.lensOf
       ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "steps")
+
+succes ::
+       forall f s t a b . Lens.Labels.HasLens "succes" f s t a b =>
+         Lens.Family2.LensLike f s t a b
+succes
+  = Lens.Labels.lensOf
+      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "succes")
+
+success ::
+        forall f s t a b . Lens.Labels.HasLens "success" f s t a b =>
+          Lens.Family2.LensLike f s t a b
+success
+  = Lens.Labels.lensOf
+      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "success")
 
 successes ::
           forall f s t a b . Lens.Labels.HasLens "successes" f s t a b =>

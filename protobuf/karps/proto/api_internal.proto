@@ -185,3 +185,25 @@ message AnalysisMessage {
     MessageSeverity level = 6;
     string stack_trace_pretty = 7;
 }
+
+// ******* Communication with python (low level) *******
+
+message NodeBuilderRequest {
+    string op_name = 1;
+    OpExtra extra = 2;
+    repeated Node parents = 3;
+}
+
+message NodeBuilderResponse {
+    ErrorMessage error = 1;
+    Node success = 2;
+}
+
+message ErrorMessage {
+    string message = 1;
+}
+
+message CoreResponse {
+    ErrorMessage error = 1;
+    bytes succes = 2;    
+}

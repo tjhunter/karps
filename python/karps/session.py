@@ -15,6 +15,7 @@ __all__ = ['Session', 'session']
 
 logger = logging.getLogger('karps')
 
+
 class Session(object):
   """ A session in Karps.
 

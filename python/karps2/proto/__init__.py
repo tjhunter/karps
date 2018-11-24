@@ -4,7 +4,7 @@ from .karps.proto import graph_pb2
 from .karps.proto import interface_pb2
 from .karps.proto import io_pb2
 from .karps.proto import profiling_pb2
-from .karps.proto import  row_pb2
+from .karps.proto import row_pb2
 from .karps.proto import std_pb2
 from .karps.proto import structured_transform_pb2
 from .karps.proto import types_pb2

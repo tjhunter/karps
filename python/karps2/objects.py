@@ -2,7 +2,13 @@
 The basic objects of the Karps API: DataFrames, Columns, Observables.
 """
 
+from typing import List
+
+from .proto import structured_transform_pb2 as st
 from .proto import graph_pb2 as gpb
+from .proto import types_pb2
+from .types import DataType
+from .utils import Path
 
 
 class HasArithmeticOps(object):
@@ -26,36 +32,49 @@ class AbstractColumn(object):
     """
     pass
 
+    def kp_as_dataframe(self): pass
+
 
 class AbstractNode(object):
     """ The base class for observables or dataframes.
     """
 
+    def __init__(self,
+                 node_p: gpb.Node,
+                 parents,  # type: List[AbstractNode]
+                 deps,  # type: List[AbstractNode]
+                 session
+                 ):
+        self._node_p = node_p
+        self._parents = parents
+        self._logical_dependencies = deps
+        self._session = session
+
     @property
     def kp_path(self):
-        return self._path
+        return Path(self._node_p.path)
 
     @property
     def kp_op_name(self):
-        return self._op_name
+        return self._node_p.op_name
 
     @property
     def kp_type(self):
         """ The data type of this column """
-        return DataType(self._type_p)
+        return DataType(self._node_p.infered_type)
 
     @property
     def kp_is_distributed(self):
-        return self._is_distributed
+        return self._node_p.locality == "DISTRIBUTED"
 
     @property
     def kp_is_local(self):
-        return not self.is_distributed
+        return self._node_p.locality == "DISTRIBUTED"
 
     @property
     def kp_op_extra(self):
         """ Returns a proto """
-        return self._op_extra_p
+        return self._node_p.op_extra
 
     @property
     def kp_parents(self):
@@ -79,13 +98,30 @@ class Column(AbstractColumn, HasArithmeticOps):
     """ A column of data isolated from a dataframe.
     """
 
+    def __init__(self,
+                 ref,  # type: DataFrame
+                 column_p: st.Column,
+                 dt: DataType,
+                 field_name: str = None):
+        AbstractColumn.__init__(self)
+        HasArithmeticOps.__init__(self)
+        self._ref = ref
+        self._column_p = column_p
+        self._dt = dt
+        self._field_name = field_name
+
     def __repr__(self):
-        return "{}:{}<-{}".format(self._pretty_name(), self.type, self.reference)
+        return "{}:{}<-{}".format(self._field_name, self.kp_reference, self.kp_type)
 
     @property
     def kp_reference(self):
         """ The referring dataframe """
         return self._ref
+
+    @property
+    def kp_type(self):
+        """ The data type of this column """
+        return self._dt
 
     def kp_as_column(self):
         """ A column, seen as a column.
@@ -94,9 +130,6 @@ class Column(AbstractColumn, HasArithmeticOps):
 
     def kp_as_dataframe(self, name_hint=None):
         """ A column, seen as a dataframe (referring to itself).
-
-        This causes all the columns to be resolved and coalesced. Intermediary dataframes may
-        also be created if some broadcasts need to happen.
         """
         pass
 
@@ -104,6 +137,16 @@ class Column(AbstractColumn, HasArithmeticOps):
 class DataFrame(AbstractColumn, AbstractNode, HasArithmeticOps):
     """ A dataframe.
     """
+
+    def __init__(self,
+                 node_p: gpb.Node,
+                 parents,  # type: List[AbstractNode]
+                 deps,  # type: List[AbstractNode]
+                 session
+                 ):
+        AbstractNode.__init__(self, node_p, parents, deps, session)
+        AbstractColumn.__init__(self)
+        HasArithmeticOps.__init__(self)
 
     @property
     def kp_reference(self):  # type DataFrame
@@ -129,4 +172,41 @@ class Observable(AbstractNode, HasArithmeticOps):
 
     Do not call the constructor, use build_observable() instead.
     """
+
+
+def make_dataframe(
+    session,
+    op_name: str,
+    op_type: DataType,
+    extra=None,
+    parents=None,
+    deps=None):
+    parents = parents or []
+    deps = deps or []
+    if isinstance(op_type, DataType):
+        op_type = op_type.to_proto
+    assert isinstance(op_type, types_pb2.SQLType), (op_type, type(op_type))
+    content = extra.SerializeToString() if extra else None
+    content_str = str(extra) if extra else None
+    oe_p = gpb.OpExtra(content=content, content_debug=content_str)
+    node_p = gpb.Node(
+        locality=gpb.DISTRIBUTED,
+        path=gpb.Path(path=['TODO']),
+        op_name=op_name,
+        op_extra=oe_p,
+        infered_type=op_type)
+    return DataFrame(node_p, parents, deps, session)
+
+
+def call_op(op_name, extra=None, parents=None, deps=None):
+    def clean(obj):
+        if not isinstance(obj, AbstractNode):
+            raise ValueError("{}:{}".format(type(obj), obj))
+    parents = parents or []
+    parents = [clean(obj) for obj in parents]
+    deps = deps or []
+    deps = [clean(obj) for obj in deps]
+    
+    pass
+
 
