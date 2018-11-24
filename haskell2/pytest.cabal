@@ -38,18 +38,6 @@ library
       text
   default-language: Haskell2010
 
-executable pytest-exe
-  main-is: Main.hs
-  other-modules:
-      Paths_pytest
-  hs-source-dirs:
-      app
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N
-  build-depends:
-      base >=4.7 && <5
-    , pytest
-  default-language: Haskell2010
-
 test-suite pytest-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
