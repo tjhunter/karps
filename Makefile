@@ -6,6 +6,13 @@ karps-py: haskell2/src/Proto python/karps2/c_core/karps_c.so
 	echo "karps-py"
 	
 
+clean:
+	rm haskell2/src/Lib.hi
+	rm haskell2/src/Lib.o
+	rm haskell2/src/Lib_stub.h
+	rm python/karps2/c_core/karps_c.so
+
+
 dev-clean:
 	rm -rf haskell2/src/Proto
 

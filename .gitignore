@@ -20,8 +20,13 @@ project/plugins/project/
 # Specific
 haskell/.stack-work/
 haskell2/.stack-work/
+haskell2/src/Lib.hi
+haskell2/src/Lib.o
+haskell2/src/Lib_stub.h
 build/
 .DS_Store
+python/karps2/c_core/karps_c.so
+
 
 # Python
 *.pyc
