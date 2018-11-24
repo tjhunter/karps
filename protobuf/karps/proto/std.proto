@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package karps.core;
+
+import "karps/proto/computation.proto";
+import "karps/proto/structured_transform.proto";
+import "karps/proto/graph.proto"; // For the locality.
+import "karps/proto/types.proto";
+
+// The standard library of messages.
+// Each of these messages corresponds to some extra op data that needs
+// to be provided to the relevant operator.
+
+// The placeholder element.
+// It needs the whole shape to be described.
+message Placeholder {
+  Locality locality = 1;
+  SQLType data_type = 2;
+};
+
+// Low-level shuffle. (structured groupby, or keyed groupby.)
+message Shuffle {
+  Aggregation agg_op = 1;
+}
+
+message StructuredTransform {
+  Column col_op = 1;
+};
+
+message LocalStructuredTransform {
+    Column col_op = 1;
+};
+
+// The structured reduction.
+message StructuredReduce {
+  Aggregation agg_op = 1;
+};
+
+// A pointer to an observable that has already been computed,
+// and whose content is assumed to be reusable elsewhere.
+// This is not meant to be used for distributed nodes, just
+// local nodes.
+message LocalPointer {
+    ComputationId computation = 1;
+    Path local_path = 2;
+    SQLType data_type = 4;
+};
+
+// The data associated with a join.
+// This so far only contains information about the type of join
+// being performed.
+message Join {
+    enum JoinType {
+        INNER = 0;
+    }
+    JoinType joint_type = 1;
+};

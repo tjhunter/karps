@@ -2,36 +2,28 @@
 
 # The main targets for the users
 
-karps-py:
+karps-py: haskell2/src/Proto python/karps2/c_core/karps_c.so
 	echo "karps-py"
 	
 
-karps-spark: dist/karps-spark.jar
-	echo "karps-spark"
-
 dev-clean:
-	rm -f lib/karps-eta.jar
-	rm -rf haskell/src/Proto
-	cd eta && etlas clean
+	rm -rf haskell2/src/Proto
 
 # The development targets
 
 protos:
 	echo "updating the proto"
 
-eta: lib/karps-eta.jar
-
-haskell/src/Proto:
+haskell2/src/Proto:
 	echo "proto"
-	protoc --plugin=protoc-gen-haskell=`which proto-lens-protoc`     --haskell_out=./haskell/src -I ./src/main/protobuf ./src/main/protobuf/karps/proto/*.proto ./src/main/protobuf/tensorflow/core/framework/*.proto
+	protoc --plugin=protoc-gen-haskell=`which proto-lens-protoc`     --haskell_out=./haskell2/src -I ./protobuf ./protobuf/karps/proto/*.proto ./protobuf/tensorflow/core/framework/*.proto
+
+python/karps2/c_core/karps_c.so:
+	cd haskell2 && stack build
+	cd haskell2 && stack ghc -- -c -dynamic -fPIC src/Lib.hs 
+	cd haskell2 && stack ghc --package pytest -- -o karps_c.so -shared -dynamic -fPIC src/Lib.o -lHSrts-ghc8.4.4
+	mv haskell2/karps_c.so python/karps2/c_core/karps_c.so
 
 
-lib/karps-eta.jar:  haskell/src/Proto haskell/src
-	echo "recompiling karps-eta"
-	cd eta && etlas build
-	cp eta/dist/build/eta-0.8.0.3/karps-eta-0.1.0.0/build/karps-eta-0.1.0.0-inplace.jar lib/karps-eta.jar
 
-dist/karps-spark.jar:
-	sbt ks_testing/assembly
-	cp target/testing/scala-2.11/ks_testing-assembly-0.2.0.jar dist/karps-spark.jar
-	
+

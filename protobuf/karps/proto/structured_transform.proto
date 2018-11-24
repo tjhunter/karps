@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+package karps.core;
+
+import "karps/proto/types.proto";
+import "karps/proto/row.proto";
+
+message Column {
+  oneof content {
+    ColumnStructure struct = 1;
+    ColumnFunction function = 2;
+    ColumnExtraction extraction = 3;
+    // This is only allowed in the functional graph.
+    // It will need to be translated into broadcasts (in the case of distributed
+    // data).
+    ColumnBroadcastObservable broadcast = 4;
+    // A constant.
+    ColumnLiteral literal = 5;
+  };
+  // The name assigned by the user (only required with structs)
+  string field_name = 10;
+};
+
+// An observable that is broadcast along the axis of this transform.
+// In the case of local transform, this simply means that the observable
+// is being accessed as a field.
+// This operation gets translated under the hood as a broadcast join and
+// need not be directly supported by the backend.
+message ColumnBroadcastObservable {
+  // The index of the observable among the parent of the operator.
+  int32 observable_index = 1;
+};
+
+// A constant value ("literal") that is fixed along one axis of the column.
+// This value can be any of the types supported by Karps.
+message ColumnLiteral {
+  // The content.
+  CellWithType content = 1;
+}
+
+message ColumnStructure {
+  repeated Column fields = 1;
+};
+
+message ColumnFunction {
+  string function_name = 1;
+  repeated Column inputs = 2;
+  // (optional) the expected type of this output.
+  // Some backends such as Spark do not fully support nullability information. Instead of
+  // reimplementing the nullability rules, the backend can use this information to optionally
+  // coerce the resulting type.
+  SQLType expected_type = 3;
+};
+
+message ColumnExtraction {
+  repeated string path = 1;
+}
+
+message Aggregation {
+  oneof agg_op {
+    AggregationFunction op = 1;
+    AggregationStructure struct = 2;
+  }
+  string field_name = 3;
+}
+
+message AggregationFunction {
+  string function_name = 1;
+  repeated ColumnExtraction inputs = 2;
+  // (optional) the expected type of this output.
+  // Some backends such as Spark do not fully support nullability information. Instead of
+  // reimplementing the nullability rules, the backend can use this information to optionally
+  // coerce the resulting type.
+  SQLType expected_type = 3;
+}
+
+message AggregationStructure {
+  repeated Aggregation fields = 1;
+}

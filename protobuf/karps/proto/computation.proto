@@ -1,0 +1,91 @@
+syntax = "proto3";
+
+package karps.core;
+
+import "karps/proto/graph.proto";
+import "karps/proto/row.proto";
+import "tensorflow/core/framework/node_def.proto";
+
+enum ResultStatus {
+  UNUSED = 0;
+  RUNNING = 1;
+  FINISHED_SUCCESS = 2;
+  FINISHED_FAILURE = 3;
+  SCHEDULED = 4;
+};
+
+message ComputationResult {
+  Path local_path = 1;
+  ResultStatus status = 2;
+  string final_error = 3;
+  CellWithType final_result = 4;
+  SparkStats spark_stats = 5;
+  // TODO: remove this field, it is duplicate with compiler output.
+  repeated Path dependencies = 6;
+};
+
+
+message BatchComputationResult {
+  Path target_path = 1;
+  repeated ComputationResult results = 2;
+}
+
+// TODO: remove
+message PointerPath {
+  ComputationId computation = 1;
+  Path local_path = 2;
+}
+
+// ---------- Spark statistics ----------
+
+message SparkStats {
+  repeated RDDInfo rdd_info = 1;
+  // The parsed logical plan
+  repeated SQLTreeInfo parsed = 2;
+  // The analyzed logical plan
+  repeated SQLTreeInfo analyzed = 3;
+  // The optimized logical plan.
+  repeated SQLTreeInfo optimized = 4;
+  // The final physical plan
+  repeated SQLTreeInfo physical = 5;
+};
+
+message RDDInfo {
+  int64 rdd_id = 1;
+  string class_name = 2;
+  string repr = 3;
+  repeated int64 parents = 4;
+  // The proto representation to easily build the graph.
+  // The name has already been nicely converted.
+  tensorflow.NodeDef proto = 5;
+};
+
+// An elemement in the logical plan of catalyst.
+message SQLTreeInfo {
+  // A truncated name that can be used for indexing
+  // and display.
+  string node_id = 1;
+  // The full name as provided by catalyst.
+  string full_name = 2;
+  // The names of the parents.
+  repeated string parent_nodes = 3;
+  // The proto representation to easily build the graph.
+  // The name has already been nicely converted.
+  tensorflow.NodeDef proto = 4;
+}
+
+// ----------- Common structures ------------
+
+// A unique identifier for a computation.
+// This is typically an integer that is incremented at each computation,
+// but no assumption is made about its value in the backend.
+message ComputationId {
+  string id = 1;
+};
+
+// An identifier for a session.
+// A session encapsulates all the state (registered functions, computed results)
+// that is required to run computations.
+message SessionId {
+  string id = 1;
+};

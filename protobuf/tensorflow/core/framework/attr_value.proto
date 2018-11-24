@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package tensorflow;
+
+// Protocol buffer representing the value for an attr used to configure an Op.
+// Comment indicates the corresponding attr type.  Only the field matching the
+// attr type may be filled.
+message AttrValue {
+    // LINT.IfChange
+    message ListValue {
+        repeated bytes s = 2;                        // "list(string)"
+        repeated int64 i = 3 [packed = true];        // "list(int)"
+        repeated float f = 4 [packed = true];        // "list(float)"
+        repeated bool b = 5 [packed = true];         // "list(bool)"
+        repeated NameAttrList func = 9;              // "list(attr)"
+    }
+    // LINT.ThenChange(https://www.tensorflow.org/code/tensorflow/c/c_api.cc)
+
+    oneof value {
+        bytes s = 2;                 // "string"
+        int64 i = 3;                 // "int"
+        float f = 4;                 // "float"
+        bool b = 5;                  // "bool"
+        ListValue list = 1;          // any "list(...)"
+    }
+}
+
+// A list of attr names and their values. The whole list is attached
+// with a string name.  E.g., MatMul[T=float].
+message NameAttrList {
+    string name = 1;
+    map<string, AttrValue> attr = 2;
+}
