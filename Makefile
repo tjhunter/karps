@@ -26,7 +26,7 @@ haskell2/src/Proto:
 	protoc --plugin=protoc-gen-haskell=`which proto-lens-protoc`     --haskell_out=./haskell2/src -I ./protobuf ./protobuf/karps/proto/*.proto ./protobuf/tensorflow/core/framework/*.proto
 
 python/karps2/proto:
-	protoc --python_out=python/karps2/proto/  -I ./protobuf ./protobuf/karps/proto/*.proto ./protobuf/tensorflow/core/framework/*.proto
+	protoc --python_out=python/karps2/  -I ./protobuf ./protobuf/karps/proto/*.proto ./protobuf/tensorflow/core/framework/*.proto
 
 python/karps2/c_core/karps_c.so: haskell2/src/Proto
 	cd haskell2 && stack build
