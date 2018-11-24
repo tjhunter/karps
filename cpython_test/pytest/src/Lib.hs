@@ -50,12 +50,26 @@ transform_simple f l p l_out = do
   let len = (fromIntegral l) :: Int
   bs <- packCStringLen((p, len))
   let out_bs = f bs
+  _return out_bs l_out
+
+transform_io :: (ByteString -> IO ByteString) -> CTrans
+transform_io f l p l_out = do
+  let len = (fromIntegral l) :: Int
+  bs <- packCStringLen((p, len))
+  out_bs <- f bs
+  _return out_bs l_out
+
+_return :: ByteString -> Ptr CInt -> IO (Ptr CChar)
+_return out_bs l_out = do
   BS.useAsCStringLen out_bs $ \(cs, cl) -> do
     let out_len = (fromIntegral cl) :: Int
     poke l_out (fromIntegral out_len)
     out_p <- mallocArray out_len
     copyArray out_p cs out_len
     return out_p
+
+-- TODO: add a free function for the pointers that we return, they cannot be deallocated 
+-- on the other side.
 
 my_transform1 :: CTrans
 my_transform1 = transform_simple f where
