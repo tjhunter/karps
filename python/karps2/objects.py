@@ -7,8 +7,10 @@ from typing import List
 from .proto import structured_transform_pb2 as st
 from .proto import graph_pb2 as gpb
 from .proto import types_pb2
+from .proto import api_internal_pb2 as api
 from .types import DataType
 from .utils import Path
+from .c_core import build_node_c
 
 
 class HasArithmeticOps(object):
@@ -85,6 +87,10 @@ class AbstractNode(object):
     def kp_logical_dependencies(self):
         """ The logical dependencies """
         return self._logical_dependencies
+
+    @@property
+    def kp_session(self):
+        return self._session
 
     def __repr__(self):
         return "{p}{l}{o}:{dt}".format(
@@ -198,7 +204,7 @@ def make_dataframe(
     return DataFrame(node_p, parents, deps, session)
 
 
-def call_op(op_name, extra=None, parents=None, deps=None):
+def call_op(op_name, extra=None, parents=None, deps=None, session=None):
     def clean(obj):
         if not isinstance(obj, AbstractNode):
             raise ValueError("{}:{}".format(type(obj), obj))
@@ -206,7 +212,24 @@ def call_op(op_name, extra=None, parents=None, deps=None):
     parents = [clean(obj) for obj in parents]
     deps = deps or []
     deps = [clean(obj) for obj in deps]
-    
-    pass
+    assert session or parents
+    session = session or parents[0].kp_session
+    for p in parents:
+        assert session is p.kp_session, (session, p.kp_session, p)
+    content = extra.SerializeToString() if extra else None
+    content_str = str(extra) if extra else None
+    oe_p = gpb.OpExtra(content=content, content_debug=content_str)
+    req = api.NodeBuilderRequest(op_name=op_name,
+                                 extra=oe_p,
+                                 parents=[p._proto for p in parents])
+    resp = build_node_c(req)
+    if resp.error is not None:
+        raise ValueError(str(resp.error))
+    assert resp.sucess, resp
+    n_p = resp.success
+    if n_p.locality == gpb.DISTRIBUTED:
+        return DataFrame(n_p, parents, deps, session)
+    else:
+        return Observable(n_p, parents, deps, session)
 
 

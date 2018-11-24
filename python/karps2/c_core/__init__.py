@@ -8,7 +8,7 @@ import logging
 import os
 
 
-__all__ = ['my_transform1']
+__all__ = ['my_transform1', 'build_node']
 
 logger = logging.getLogger('karps')
 
@@ -50,3 +50,5 @@ def expose_fun(fname):
 
 
 my_transform1 = expose_fun("my_transform1")
+
+build_node_c = expose_fun("build_node")
