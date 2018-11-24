@@ -15,7 +15,8 @@ clean:
 
 dev-clean: clean
 	rm -rf haskell2/src/Proto
-	rm -rf python/karps2/proto
+	rm -rf python/karps2/proto/karps
+	rm -rf python/karps2/proto/tensorflow
 
 # The development targets
 
