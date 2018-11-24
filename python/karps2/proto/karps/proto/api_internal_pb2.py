@@ -155,42 +155,42 @@ _PERFORMGRAPHTRANSFORM = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='computation', full_name='karps.core.PerformGraphTransform.computation', index=1,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='functional_graph', full_name='karps.core.PerformGraphTransform.functional_graph', index=2,
       number=3, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='available_nodes', full_name='karps.core.PerformGraphTransform.available_nodes', index=3,
       number=4, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='requested_paths', full_name='karps.core.PerformGraphTransform.requested_paths', index=4,
       number=5, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='known_resources', full_name='karps.core.PerformGraphTransform.known_resources', index=5,
       number=6, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -221,28 +221,28 @@ _GRAPHTRANSFORMRESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='node_map', full_name='karps.core.GraphTransformResponse.node_map', index=1,
       number=2, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='messages', full_name='karps.core.GraphTransformResponse.messages', index=2,
       number=3, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='steps', full_name='karps.core.GraphTransformResponse.steps', index=3,
       number=4, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -273,14 +273,14 @@ _RESOURCESTATUS = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='stamp', full_name='karps.core.ResourceStatus.stamp', index=1,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -311,14 +311,14 @@ _ANALYZERESOURCESREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='session', full_name='karps.core.AnalyzeResourcesRequest.session', index=1,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -349,14 +349,14 @@ _ANALYZERESOURCERESPONSE_FAILEDSTATUS = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='error', full_name='karps.core.AnalyzeResourceResponse.FailedStatus.error', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -386,14 +386,14 @@ _ANALYZERESOURCERESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='failures', full_name='karps.core.AnalyzeResourceResponse.failures', index=1,
       number=2, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -424,28 +424,28 @@ _NODEMAPITEM = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='path', full_name='karps.core.NodeMapItem.path', index=1,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='computation', full_name='karps.core.NodeMapItem.computation', index=2,
       number=3, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='session', full_name='karps.core.NodeMapItem.session', index=3,
       number=4, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -476,21 +476,21 @@ _COMPILERSTEP = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='graph', full_name='karps.core.CompilerStep.graph', index=1,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='graph_def', full_name='karps.core.CompilerStep.graph_def', index=2,
       number=3, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -521,7 +521,7 @@ _NODEID = _descriptor.Descriptor(
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -552,49 +552,49 @@ _ANALYSISMESSAGE = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='session', full_name='karps.core.AnalysisMessage.session', index=1,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='relevant_id', full_name='karps.core.AnalysisMessage.relevant_id', index=2,
       number=3, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='path', full_name='karps.core.AnalysisMessage.path', index=3,
       number=4, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='content', full_name='karps.core.AnalysisMessage.content', index=4,
       number=5, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='level', full_name='karps.core.AnalysisMessage.level', index=5,
       number=6, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='stack_trace_pretty', full_name='karps.core.AnalysisMessage.stack_trace_pretty', index=6,
       number=7, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -726,195 +726,46 @@ AnalysisMessage = _reflection.GeneratedProtocolMessageType('AnalysisMessage', (_
 _sym_db.RegisterMessage(AnalysisMessage)
 
 
-try:
-  # THESE ELEMENTS WILL BE DEPRECATED.
-  # Please use the generated *_pb2_grpc.py files instead.
-  import grpc
-  from grpc.beta import implementations as beta_implementations
-  from grpc.beta import interfaces as beta_interfaces
-  from grpc.framework.common import cardinality
-  from grpc.framework.interfaces.face import utilities as face_utilities
 
+_KARPSREST = _descriptor.ServiceDescriptor(
+  name='KarpsRest',
+  full_name='karps.core.KarpsRest',
+  file=DESCRIPTOR,
+  index=0,
+  options=None,
+  serialized_start=2104,
+  serialized_end=2400,
+  methods=[
+  _descriptor.MethodDescriptor(
+    name='CreateComputation',
+    full_name='karps.core.KarpsRest.CreateComputation',
+    index=0,
+    containing_service=None,
+    input_type=karps_dot_proto_dot_interface__pb2._CREATECOMPUTATIONREQUEST,
+    output_type=karps_dot_proto_dot_interface__pb2._CREATECOMPUTATIONRESPONSE,
+    options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='ComputationStatus',
+    full_name='karps.core.KarpsRest.ComputationStatus',
+    index=1,
+    containing_service=None,
+    input_type=karps_dot_proto_dot_interface__pb2._COMPUTATIONSTATUSREQUEST,
+    output_type=karps_dot_proto_dot_computation__pb2._BATCHCOMPUTATIONRESULT,
+    options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='ResourceStatus',
+    full_name='karps.core.KarpsRest.ResourceStatus',
+    index=2,
+    containing_service=None,
+    input_type=_ANALYZERESOURCESREQUEST,
+    output_type=_ANALYZERESOURCERESPONSE,
+    options=None,
+  ),
+])
+_sym_db.RegisterServiceDescriptor(_KARPSREST)
 
-  class KarpsRestStub(object):
-    """This service is not implemented in GRPC.
-    It is implemented as a collection of RPC calls that accepts proto byte strings.
-    This is useful for languages that do not have GRPC support.
-    """
+DESCRIPTOR.services_by_name['KarpsRest'] = _KARPSREST
 
-    def __init__(self, channel):
-      """Constructor.
-
-      Args:
-        channel: A grpc.Channel.
-      """
-      self.CreateComputation = channel.unary_unary(
-          '/karps.core.KarpsRest/CreateComputation',
-          request_serializer=karps_dot_proto_dot_interface__pb2.CreateComputationRequest.SerializeToString,
-          response_deserializer=karps_dot_proto_dot_interface__pb2.CreateComputationResponse.FromString,
-          )
-      self.ComputationStatus = channel.unary_unary(
-          '/karps.core.KarpsRest/ComputationStatus',
-          request_serializer=karps_dot_proto_dot_interface__pb2.ComputationStatusRequest.SerializeToString,
-          response_deserializer=karps_dot_proto_dot_computation__pb2.BatchComputationResult.FromString,
-          )
-      self.ResourceStatus = channel.unary_unary(
-          '/karps.core.KarpsRest/ResourceStatus',
-          request_serializer=AnalyzeResourcesRequest.SerializeToString,
-          response_deserializer=AnalyzeResourceResponse.FromString,
-          )
-
-
-  class KarpsRestServicer(object):
-    """This service is not implemented in GRPC.
-    It is implemented as a collection of RPC calls that accepts proto byte strings.
-    This is useful for languages that do not have GRPC support.
-    """
-
-    def CreateComputation(self, request, context):
-      # missing associated documentation comment in .proto file
-      pass
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-    def ComputationStatus(self, request, context):
-      # missing associated documentation comment in .proto file
-      pass
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-    def ResourceStatus(self, request, context):
-      # missing associated documentation comment in .proto file
-      pass
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-
-  def add_KarpsRestServicer_to_server(servicer, server):
-    rpc_method_handlers = {
-        'CreateComputation': grpc.unary_unary_rpc_method_handler(
-            servicer.CreateComputation,
-            request_deserializer=karps_dot_proto_dot_interface__pb2.CreateComputationRequest.FromString,
-            response_serializer=karps_dot_proto_dot_interface__pb2.CreateComputationResponse.SerializeToString,
-        ),
-        'ComputationStatus': grpc.unary_unary_rpc_method_handler(
-            servicer.ComputationStatus,
-            request_deserializer=karps_dot_proto_dot_interface__pb2.ComputationStatusRequest.FromString,
-            response_serializer=karps_dot_proto_dot_computation__pb2.BatchComputationResult.SerializeToString,
-        ),
-        'ResourceStatus': grpc.unary_unary_rpc_method_handler(
-            servicer.ResourceStatus,
-            request_deserializer=AnalyzeResourcesRequest.FromString,
-            response_serializer=AnalyzeResourceResponse.SerializeToString,
-        ),
-    }
-    generic_handler = grpc.method_handlers_generic_handler(
-        'karps.core.KarpsRest', rpc_method_handlers)
-    server.add_generic_rpc_handlers((generic_handler,))
-
-
-  class BetaKarpsRestServicer(object):
-    """The Beta API is deprecated for 0.15.0 and later.
-
-    It is recommended to use the GA API (classes and functions in this
-    file not marked beta) for all further purposes. This class was generated
-    only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0."""
-    """This service is not implemented in GRPC.
-    It is implemented as a collection of RPC calls that accepts proto byte strings.
-    This is useful for languages that do not have GRPC support.
-    """
-    def CreateComputation(self, request, context):
-      # missing associated documentation comment in .proto file
-      pass
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-    def ComputationStatus(self, request, context):
-      # missing associated documentation comment in .proto file
-      pass
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-    def ResourceStatus(self, request, context):
-      # missing associated documentation comment in .proto file
-      pass
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-
-
-  class BetaKarpsRestStub(object):
-    """The Beta API is deprecated for 0.15.0 and later.
-
-    It is recommended to use the GA API (classes and functions in this
-    file not marked beta) for all further purposes. This class was generated
-    only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0."""
-    """This service is not implemented in GRPC.
-    It is implemented as a collection of RPC calls that accepts proto byte strings.
-    This is useful for languages that do not have GRPC support.
-    """
-    def CreateComputation(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      # missing associated documentation comment in .proto file
-      pass
-      raise NotImplementedError()
-    CreateComputation.future = None
-    def ComputationStatus(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      # missing associated documentation comment in .proto file
-      pass
-      raise NotImplementedError()
-    ComputationStatus.future = None
-    def ResourceStatus(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      # missing associated documentation comment in .proto file
-      pass
-      raise NotImplementedError()
-    ResourceStatus.future = None
-
-
-  def beta_create_KarpsRest_server(servicer, pool=None, pool_size=None, default_timeout=None, maximum_timeout=None):
-    """The Beta API is deprecated for 0.15.0 and later.
-
-    It is recommended to use the GA API (classes and functions in this
-    file not marked beta) for all further purposes. This function was
-    generated only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0"""
-    request_deserializers = {
-      ('karps.core.KarpsRest', 'ComputationStatus'): karps_dot_proto_dot_interface__pb2.ComputationStatusRequest.FromString,
-      ('karps.core.KarpsRest', 'CreateComputation'): karps_dot_proto_dot_interface__pb2.CreateComputationRequest.FromString,
-      ('karps.core.KarpsRest', 'ResourceStatus'): AnalyzeResourcesRequest.FromString,
-    }
-    response_serializers = {
-      ('karps.core.KarpsRest', 'ComputationStatus'): karps_dot_proto_dot_computation__pb2.BatchComputationResult.SerializeToString,
-      ('karps.core.KarpsRest', 'CreateComputation'): karps_dot_proto_dot_interface__pb2.CreateComputationResponse.SerializeToString,
-      ('karps.core.KarpsRest', 'ResourceStatus'): AnalyzeResourceResponse.SerializeToString,
-    }
-    method_implementations = {
-      ('karps.core.KarpsRest', 'ComputationStatus'): face_utilities.unary_unary_inline(servicer.ComputationStatus),
-      ('karps.core.KarpsRest', 'CreateComputation'): face_utilities.unary_unary_inline(servicer.CreateComputation),
-      ('karps.core.KarpsRest', 'ResourceStatus'): face_utilities.unary_unary_inline(servicer.ResourceStatus),
-    }
-    server_options = beta_implementations.server_options(request_deserializers=request_deserializers, response_serializers=response_serializers, thread_pool=pool, thread_pool_size=pool_size, default_timeout=default_timeout, maximum_timeout=maximum_timeout)
-    return beta_implementations.server(method_implementations, options=server_options)
-
-
-  def beta_create_KarpsRest_stub(channel, host=None, metadata_transformer=None, pool=None, pool_size=None):
-    """The Beta API is deprecated for 0.15.0 and later.
-
-    It is recommended to use the GA API (classes and functions in this
-    file not marked beta) for all further purposes. This function was
-    generated only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0"""
-    request_serializers = {
-      ('karps.core.KarpsRest', 'ComputationStatus'): karps_dot_proto_dot_interface__pb2.ComputationStatusRequest.SerializeToString,
-      ('karps.core.KarpsRest', 'CreateComputation'): karps_dot_proto_dot_interface__pb2.CreateComputationRequest.SerializeToString,
-      ('karps.core.KarpsRest', 'ResourceStatus'): AnalyzeResourcesRequest.SerializeToString,
-    }
-    response_deserializers = {
-      ('karps.core.KarpsRest', 'ComputationStatus'): karps_dot_proto_dot_computation__pb2.BatchComputationResult.FromString,
-      ('karps.core.KarpsRest', 'CreateComputation'): karps_dot_proto_dot_interface__pb2.CreateComputationResponse.FromString,
-      ('karps.core.KarpsRest', 'ResourceStatus'): AnalyzeResourceResponse.FromString,
-    }
-    cardinalities = {
-      'ComputationStatus': cardinality.Cardinality.UNARY_UNARY,
-      'CreateComputation': cardinality.Cardinality.UNARY_UNARY,
-      'ResourceStatus': cardinality.Cardinality.UNARY_UNARY,
-    }
-    stub_options = beta_implementations.stub_options(host=host, metadata_transformer=metadata_transformer, request_serializers=request_serializers, response_deserializers=response_deserializers, thread_pool=pool, thread_pool_size=pool_size)
-    return beta_implementations.dynamic_stub(channel, 'karps.core.KarpsRest', cardinalities, options=stub_options)
-except ImportError:
-  pass
 # @@protoc_insertion_point(module_scope)
