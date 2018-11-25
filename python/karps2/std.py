@@ -4,7 +4,7 @@ The standard library functions that extend the Pandas API.
 from typing import List
 import pandas as pd
 
-from .objects import AbstractColumn
+from .objects import AbstractColumn, call_op
 
 __all__ = ['reassign', 'truncate', 'collect']
 
@@ -36,13 +36,11 @@ def collect(df) -> pd.DataFrame:
     Collect a dataframe (no-op in pandas).
     """
     if isinstance(df, AbstractColumn):
-        n = call_op(df, "org.karps.Collect", parents=[df])
-        cwt = n._kp_eval()
+        n = call_op("org.karps.Collect", parents=[df])
+        cwt = n.kp_eval_pandas()
         return _cwt_to_pandas(cwt)
     return df.copy()
 
-def call_op(obj, op_name, extra=None, parents=None, deps=None):
-    pass
 
-def _cwt_to_pandas(cwt):
+def _cwt_to_pandas(cwt) -> pd.DataFrame:
     pass

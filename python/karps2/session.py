@@ -1,10 +1,10 @@
 import logging
 import os
 
-from .proto import types_pb2, graph_pb2
+from .proto import types_pb2
 from .types import DataType
 from .row import as_cell
-from .objects import DataFrame, make_dataframe
+from .objects import make_dataframe
 
 __all__ = ['Session', 'ProcessContext']
 

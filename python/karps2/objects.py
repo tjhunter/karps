@@ -53,6 +53,13 @@ class AbstractNode(object):
         self._session = session
 
     @property
+    def kp_node_proto(self) -> gpb.Node:
+        """
+        Returns a proto
+        """
+        return self._node_p
+
+    @property
     def kp_path(self):
         return Path(self._node_p.path)
 
@@ -88,7 +95,7 @@ class AbstractNode(object):
         """ The logical dependencies """
         return self._logical_dependencies
 
-    @@property
+    @property
     def kp_session(self):
         return self._session
 
@@ -208,6 +215,7 @@ def call_op(op_name, extra=None, parents=None, deps=None, session=None):
     def clean(obj):
         if not isinstance(obj, AbstractNode):
             raise ValueError("{}:{}".format(type(obj), obj))
+        return obj
     parents = parents or []
     parents = [clean(obj) for obj in parents]
     deps = deps or []
@@ -221,8 +229,10 @@ def call_op(op_name, extra=None, parents=None, deps=None, session=None):
     oe_p = gpb.OpExtra(content=content, content_debug=content_str)
     req = api.NodeBuilderRequest(op_name=op_name,
                                  extra=oe_p,
-                                 parents=[p._proto for p in parents])
-    resp = build_node_c(req)
+                                 parents=[p.kp_node_proto for p in parents])
+    resp0 = build_node_c(req.SerializeToString())
+    resp = api.NodeBuilderResponse()
+    resp.ParseFromString(resp0)
     if resp.error is not None:
         raise ValueError(str(resp.error))
     assert resp.sucess, resp

@@ -14,7 +14,20 @@ import Data.Text.Encoding(decodeUtf8, encodeUtf8)
 import qualified Data.ByteString as BS
 import Foreign.Marshal.Array(mallocArray, copyArray)
 import Data.Text(pack)
-import Lib2
+import Data.ProtoLens.Encoding(decodeMessage, encodeMessage)
+import Data.ProtoLens.Message(Message)
+import Data.ProtoLens.Message(Message)
+import Data.ProtoLens.Encoding(encodeMessage, decodeMessage)
+import Data.ProtoLens.TextFormat(showMessage)
+import Data.ProtoLens(def)
+import Lens.Micro((&), (.~))
+
+import qualified Proto.Karps.Proto.Graph as PG
+import qualified Proto.Karps.Proto.Graph_Fields as PG
+import qualified Proto.Karps.Proto.ApiInternal as PI
+import qualified Proto.Karps.Proto.ApiInternal_Fields as PI
+
+import Lib3
 
 someFunc :: IO ()
 someFunc = putStrLn "someFunc"
@@ -79,9 +92,20 @@ my_transform1 = transform_simple f where
     out_bs = encodeUtf8 out
 
 
+build_node :: CTrans
+build_node = transform_io f where
+  f bs = do
+    let err_msg = (def :: PI.ErrorMessage) & PI.message .~ (pack "error message")
+    let out_msg = (def :: PI.NodeBuilderResponse) & PI.error .~ err_msg
+    return $ encodeMessage out_msg
+
+--build_node_internal :: StructuredNodeBuilderRegistry -> OpName -> OpExtra -> [NodeShape] -> Try Node
+
 foreign export ccall fibonacci_hs :: CInt -> CInt
 
 foreign export ccall input_hs :: CInt -> Ptr CChar -> Ptr CInt -> IO (Ptr CChar)
 
 foreign export ccall my_transform1 :: CTrans
+
+foreign export ccall build_node :: CTrans
 

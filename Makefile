@@ -2,7 +2,7 @@
 
 # The main targets for the users
 
-karps-py: haskell2/src/Proto python/karps2/proto/karps python/karps2/c_core/karps_c.so
+karps: haskell2/src/Proto python/karps2/proto/karps python/karps2/c_core/karps_c.so
 	echo "karps-py"
 	
 
@@ -35,7 +35,7 @@ python/karps2/proto/karps:
 python/karps2/c_core/karps_c.so: haskell2/src/Proto
 	cd haskell2 && stack build
 	cd haskell2 && stack ghc -- -c -dynamic -fPIC src/Lib.hs 
-	cd haskell2 && stack ghc --package pytest -- -o karps_c.so -shared -dynamic -fPIC src/Lib.o -lHSrts-ghc8.4.4
+	cd haskell2 && stack ghc --package karps -- -o karps_c.so -shared -dynamic -fPIC src/Lib.o -lHSrts-ghc8.4.4
 	mv haskell2/karps_c.so python/karps2/c_core/karps_c.so
 
 

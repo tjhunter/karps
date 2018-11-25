@@ -1,5 +1,5 @@
 
-module Lib2
+module Lib3
     ( fibonacci
     ) where
 
