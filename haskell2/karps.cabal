@@ -55,17 +55,53 @@ library
       Proto.Tensorflow.Core.Framework.Graph_Fields
       Proto.Tensorflow.Core.Framework.NodeDef
       Proto.Tensorflow.Core.Framework.NodeDef_Fields
+      Spark.Common.ComputeDag
+      Spark.Common.DAGFunctions
+      Spark.Common.DAGStructures
+      Spark.Common.NodeBuilder
+      Spark.Common.NodeFunctions
+      Spark.Common.NodeStructures
+      Spark.Common.OpFunctions
+      Spark.Common.OpStructures
+      Spark.Common.Paths
+      Spark.Common.PathsUntyped
+      Spark.Common.ProtoUtils
+      Spark.Common.RowGenerics
+      Spark.Common.RowGenericsFrom
+      Spark.Common.RowStructures
+      Spark.Common.RowUtils
+      Spark.Common.StructuresInternal
+      Spark.Common.Try
+      Spark.Common.TypesGenerics
+      Spark.Common.TypesStructures
+      Spark.Common.TypesStructuresRepr
+      Spark.Common.TypesFunctions
+      Spark.Common.Utilities
   other-modules:
   hs-source-dirs:
       src
   build-depends:
       base >=4.7 && <5,
+      base16-bytestring,
+      base64-bytestring,
       bytestring,
+      call-stack,
+      containers,
+      cryptohash-sha256,
+      formatting,
+      hashable,
+      lens-family,
       microlens,
+      mtl,
       proto-lens >= 0.3 && < 0.4,
       proto-lens-protoc >= 0.3 && < 0.4,
-      text
+      text,
+      text-format,
+      transformers,
+      unordered-containers,
+      vector
   default-language: Haskell2010
+  default-extensions: FlexibleContexts, MultiParamTypeClasses, ScopedTypeVariables, OverloadedStrings
 
 test-suite karps-test
   type: exitcode-stdio-1.0
