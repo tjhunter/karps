@@ -40,7 +40,7 @@ module Spark.Common.NodeBuilder(
 import qualified Data.Map.Strict as M
 import qualified Data.List.NonEmpty as N
 import Control.Arrow ((&&&))
-import Data.Text(Text)
+import Data.Text(Text, unpack)
 import Data.ProtoLens.Message(Message)
 
 import Spark.Common.OpStructures
@@ -75,6 +75,12 @@ data NodeBuilderRegistry = NodeBuilderRegistry {
 This allows developers to properly define a schema to the content.
 -}
 data TypedNodeBuilder a = TypedNodeBuilder !Text (a -> [NodeShape] -> Try CoreNodeInfo)
+
+instance Show NodeBuilder where
+  show (NodeBuilder n _) = "<" ++ unpack n ++ ">"
+
+instance Show NodeBuilderRegistry where
+  show (NodeBuilderRegistry _) = "NodeBuilderRegistry"
 
 registryNode :: NodeBuilderRegistry -> NodeDefName -> Maybe NodeBuilder
 registryNode = _registryNode

@@ -233,9 +233,9 @@ def call_op(op_name, extra=None, parents=None, deps=None, session=None):
     resp0 = build_node_c(req.SerializeToString())
     resp = api.NodeBuilderResponse()
     resp.ParseFromString(resp0)
-    if resp.error is not None:
-        raise ValueError(str(resp.error))
-    assert resp.sucess, resp
+    if resp.error.message:
+        raise ValueError(str(resp.error) + str(type(resp.error)) + str(resp))
+    assert resp.success, resp
     n_p = resp.success
     if n_p.locality == gpb.DISTRIBUTED:
         return DataFrame(n_p, parents, deps, session)

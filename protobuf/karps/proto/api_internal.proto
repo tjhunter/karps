@@ -200,10 +200,17 @@ message NodeBuilderResponse {
 }
 
 message ErrorMessage {
+    message StackElement {
+      string function = 1;
+      string package = 2;
+      string module = 3;
+      string file = 4;
+      int32 start_line = 5;
+      int32 start_col = 6;
+    }
+
     string message = 1;
+    repeated StackElement hs_stack = 2;
+    repeated string path = 3;
 }
 
-message CoreResponse {
-    ErrorMessage error = 1;
-    bytes succes = 2;    
-}

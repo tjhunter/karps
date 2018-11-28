@@ -2,7 +2,7 @@
 
 # The main targets for the users
 
-karps: haskell2/src/Proto python/karps2/proto/karps python/karps2/c_core/karps_c.so
+karps: protos python/karps2/c_core/karps_c.so
 	echo "karps-py"
 	
 
@@ -22,7 +22,7 @@ dev-clean: clean
 
 # The development targets
 
-protos:
+protos: haskell2/src/Proto python/karps2/proto/karps
 	echo "updating the proto"
 
 haskell2/src/Proto:
@@ -34,7 +34,7 @@ python/karps2/proto/karps:
 
 python/karps2/c_core/karps_c.so: haskell2/src/Proto
 	cd haskell2 && stack build
-	cd haskell2 && stack ghc -- -c -dynamic -fPIC src/Lib.hs 
+	cd haskell2 && stack ghc -- -XScopedTypeVariables -XFlexibleContexts -XMultiParamTypeClasses -XOverloadedStrings -c -dynamic -fPIC src/Lib.hs 
 	cd haskell2 && stack ghc --package karps -- -o karps_c.so -shared -dynamic -fPIC src/Lib.o -lHSrts-ghc8.4.4
 	mv haskell2/karps_c.so python/karps2/c_core/karps_c.so
 

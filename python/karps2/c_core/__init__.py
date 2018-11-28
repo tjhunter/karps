@@ -8,7 +8,7 @@ import logging
 import os
 
 
-__all__ = ['my_transform1', 'build_node']
+__all__ = ['my_transform1', 'build_node_c']
 
 logger = logging.getLogger('karps')
 

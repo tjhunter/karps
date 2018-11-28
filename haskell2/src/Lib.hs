@@ -12,7 +12,9 @@ import Data.String
 import Data.ByteString(packCStringLen, ByteString)
 import Data.Text.Encoding(decodeUtf8, encodeUtf8)
 import qualified Data.ByteString as BS
+import qualified Data.Vector as V
 import Foreign.Marshal.Array(mallocArray, copyArray)
+import Formatting
 import Data.Text(pack, Text)
 import Data.ProtoLens.Encoding(decodeMessage, encodeMessage)
 import Data.ProtoLens.Message(Message)
@@ -24,11 +26,13 @@ import qualified Proto.Karps.Proto.Graph as PG
 import qualified Proto.Karps.Proto.Graph_Fields as PG
 import qualified Proto.Karps.Proto.ApiInternal as PI
 import qualified Proto.Karps.Proto.ApiInternal_Fields as PI
-import Spark.Common.OpStructures(CoreNodeInfo, OpExtra, OperatorName, Locality(..))
-import Spark.Common.ProtoUtils(FromProto(..), extractMaybe, extractMaybe')
-import Spark.Common.StructuresInternal(NodePath)
+import Spark.Common.NodeBuilder(NodeBuilderRegistry, registryNode, nbBuilder)
+import Spark.Common.OpStructures(CoreNodeInfo(..), OpExtra, OperatorName, Locality(..), NodeShape(..), localityToProto)
+import Spark.Common.ProtoUtils(FromProto(..), ToProto(..), extractMaybe, extractMaybe')
+import Spark.Common.StructuresInternal(NodePath(..))
 import Spark.Common.TypesStructures(DataType)
 import Spark.Common.Try(Try(..), tryError)
+import Spark.Common.Utilities(sh, show')
 
 import Lib3
 
@@ -138,31 +142,53 @@ instance FromProto PG.Node ParsedNode where
       pnType = dt
     }
 
+instance ToProto PG.Node ParsedNode where
+  toProto pn = (def :: PG.Node)
+     & PG.locality .~ localityToProto (pnLocality pn)
+     & PG.path .~ toProto (pnPath pn)
+     & PG.opName .~ pnOpName pn
+     & PG.opExtra .~ toProto (pnExtra pn)
+     & PG.parents .~ (toProto <$> pnParents pn)
+     & PG.logicalDependencies .~ (toProto <$> pnDeps pn)
+     & PG.inferedType .~ toProto (pnType pn)
 
 build_node :: CTrans
 build_node = transform_io f where
-  process_msg op_name extra parents registry = out_msg where
-    case registry `registryNode` pnOpName op_name of
-      Nothing -> tryError $ sformat ("_buildNode: could not find op name '"%sh%"' in the registry") (pnOpName pn)
-      Just nb' -> undefined
-
-    err_msg = (def :: PI.ErrorMessage) & PI.message .~ (pack "error message")
-    out_msg = (def :: PI.NodeBuilderResponse) & PI.error .~ err_msg
-  error_msg txt = out_msg where
-      err_msg = (def :: PI.ErrorMessage) & PI.message .~ (pack "error message")
+  error_msg :: Text -> PI.NodeBuilderResponse
+  error_msg ne = out_msg where
+      err_msg = (def :: PI.ErrorMessage) & PI.message .~ (pack "error message:" <> show' ne)
       out_msg = (def :: PI.NodeBuilderResponse) & PI.error .~ err_msg
+  error_msg' ne = out_msg where
+      out_msg = (def :: PI.NodeBuilderResponse) & PI.error .~ toProto ne
+
   f :: ByteString -> IO ByteString
   f bs = do
     registry <- accessRegistry
     let out = case decodeMessage bs of
-          Left txt -> error_msg txt
-          Right (nbr :: PI.NodeBuilderRequest) -> case fromProto nbr of
-            Left txt -> error_msg txt
-            Right (NodeBuilderRequest op_name extra parents) ->
-                process_msg op_name extra parents registry
+          Left txt -> error_msg (pack txt)
+          Right (nbr :: PI.NodeBuilderRequest) -> case fromProto nbr >>= _build_node registry of
+            Left ne -> error_msg' ne
+            Right (pn :: ParsedNode) ->
+                (def :: PI.NodeBuilderResponse) & PI.success .~ toProto pn
     return $ encodeMessage out
 
-
+_build_node :: NodeBuilderRegistry -> NodeBuilderRequest -> Try ParsedNode
+_build_node registry (NodeBuilderRequest op_name extras parents) = do
+  builder <- case registry `registryNode` op_name of
+        Nothing -> tryError $ sformat ("_buildNode: could not find op name '"%sh%"' in the registry") op_name
+        Just nb' -> pure nb'
+  let parent_shapes = f <$> parents where f pn = NodeShape (pnType pn) (pnLocality pn)
+  cni <- nbBuilder builder extras parent_shapes
+  let ns = cniShape cni
+  return $ ParsedNode {
+      pnLocality = nsLocality ns,
+      pnPath = NodePath V.empty,
+      pnOpName = op_name,
+      pnExtra = extras,
+      pnParents = pnPath <$> parents,
+      pnDeps = [],
+      pnType = nsType ns
+    }
 --build_node_internal :: StructuredNodeBuilderRegistry -> OpName -> OpExtra -> [NodeShape] -> Try Node
 
 foreign export ccall fibonacci_hs :: CInt -> CInt

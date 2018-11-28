@@ -10,8 +10,8 @@ module Proto.Karps.Proto.ApiInternal
         AnalyzeResourceResponse'FailedStatus(..),
         AnalyzeResourcesRequest(..), CompilerStep(..), CompilingPhase(..),
         CompilingPhase(), CompilingPhase'UnrecognizedValue,
-        CoreResponse(..), ErrorMessage(..), GraphTransformResponse(..),
-        MessageSeverity(..), MessageSeverity(),
+        CoreResponse(..), ErrorMessage(..), ErrorMessage'StackElement(..),
+        GraphTransformResponse(..), MessageSeverity(..), MessageSeverity(),
         MessageSeverity'UnrecognizedValue, NodeBuilderRequest(..),
         NodeBuilderResponse(..), NodeId(..), NodeMapItem(..),
         PerformGraphTransform(..), ResourceStatus(..))
@@ -852,9 +852,13 @@ instance Data.ProtoLens.Message CoreResponse where
 {- | Fields :
 
     * 'Proto.Karps.Proto.ApiInternal_Fields.message' @:: Lens' ErrorMessage Data.Text.Text@
+    * 'Proto.Karps.Proto.ApiInternal_Fields.hsStack' @:: Lens' ErrorMessage [ErrorMessage'StackElement]@
+    * 'Proto.Karps.Proto.ApiInternal_Fields.path' @:: Lens' ErrorMessage [Data.Text.Text]@
  -}
 data ErrorMessage = ErrorMessage{_ErrorMessage'message ::
                                  !Data.Text.Text,
+                                 _ErrorMessage'hsStack :: ![ErrorMessage'StackElement],
+                                 _ErrorMessage'path :: ![Data.Text.Text],
                                  _ErrorMessage'_unknownFields :: !Data.ProtoLens.FieldSet}
                       deriving (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance (Lens.Labels.HasLens' f ErrorMessage x a, a ~ b) =>
@@ -869,9 +873,27 @@ instance Prelude.Functor f =>
               (Lens.Family2.Unchecked.lens _ErrorMessage'message
                  (\ x__ y__ -> x__{_ErrorMessage'message = y__}))
               Prelude.id
+instance Prelude.Functor f =>
+         Lens.Labels.HasLens' f ErrorMessage "hsStack"
+           ([ErrorMessage'StackElement])
+         where
+        lensOf' _
+          = (Prelude..)
+              (Lens.Family2.Unchecked.lens _ErrorMessage'hsStack
+                 (\ x__ y__ -> x__{_ErrorMessage'hsStack = y__}))
+              Prelude.id
+instance Prelude.Functor f =>
+         Lens.Labels.HasLens' f ErrorMessage "path" ([Data.Text.Text])
+         where
+        lensOf' _
+          = (Prelude..)
+              (Lens.Family2.Unchecked.lens _ErrorMessage'path
+                 (\ x__ y__ -> x__{_ErrorMessage'path = y__}))
+              Prelude.id
 instance Data.Default.Class.Default ErrorMessage where
         def
           = ErrorMessage{_ErrorMessage'message = Data.ProtoLens.fieldDefault,
+                         _ErrorMessage'hsStack = [], _ErrorMessage'path = [],
                          _ErrorMessage'_unknownFields = ([])}
 instance Data.ProtoLens.Message ErrorMessage where
         messageName _ = Data.Text.pack "karps.core.ErrorMessage"
@@ -884,12 +906,195 @@ instance Data.ProtoLens.Message ErrorMessage where
                          (Lens.Labels.lensOf
                             ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "message")))
                       :: Data.ProtoLens.FieldDescriptor ErrorMessage
+                hsStack__field_descriptor
+                  = Data.ProtoLens.FieldDescriptor "hs_stack"
+                      (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                         Data.ProtoLens.FieldTypeDescriptor ErrorMessage'StackElement)
+                      (Data.ProtoLens.RepeatedField Data.ProtoLens.Unpacked
+                         (Lens.Labels.lensOf
+                            ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "hsStack")))
+                      :: Data.ProtoLens.FieldDescriptor ErrorMessage
+                path__field_descriptor
+                  = Data.ProtoLens.FieldDescriptor "path"
+                      (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                         Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+                      (Data.ProtoLens.RepeatedField Data.ProtoLens.Unpacked
+                         (Lens.Labels.lensOf
+                            ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "path")))
+                      :: Data.ProtoLens.FieldDescriptor ErrorMessage
               in
               Data.Map.fromList
-                [(Data.ProtoLens.Tag 1, message__field_descriptor)]
+                [(Data.ProtoLens.Tag 1, message__field_descriptor),
+                 (Data.ProtoLens.Tag 2, hsStack__field_descriptor),
+                 (Data.ProtoLens.Tag 3, path__field_descriptor)]
         unknownFields
           = Lens.Family2.Unchecked.lens _ErrorMessage'_unknownFields
               (\ x__ y__ -> x__{_ErrorMessage'_unknownFields = y__})
+{- | Fields :
+
+    * 'Proto.Karps.Proto.ApiInternal_Fields.function' @:: Lens' ErrorMessage'StackElement Data.Text.Text@
+    * 'Proto.Karps.Proto.ApiInternal_Fields.package' @:: Lens' ErrorMessage'StackElement Data.Text.Text@
+    * 'Proto.Karps.Proto.ApiInternal_Fields.module'' @:: Lens' ErrorMessage'StackElement Data.Text.Text@
+    * 'Proto.Karps.Proto.ApiInternal_Fields.file' @:: Lens' ErrorMessage'StackElement Data.Text.Text@
+    * 'Proto.Karps.Proto.ApiInternal_Fields.startLine' @:: Lens' ErrorMessage'StackElement Data.Int.Int32@
+    * 'Proto.Karps.Proto.ApiInternal_Fields.startCol' @:: Lens' ErrorMessage'StackElement Data.Int.Int32@
+ -}
+data ErrorMessage'StackElement = ErrorMessage'StackElement{_ErrorMessage'StackElement'function
+                                                           :: !Data.Text.Text,
+                                                           _ErrorMessage'StackElement'package ::
+                                                           !Data.Text.Text,
+                                                           _ErrorMessage'StackElement'module' ::
+                                                           !Data.Text.Text,
+                                                           _ErrorMessage'StackElement'file ::
+                                                           !Data.Text.Text,
+                                                           _ErrorMessage'StackElement'startLine ::
+                                                           !Data.Int.Int32,
+                                                           _ErrorMessage'StackElement'startCol ::
+                                                           !Data.Int.Int32,
+                                                           _ErrorMessage'StackElement'_unknownFields
+                                                           :: !Data.ProtoLens.FieldSet}
+                                   deriving (Prelude.Show, Prelude.Eq, Prelude.Ord)
+instance (Lens.Labels.HasLens' f ErrorMessage'StackElement x a,
+          a ~ b) =>
+         Lens.Labels.HasLens f ErrorMessage'StackElement
+           ErrorMessage'StackElement
+           x
+           a
+           b
+         where
+        lensOf = Lens.Labels.lensOf'
+instance Prelude.Functor f =>
+         Lens.Labels.HasLens' f ErrorMessage'StackElement "function"
+           (Data.Text.Text)
+         where
+        lensOf' _
+          = (Prelude..)
+              (Lens.Family2.Unchecked.lens _ErrorMessage'StackElement'function
+                 (\ x__ y__ -> x__{_ErrorMessage'StackElement'function = y__}))
+              Prelude.id
+instance Prelude.Functor f =>
+         Lens.Labels.HasLens' f ErrorMessage'StackElement "package"
+           (Data.Text.Text)
+         where
+        lensOf' _
+          = (Prelude..)
+              (Lens.Family2.Unchecked.lens _ErrorMessage'StackElement'package
+                 (\ x__ y__ -> x__{_ErrorMessage'StackElement'package = y__}))
+              Prelude.id
+instance Prelude.Functor f =>
+         Lens.Labels.HasLens' f ErrorMessage'StackElement "module'"
+           (Data.Text.Text)
+         where
+        lensOf' _
+          = (Prelude..)
+              (Lens.Family2.Unchecked.lens _ErrorMessage'StackElement'module'
+                 (\ x__ y__ -> x__{_ErrorMessage'StackElement'module' = y__}))
+              Prelude.id
+instance Prelude.Functor f =>
+         Lens.Labels.HasLens' f ErrorMessage'StackElement "file"
+           (Data.Text.Text)
+         where
+        lensOf' _
+          = (Prelude..)
+              (Lens.Family2.Unchecked.lens _ErrorMessage'StackElement'file
+                 (\ x__ y__ -> x__{_ErrorMessage'StackElement'file = y__}))
+              Prelude.id
+instance Prelude.Functor f =>
+         Lens.Labels.HasLens' f ErrorMessage'StackElement "startLine"
+           (Data.Int.Int32)
+         where
+        lensOf' _
+          = (Prelude..)
+              (Lens.Family2.Unchecked.lens _ErrorMessage'StackElement'startLine
+                 (\ x__ y__ -> x__{_ErrorMessage'StackElement'startLine = y__}))
+              Prelude.id
+instance Prelude.Functor f =>
+         Lens.Labels.HasLens' f ErrorMessage'StackElement "startCol"
+           (Data.Int.Int32)
+         where
+        lensOf' _
+          = (Prelude..)
+              (Lens.Family2.Unchecked.lens _ErrorMessage'StackElement'startCol
+                 (\ x__ y__ -> x__{_ErrorMessage'StackElement'startCol = y__}))
+              Prelude.id
+instance Data.Default.Class.Default ErrorMessage'StackElement where
+        def
+          = ErrorMessage'StackElement{_ErrorMessage'StackElement'function =
+                                        Data.ProtoLens.fieldDefault,
+                                      _ErrorMessage'StackElement'package =
+                                        Data.ProtoLens.fieldDefault,
+                                      _ErrorMessage'StackElement'module' =
+                                        Data.ProtoLens.fieldDefault,
+                                      _ErrorMessage'StackElement'file = Data.ProtoLens.fieldDefault,
+                                      _ErrorMessage'StackElement'startLine =
+                                        Data.ProtoLens.fieldDefault,
+                                      _ErrorMessage'StackElement'startCol =
+                                        Data.ProtoLens.fieldDefault,
+                                      _ErrorMessage'StackElement'_unknownFields = ([])}
+instance Data.ProtoLens.Message ErrorMessage'StackElement where
+        messageName _
+          = Data.Text.pack "karps.core.ErrorMessage.StackElement"
+        fieldsByTag
+          = let function__field_descriptor
+                  = Data.ProtoLens.FieldDescriptor "function"
+                      (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                         Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+                      (Data.ProtoLens.PlainField Data.ProtoLens.Optional
+                         (Lens.Labels.lensOf
+                            ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "function")))
+                      :: Data.ProtoLens.FieldDescriptor ErrorMessage'StackElement
+                package__field_descriptor
+                  = Data.ProtoLens.FieldDescriptor "package"
+                      (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                         Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+                      (Data.ProtoLens.PlainField Data.ProtoLens.Optional
+                         (Lens.Labels.lensOf
+                            ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "package")))
+                      :: Data.ProtoLens.FieldDescriptor ErrorMessage'StackElement
+                module'__field_descriptor
+                  = Data.ProtoLens.FieldDescriptor "module"
+                      (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                         Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+                      (Data.ProtoLens.PlainField Data.ProtoLens.Optional
+                         (Lens.Labels.lensOf
+                            ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "module'")))
+                      :: Data.ProtoLens.FieldDescriptor ErrorMessage'StackElement
+                file__field_descriptor
+                  = Data.ProtoLens.FieldDescriptor "file"
+                      (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                         Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+                      (Data.ProtoLens.PlainField Data.ProtoLens.Optional
+                         (Lens.Labels.lensOf
+                            ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "file")))
+                      :: Data.ProtoLens.FieldDescriptor ErrorMessage'StackElement
+                startLine__field_descriptor
+                  = Data.ProtoLens.FieldDescriptor "start_line"
+                      (Data.ProtoLens.ScalarField Data.ProtoLens.Int32Field ::
+                         Data.ProtoLens.FieldTypeDescriptor Data.Int.Int32)
+                      (Data.ProtoLens.PlainField Data.ProtoLens.Optional
+                         (Lens.Labels.lensOf
+                            ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "startLine")))
+                      :: Data.ProtoLens.FieldDescriptor ErrorMessage'StackElement
+                startCol__field_descriptor
+                  = Data.ProtoLens.FieldDescriptor "start_col"
+                      (Data.ProtoLens.ScalarField Data.ProtoLens.Int32Field ::
+                         Data.ProtoLens.FieldTypeDescriptor Data.Int.Int32)
+                      (Data.ProtoLens.PlainField Data.ProtoLens.Optional
+                         (Lens.Labels.lensOf
+                            ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "startCol")))
+                      :: Data.ProtoLens.FieldDescriptor ErrorMessage'StackElement
+              in
+              Data.Map.fromList
+                [(Data.ProtoLens.Tag 1, function__field_descriptor),
+                 (Data.ProtoLens.Tag 2, package__field_descriptor),
+                 (Data.ProtoLens.Tag 3, module'__field_descriptor),
+                 (Data.ProtoLens.Tag 4, file__field_descriptor),
+                 (Data.ProtoLens.Tag 5, startLine__field_descriptor),
+                 (Data.ProtoLens.Tag 6, startCol__field_descriptor)]
+        unknownFields
+          = Lens.Family2.Unchecked.lens
+              _ErrorMessage'StackElement'_unknownFields
+              (\ x__ y__ -> x__{_ErrorMessage'StackElement'_unknownFields = y__})
 {- | Fields :
 
     * 'Proto.Karps.Proto.ApiInternal_Fields.pinnedGraph' @:: Lens' GraphTransformResponse Proto.Karps.Proto.Graph.Graph@

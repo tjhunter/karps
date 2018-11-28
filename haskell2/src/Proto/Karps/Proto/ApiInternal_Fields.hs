@@ -74,6 +74,18 @@ failures ::
 failures
   = Lens.Labels.lensOf
       ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "failures")
+file ::
+     forall f s t a b . (Lens.Labels.HasLens f s t "file" a b) =>
+       Lens.Family2.LensLike f s t a b
+file
+  = Lens.Labels.lensOf
+      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "file")
+function ::
+         forall f s t a b . (Lens.Labels.HasLens f s t "function" a b) =>
+           Lens.Family2.LensLike f s t a b
+function
+  = Lens.Labels.lensOf
+      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "function")
 functionalGraph ::
                 forall f s t a b .
                   (Lens.Labels.HasLens f s t "functionalGraph" a b) =>
@@ -93,6 +105,12 @@ graphDef ::
 graphDef
   = Lens.Labels.lensOf
       ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "graphDef")
+hsStack ::
+        forall f s t a b . (Lens.Labels.HasLens f s t "hsStack" a b) =>
+          Lens.Family2.LensLike f s t a b
+hsStack
+  = Lens.Labels.lensOf
+      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "hsStack")
 knownResources ::
                forall f s t a b .
                  (Lens.Labels.HasLens f s t "knownResources" a b) =>
@@ -211,6 +229,12 @@ messages ::
 messages
   = Lens.Labels.lensOf
       ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "messages")
+module' ::
+        forall f s t a b . (Lens.Labels.HasLens f s t "module'" a b) =>
+          Lens.Family2.LensLike f s t a b
+module'
+  = Lens.Labels.lensOf
+      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "module'")
 node ::
      forall f s t a b . (Lens.Labels.HasLens f s t "node" a b) =>
        Lens.Family2.LensLike f s t a b
@@ -229,6 +253,12 @@ opName ::
 opName
   = Lens.Labels.lensOf
       ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "opName")
+package ::
+        forall f s t a b . (Lens.Labels.HasLens f s t "package" a b) =>
+          Lens.Family2.LensLike f s t a b
+package
+  = Lens.Labels.lensOf
+      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "package")
 parents ::
         forall f s t a b . (Lens.Labels.HasLens f s t "parents" a b) =>
           Lens.Family2.LensLike f s t a b
@@ -297,6 +327,18 @@ stamp ::
 stamp
   = Lens.Labels.lensOf
       ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "stamp")
+startCol ::
+         forall f s t a b . (Lens.Labels.HasLens f s t "startCol" a b) =>
+           Lens.Family2.LensLike f s t a b
+startCol
+  = Lens.Labels.lensOf
+      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "startCol")
+startLine ::
+          forall f s t a b . (Lens.Labels.HasLens f s t "startLine" a b) =>
+            Lens.Family2.LensLike f s t a b
+startLine
+  = Lens.Labels.lensOf
+      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "startLine")
 steps ::
       forall f s t a b . (Lens.Labels.HasLens f s t "steps" a b) =>
         Lens.Family2.LensLike f s t a b

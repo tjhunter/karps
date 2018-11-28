@@ -4,7 +4,7 @@ import os
 from .proto import types_pb2
 from .types import DataType
 from .row import as_cell
-from .objects import make_dataframe
+from .objects import call_op
 
 __all__ = ['Session', 'ProcessContext']
 
@@ -31,9 +31,7 @@ class Session(object):
         cwt = _build_cwt(obj, schema)
         # In the case of the dataframe, the top level should be an array.
         assert cwt.type.is_array_type, cwt.type
-        ct_proto = cwt.type.inner_type._proto
-        return make_dataframe(self, "org.karps.Literal",
-                              ct_proto, cwt._proto)
+        return call_op("org.karps.DistributedLiteral", extra=cwt._proto, session=self)
 
 
 def set_default_context(session: Session):

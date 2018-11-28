@@ -32,7 +32,9 @@ module Spark.Common.OpStructures(
   OpExtra(..),
   makeOperator,
   coreNodeInfo,
-  emptyExtra
+  emptyExtra,
+  localityFromProto,
+  localityToProto
 ) where
 
 import qualified Data.Vector as V
@@ -375,6 +377,14 @@ makeOperator txt sqlt =
     soName = txt,
     soOutputType = unSQLType sqlt,
     soExtra = emptyExtra  }
+
+localityFromProto :: PG.Locality -> Locality
+localityFromProto PG.LOCAL = Local
+localityFromProto PG.DISTRIBUTED = Distributed
+
+localityToProto :: Locality -> PG.Locality
+localityToProto Local = PG.LOCAL
+localityToProto Distributed = PG.DISTRIBUTED
 
 instance ToProto PG.Locality Locality where
   toProto Distributed = PG.DISTRIBUTED
