@@ -1,9 +1,11 @@
+import numpy as np
+
 from .proto import types_pb2 as pb
 from .utils import AbstractProtoWrapper
 
 __all__ = ['DataType', 'IntegerType', 'DoubleType', 'BooleanType',
            'ArrayType', 'StructField', 'StructType',
-           'merge_proto_types', 'merge_types']
+           'merge_proto_types', 'merge_types', 'as_sql_type']
 
 
 class DataType(AbstractProtoWrapper):
@@ -138,6 +140,39 @@ def merge_types(tp1, tp2):
 
 
 _none_proto_type = pb.SQLType()
+
+
+def _builtin_types():
+    base = {
+        pb.SQLType.INT: [int, np.int, np.int32, 'int', 'int32'],
+        pb.SQLType.DOUBLE: [float, np.double, np.float64, 'double', 'float64'],
+        pb.SQLType.STRING: [str, 'str', np.str]
+    }
+    all_types = [(bt, pbt) for (pbt, lt) in base.items() for bt in lt]
+    return dict(all_types)
+
+
+_known_types = _builtin_types()
+
+
+def as_sql_type(tpe):
+    if isinstance(tpe, list):
+        assert tpe, 'List cannot be empty'
+
+        def f(fname, ftype):
+            assert isinstance(fname, str), (type(fname), fname)
+            # Unknown field type, but we fix the field name.
+            t = as_sql_type(ftype)
+            return pb.StructField(field_name=fname, field_type=t)
+        fields = [f(fname, ftype) for (fname, ftype) in tpe]
+        return pb.StructType(fields=fields)
+    if isinstance(tpe, dict):
+        ll = sorted(list(tpe.items()), key=lambda x: x[0])
+        return as_sql_type(ll)
+    if tpe in _known_types:
+        return _known_types[tpe]
+    raise ValueError("Unknown type {}".format(tpe))
+
 
 
 def merge_proto_types(tp1, tp2):

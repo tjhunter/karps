@@ -16,8 +16,6 @@ _sym_db = _symbol_database.Default()
 
 from karps.proto import computation_pb2 as karps_dot_proto_dot_computation__pb2
 from karps.proto import graph_pb2 as karps_dot_proto_dot_graph__pb2
-from karps.proto import interface_pb2 as karps_dot_proto_dot_interface__pb2
-from karps.proto import io_pb2 as karps_dot_proto_dot_io__pb2
 from tensorflow.core.framework import graph_pb2 as tensorflow_dot_core_dot_framework_dot_graph__pb2
 
 
@@ -25,9 +23,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='karps/proto/api_internal.proto',
   package='karps.core',
   syntax='proto3',
-  serialized_pb=_b('\n\x1ekarps/proto/api_internal.proto\x12\nkarps.core\x1a\x1dkarps/proto/computation.proto\x1a\x17karps/proto/graph.proto\x1a\x1bkarps/proto/interface.proto\x1a\x14karps/proto/io.proto\x1a%tensorflow/core/framework/graph.proto\"\xae\x02\n\x15PerformGraphTransform\x12&\n\x07session\x18\x01 \x01(\x0b\x32\x15.karps.core.SessionId\x12.\n\x0b\x63omputation\x18\x02 \x01(\x0b\x32\x19.karps.core.ComputationId\x12+\n\x10\x66unctional_graph\x18\x03 \x01(\x0b\x32\x11.karps.core.Graph\x12\x30\n\x0f\x61vailable_nodes\x18\x04 \x03(\x0b\x32\x17.karps.core.NodeMapItem\x12)\n\x0frequested_paths\x18\x05 \x03(\x0b\x32\x10.karps.core.Path\x12\x33\n\x0fknown_resources\x18\x06 \x03(\x0b\x32\x1a.karps.core.ResourceStatus\"\xc4\x01\n\x16GraphTransformResponse\x12\'\n\x0cpinned_graph\x18\x01 \x01(\x0b\x32\x11.karps.core.Graph\x12)\n\x08node_map\x18\x02 \x03(\x0b\x32\x17.karps.core.NodeMapItem\x12-\n\x08messages\x18\x03 \x03(\x0b\x32\x1b.karps.core.AnalysisMessage\x12\'\n\x05steps\x18\x04 \x03(\x0b\x32\x18.karps.core.CompilerStep\"f\n\x0eResourceStatus\x12*\n\x08resource\x18\x01 \x01(\x0b\x32\x18.karps.core.ResourcePath\x12(\n\x05stamp\x18\x02 \x01(\x0b\x32\x19.karps.core.ResourceStamp\"n\n\x17\x41nalyzeResourcesRequest\x12+\n\tresources\x18\x01 \x03(\x0b\x32\x18.karps.core.ResourcePath\x12&\n\x07session\x18\x02 \x01(\x0b\x32\x15.karps.core.SessionId\"\xd7\x01\n\x17\x41nalyzeResourceResponse\x12-\n\tsuccesses\x18\x01 \x03(\x0b\x32\x1a.karps.core.ResourceStatus\x12\x42\n\x08\x66\x61ilures\x18\x02 \x03(\x0b\x32\x30.karps.core.AnalyzeResourceResponse.FailedStatus\x1aI\n\x0c\x46\x61iledStatus\x12*\n\x08resource\x18\x01 \x01(\x0b\x32\x18.karps.core.ResourcePath\x12\r\n\x05\x65rror\x18\x02 \x01(\t\"\xa7\x01\n\x0bNodeMapItem\x12 \n\x04node\x18\x01 \x01(\x0b\x32\x12.karps.core.NodeId\x12\x1e\n\x04path\x18\x02 \x01(\x0b\x32\x10.karps.core.Path\x12.\n\x0b\x63omputation\x18\x03 \x01(\x0b\x32\x19.karps.core.ComputationId\x12&\n\x07session\x18\x04 \x01(\x0b\x32\x15.karps.core.SessionId\"\x84\x01\n\x0c\x43ompilerStep\x12)\n\x05phase\x18\x01 \x01(\x0e\x32\x1a.karps.core.CompilingPhase\x12 \n\x05graph\x18\x02 \x01(\x0b\x32\x11.karps.core.Graph\x12\'\n\tgraph_def\x18\x03 \x01(\x0b\x32\x14.tensorflow.GraphDef\"\x17\n\x06NodeId\x12\r\n\x05value\x18\x01 \x01(\t\"\x8b\x02\n\x0f\x41nalysisMessage\x12.\n\x0b\x63omputation\x18\x01 \x01(\x0b\x32\x19.karps.core.ComputationId\x12&\n\x07session\x18\x02 \x01(\x0b\x32\x15.karps.core.SessionId\x12\'\n\x0brelevant_id\x18\x03 \x01(\x0b\x32\x12.karps.core.NodeId\x12\x1e\n\x04path\x18\x04 \x01(\x0b\x32\x10.karps.core.Path\x12\x0f\n\x07\x63ontent\x18\x05 \x01(\t\x12*\n\x05level\x18\x06 \x01(\x0e\x32\x1b.karps.core.MessageSeverity\x12\x1a\n\x12stack_trace_pretty\x18\x07 \x01(\t\"l\n\x12NodeBuilderRequest\x12\x0f\n\x07op_name\x18\x01 \x01(\t\x12\"\n\x05\x65xtra\x18\x02 \x01(\x0b\x32\x13.karps.core.OpExtra\x12!\n\x07parents\x18\x03 \x03(\x0b\x32\x10.karps.core.Node\"a\n\x13NodeBuilderResponse\x12\'\n\x05\x65rror\x18\x01 \x01(\x0b\x32\x18.karps.core.ErrorMessage\x12!\n\x07success\x18\x02 \x01(\x0b\x32\x10.karps.core.Node\"\xde\x01\n\x0c\x45rrorMessage\x12\x0f\n\x07message\x18\x01 \x01(\t\x12\x37\n\x08hs_stack\x18\x02 \x03(\x0b\x32%.karps.core.ErrorMessage.StackElement\x12\x0c\n\x04path\x18\x03 \x03(\t\x1av\n\x0cStackElement\x12\x10\n\x08\x66unction\x18\x01 \x01(\t\x12\x0f\n\x07package\x18\x02 \x01(\t\x12\x0e\n\x06module\x18\x03 \x01(\t\x12\x0c\n\x04\x66ile\x18\x04 \x01(\t\x12\x12\n\nstart_line\x18\x05 \x01(\x05\x12\x11\n\tstart_col\x18\x06 \x01(\x05\"G\n\x0c\x43oreResponse\x12\'\n\x05\x65rror\x18\x01 \x01(\x0b\x32\x18.karps.core.ErrorMessage\x12\x0e\n\x06succes\x18\x02 \x01(\x0c*\xbd\x02\n\x0e\x43ompilingPhase\x12\x0b\n\x07INITIAL\x10\x00\x12\x16\n\x12REMOVE_UNREACHABLE\x10\x01\x12 \n\x1cREMOVE_OBSERVABLE_BROADCASTS\x10\n\x12\x19\n\x15\x44\x41TA_SOURCE_INSERTION\x10\x02\x12\x12\n\x0ePOINTER_SWAP_1\x10\x03\x12\x16\n\x12MERGE_AGGREGATIONS\x10\x07\x12\x1d\n\x19MERGE_PREAGG_AGGREGATIONS\x10\x0b\x12\x14\n\x10MERGE_TRANSFORMS\x10\x08\x12\x18\n\x14MERGE_AGGREGATIONS_2\x10\t\x12\x19\n\x15\x46UNCTIONAL_FLATTENING\x10\x04\x12\x16\n\x12\x41UTOCACHE_FULLFILL\x10\x05\x12\x0f\n\x0b\x43\x41\x43HE_CHECK\x10\x06\x12\n\n\x05\x46INAL\x10\xe8\x07*3\n\x0fMessageSeverity\x12\x08\n\x04INFO\x10\x00\x12\x0b\n\x07WARNING\x10\x01\x12\t\n\x05\x46\x41TAL\x10\x02\x32\xa8\x02\n\tKarpsRest\x12`\n\x11\x43reateComputation\x12$.karps.core.CreateComputationRequest\x1a%.karps.core.CreateComputationResponse\x12]\n\x11\x43omputationStatus\x12$.karps.core.ComputationStatusRequest\x1a\".karps.core.BatchComputationResult\x12Z\n\x0eResourceStatus\x12#.karps.core.AnalyzeResourcesRequest\x1a#.karps.core.AnalyzeResourceResponseb\x06proto3')
+  serialized_pb=_b('\n\x1ekarps/proto/api_internal.proto\x12\nkarps.core\x1a\x1dkarps/proto/computation.proto\x1a\x17karps/proto/graph.proto\x1a%tensorflow/core/framework/graph.proto\"\xa7\x01\n\x0bNodeMapItem\x12 \n\x04node\x18\x01 \x01(\x0b\x32\x12.karps.core.NodeId\x12\x1e\n\x04path\x18\x02 \x01(\x0b\x32\x10.karps.core.Path\x12.\n\x0b\x63omputation\x18\x03 \x01(\x0b\x32\x19.karps.core.ComputationId\x12&\n\x07session\x18\x04 \x01(\x0b\x32\x15.karps.core.SessionId\"\x84\x01\n\x0c\x43ompilerStep\x12)\n\x05phase\x18\x01 \x01(\x0e\x32\x1a.karps.core.CompilingPhase\x12 \n\x05graph\x18\x02 \x01(\x0b\x32\x11.karps.core.Graph\x12\'\n\tgraph_def\x18\x03 \x01(\x0b\x32\x14.tensorflow.GraphDef\"\x17\n\x06NodeId\x12\r\n\x05value\x18\x01 \x01(\t\"\x8b\x02\n\x0f\x41nalysisMessage\x12.\n\x0b\x63omputation\x18\x01 \x01(\x0b\x32\x19.karps.core.ComputationId\x12&\n\x07session\x18\x02 \x01(\x0b\x32\x15.karps.core.SessionId\x12\'\n\x0brelevant_id\x18\x03 \x01(\x0b\x32\x12.karps.core.NodeId\x12\x1e\n\x04path\x18\x04 \x01(\x0b\x32\x10.karps.core.Path\x12\x0f\n\x07\x63ontent\x18\x05 \x01(\t\x12*\n\x05level\x18\x06 \x01(\x0e\x32\x1b.karps.core.MessageSeverity\x12\x1a\n\x12stack_trace_pretty\x18\x07 \x01(\t\"\xde\x01\n\x0c\x45rrorMessage\x12\x0f\n\x07message\x18\x01 \x01(\t\x12\x37\n\x08hs_stack\x18\x02 \x03(\x0b\x32%.karps.core.ErrorMessage.StackElement\x12\x0c\n\x04path\x18\x03 \x03(\t\x1av\n\x0cStackElement\x12\x10\n\x08\x66unction\x18\x01 \x01(\t\x12\x0f\n\x07package\x18\x02 \x01(\t\x12\x0e\n\x06module\x18\x03 \x01(\t\x12\x0c\n\x04\x66ile\x18\x04 \x01(\t\x12\x12\n\nstart_line\x18\x05 \x01(\x05\x12\x11\n\tstart_col\x18\x06 \x01(\x05\"l\n\x12NodeBuilderRequest\x12\x0f\n\x07op_name\x18\x01 \x01(\t\x12\"\n\x05\x65xtra\x18\x02 \x01(\x0b\x32\x13.karps.core.OpExtra\x12!\n\x07parents\x18\x03 \x03(\x0b\x32\x10.karps.core.Node\"a\n\x13NodeBuilderResponse\x12\'\n\x05\x65rror\x18\x01 \x01(\x0b\x32\x18.karps.core.ErrorMessage\x12!\n\x07success\x18\x02 \x01(\x0b\x32\x10.karps.core.Node\"o\n\x15GraphTransformRequest\x12+\n\x10\x66unctional_graph\x18\x03 \x01(\x0b\x32\x11.karps.core.Graph\x12)\n\x0frequested_paths\x18\x05 \x03(\x0b\x32\x10.karps.core.Path\"\xc2\x01\n\x16GraphTransformResponse\x12\'\n\x0cpinned_graph\x18\x01 \x01(\x0b\x32\x11.karps.core.Graph\x12-\n\x08messages\x18\x03 \x03(\x0b\x32\x1b.karps.core.AnalysisMessage\x12\'\n\x05steps\x18\x04 \x03(\x0b\x32\x18.karps.core.CompilerStep\x12\'\n\x05\x65rror\x18\x05 \x01(\x0b\x32\x18.karps.core.ErrorMessage*\xbd\x02\n\x0e\x43ompilingPhase\x12\x0b\n\x07INITIAL\x10\x00\x12\x16\n\x12REMOVE_UNREACHABLE\x10\x01\x12 \n\x1cREMOVE_OBSERVABLE_BROADCASTS\x10\n\x12\x19\n\x15\x44\x41TA_SOURCE_INSERTION\x10\x02\x12\x12\n\x0ePOINTER_SWAP_1\x10\x03\x12\x16\n\x12MERGE_AGGREGATIONS\x10\x07\x12\x1d\n\x19MERGE_PREAGG_AGGREGATIONS\x10\x0b\x12\x14\n\x10MERGE_TRANSFORMS\x10\x08\x12\x18\n\x14MERGE_AGGREGATIONS_2\x10\t\x12\x19\n\x15\x46UNCTIONAL_FLATTENING\x10\x04\x12\x16\n\x12\x41UTOCACHE_FULLFILL\x10\x05\x12\x0f\n\x0b\x43\x41\x43HE_CHECK\x10\x06\x12\n\n\x05\x46INAL\x10\xe8\x07*3\n\x0fMessageSeverity\x12\x08\n\x04INFO\x10\x00\x12\x0b\n\x07WARNING\x10\x01\x12\t\n\x05\x46\x41TAL\x10\x02\x62\x06proto3')
   ,
-  dependencies=[karps_dot_proto_dot_computation__pb2.DESCRIPTOR,karps_dot_proto_dot_graph__pb2.DESCRIPTOR,karps_dot_proto_dot_interface__pb2.DESCRIPTOR,karps_dot_proto_dot_io__pb2.DESCRIPTOR,tensorflow_dot_core_dot_framework_dot_graph__pb2.DESCRIPTOR,])
+  dependencies=[karps_dot_proto_dot_computation__pb2.DESCRIPTOR,karps_dot_proto_dot_graph__pb2.DESCRIPTOR,tensorflow_dot_core_dot_framework_dot_graph__pb2.DESCRIPTOR,])
 
 _COMPILINGPHASE = _descriptor.EnumDescriptor(
   name='CompilingPhase',
@@ -90,8 +88,8 @@ _COMPILINGPHASE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=2238,
-  serialized_end=2555,
+  serialized_start=1486,
+  serialized_end=1803,
 )
 _sym_db.RegisterEnumDescriptor(_COMPILINGPHASE)
 
@@ -117,8 +115,8 @@ _MESSAGESEVERITY = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=2557,
-  serialized_end=2608,
+  serialized_start=1805,
+  serialized_end=1856,
 )
 _sym_db.RegisterEnumDescriptor(_MESSAGESEVERITY)
 
@@ -140,275 +138,6 @@ INFO = 0
 WARNING = 1
 FATAL = 2
 
-
-
-_PERFORMGRAPHTRANSFORM = _descriptor.Descriptor(
-  name='PerformGraphTransform',
-  full_name='karps.core.PerformGraphTransform',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='session', full_name='karps.core.PerformGraphTransform.session', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='computation', full_name='karps.core.PerformGraphTransform.computation', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='functional_graph', full_name='karps.core.PerformGraphTransform.functional_graph', index=2,
-      number=3, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='available_nodes', full_name='karps.core.PerformGraphTransform.available_nodes', index=3,
-      number=4, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='requested_paths', full_name='karps.core.PerformGraphTransform.requested_paths', index=4,
-      number=5, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='known_resources', full_name='karps.core.PerformGraphTransform.known_resources', index=5,
-      number=6, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=193,
-  serialized_end=495,
-)
-
-
-_GRAPHTRANSFORMRESPONSE = _descriptor.Descriptor(
-  name='GraphTransformResponse',
-  full_name='karps.core.GraphTransformResponse',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='pinned_graph', full_name='karps.core.GraphTransformResponse.pinned_graph', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='node_map', full_name='karps.core.GraphTransformResponse.node_map', index=1,
-      number=2, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='messages', full_name='karps.core.GraphTransformResponse.messages', index=2,
-      number=3, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='steps', full_name='karps.core.GraphTransformResponse.steps', index=3,
-      number=4, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=498,
-  serialized_end=694,
-)
-
-
-_RESOURCESTATUS = _descriptor.Descriptor(
-  name='ResourceStatus',
-  full_name='karps.core.ResourceStatus',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='resource', full_name='karps.core.ResourceStatus.resource', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='stamp', full_name='karps.core.ResourceStatus.stamp', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=696,
-  serialized_end=798,
-)
-
-
-_ANALYZERESOURCESREQUEST = _descriptor.Descriptor(
-  name='AnalyzeResourcesRequest',
-  full_name='karps.core.AnalyzeResourcesRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='resources', full_name='karps.core.AnalyzeResourcesRequest.resources', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='session', full_name='karps.core.AnalyzeResourcesRequest.session', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=800,
-  serialized_end=910,
-)
-
-
-_ANALYZERESOURCERESPONSE_FAILEDSTATUS = _descriptor.Descriptor(
-  name='FailedStatus',
-  full_name='karps.core.AnalyzeResourceResponse.FailedStatus',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='resource', full_name='karps.core.AnalyzeResourceResponse.FailedStatus.resource', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='error', full_name='karps.core.AnalyzeResourceResponse.FailedStatus.error', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1055,
-  serialized_end=1128,
-)
-
-_ANALYZERESOURCERESPONSE = _descriptor.Descriptor(
-  name='AnalyzeResourceResponse',
-  full_name='karps.core.AnalyzeResourceResponse',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='successes', full_name='karps.core.AnalyzeResourceResponse.successes', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='failures', full_name='karps.core.AnalyzeResourceResponse.failures', index=1,
-      number=2, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[_ANALYZERESOURCERESPONSE_FAILEDSTATUS, ],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=913,
-  serialized_end=1128,
-)
 
 
 _NODEMAPITEM = _descriptor.Descriptor(
@@ -458,8 +187,8 @@ _NODEMAPITEM = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1131,
-  serialized_end=1298,
+  serialized_start=142,
+  serialized_end=309,
 )
 
 
@@ -503,8 +232,8 @@ _COMPILERSTEP = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1301,
-  serialized_end=1433,
+  serialized_start=312,
+  serialized_end=444,
 )
 
 
@@ -534,8 +263,8 @@ _NODEID = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1435,
-  serialized_end=1458,
+  serialized_start=446,
+  serialized_end=469,
 )
 
 
@@ -607,91 +336,8 @@ _ANALYSISMESSAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1461,
-  serialized_end=1728,
-)
-
-
-_NODEBUILDERREQUEST = _descriptor.Descriptor(
-  name='NodeBuilderRequest',
-  full_name='karps.core.NodeBuilderRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='op_name', full_name='karps.core.NodeBuilderRequest.op_name', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='extra', full_name='karps.core.NodeBuilderRequest.extra', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='parents', full_name='karps.core.NodeBuilderRequest.parents', index=2,
-      number=3, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1730,
-  serialized_end=1838,
-)
-
-
-_NODEBUILDERRESPONSE = _descriptor.Descriptor(
-  name='NodeBuilderResponse',
-  full_name='karps.core.NodeBuilderResponse',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='error', full_name='karps.core.NodeBuilderResponse.error', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='success', full_name='karps.core.NodeBuilderResponse.success', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1840,
-  serialized_end=1937,
+  serialized_start=472,
+  serialized_end=739,
 )
 
 
@@ -756,8 +402,8 @@ _ERRORMESSAGE_STACKELEMENT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2044,
-  serialized_end=2162,
+  serialized_start=846,
+  serialized_end=964,
 )
 
 _ERRORMESSAGE = _descriptor.Descriptor(
@@ -800,29 +446,36 @@ _ERRORMESSAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1940,
-  serialized_end=2162,
+  serialized_start=742,
+  serialized_end=964,
 )
 
 
-_CORERESPONSE = _descriptor.Descriptor(
-  name='CoreResponse',
-  full_name='karps.core.CoreResponse',
+_NODEBUILDERREQUEST = _descriptor.Descriptor(
+  name='NodeBuilderRequest',
+  full_name='karps.core.NodeBuilderRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='error', full_name='karps.core.CoreResponse.error', index=0,
-      number=1, type=11, cpp_type=10, label=1,
+      name='op_name', full_name='karps.core.NodeBuilderRequest.op_name', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='extra', full_name='karps.core.NodeBuilderRequest.extra', index=1,
+      number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='succes', full_name='karps.core.CoreResponse.succes', index=1,
-      number=2, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
+      name='parents', full_name='karps.core.NodeBuilderRequest.parents', index=2,
+      number=3, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
@@ -838,28 +491,138 @@ _CORERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2164,
-  serialized_end=2235,
+  serialized_start=966,
+  serialized_end=1074,
 )
 
-_PERFORMGRAPHTRANSFORM.fields_by_name['session'].message_type = karps_dot_proto_dot_computation__pb2._SESSIONID
-_PERFORMGRAPHTRANSFORM.fields_by_name['computation'].message_type = karps_dot_proto_dot_computation__pb2._COMPUTATIONID
-_PERFORMGRAPHTRANSFORM.fields_by_name['functional_graph'].message_type = karps_dot_proto_dot_graph__pb2._GRAPH
-_PERFORMGRAPHTRANSFORM.fields_by_name['available_nodes'].message_type = _NODEMAPITEM
-_PERFORMGRAPHTRANSFORM.fields_by_name['requested_paths'].message_type = karps_dot_proto_dot_graph__pb2._PATH
-_PERFORMGRAPHTRANSFORM.fields_by_name['known_resources'].message_type = _RESOURCESTATUS
-_GRAPHTRANSFORMRESPONSE.fields_by_name['pinned_graph'].message_type = karps_dot_proto_dot_graph__pb2._GRAPH
-_GRAPHTRANSFORMRESPONSE.fields_by_name['node_map'].message_type = _NODEMAPITEM
-_GRAPHTRANSFORMRESPONSE.fields_by_name['messages'].message_type = _ANALYSISMESSAGE
-_GRAPHTRANSFORMRESPONSE.fields_by_name['steps'].message_type = _COMPILERSTEP
-_RESOURCESTATUS.fields_by_name['resource'].message_type = karps_dot_proto_dot_io__pb2._RESOURCEPATH
-_RESOURCESTATUS.fields_by_name['stamp'].message_type = karps_dot_proto_dot_io__pb2._RESOURCESTAMP
-_ANALYZERESOURCESREQUEST.fields_by_name['resources'].message_type = karps_dot_proto_dot_io__pb2._RESOURCEPATH
-_ANALYZERESOURCESREQUEST.fields_by_name['session'].message_type = karps_dot_proto_dot_computation__pb2._SESSIONID
-_ANALYZERESOURCERESPONSE_FAILEDSTATUS.fields_by_name['resource'].message_type = karps_dot_proto_dot_io__pb2._RESOURCEPATH
-_ANALYZERESOURCERESPONSE_FAILEDSTATUS.containing_type = _ANALYZERESOURCERESPONSE
-_ANALYZERESOURCERESPONSE.fields_by_name['successes'].message_type = _RESOURCESTATUS
-_ANALYZERESOURCERESPONSE.fields_by_name['failures'].message_type = _ANALYZERESOURCERESPONSE_FAILEDSTATUS
+
+_NODEBUILDERRESPONSE = _descriptor.Descriptor(
+  name='NodeBuilderResponse',
+  full_name='karps.core.NodeBuilderResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='error', full_name='karps.core.NodeBuilderResponse.error', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='success', full_name='karps.core.NodeBuilderResponse.success', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1076,
+  serialized_end=1173,
+)
+
+
+_GRAPHTRANSFORMREQUEST = _descriptor.Descriptor(
+  name='GraphTransformRequest',
+  full_name='karps.core.GraphTransformRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='functional_graph', full_name='karps.core.GraphTransformRequest.functional_graph', index=0,
+      number=3, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='requested_paths', full_name='karps.core.GraphTransformRequest.requested_paths', index=1,
+      number=5, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1175,
+  serialized_end=1286,
+)
+
+
+_GRAPHTRANSFORMRESPONSE = _descriptor.Descriptor(
+  name='GraphTransformResponse',
+  full_name='karps.core.GraphTransformResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='pinned_graph', full_name='karps.core.GraphTransformResponse.pinned_graph', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='messages', full_name='karps.core.GraphTransformResponse.messages', index=1,
+      number=3, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='steps', full_name='karps.core.GraphTransformResponse.steps', index=2,
+      number=4, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='error', full_name='karps.core.GraphTransformResponse.error', index=3,
+      number=5, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1289,
+  serialized_end=1483,
+)
+
 _NODEMAPITEM.fields_by_name['node'].message_type = _NODEID
 _NODEMAPITEM.fields_by_name['path'].message_type = karps_dot_proto_dot_graph__pb2._PATH
 _NODEMAPITEM.fields_by_name['computation'].message_type = karps_dot_proto_dot_computation__pb2._COMPUTATIONID
@@ -872,72 +635,30 @@ _ANALYSISMESSAGE.fields_by_name['session'].message_type = karps_dot_proto_dot_co
 _ANALYSISMESSAGE.fields_by_name['relevant_id'].message_type = _NODEID
 _ANALYSISMESSAGE.fields_by_name['path'].message_type = karps_dot_proto_dot_graph__pb2._PATH
 _ANALYSISMESSAGE.fields_by_name['level'].enum_type = _MESSAGESEVERITY
+_ERRORMESSAGE_STACKELEMENT.containing_type = _ERRORMESSAGE
+_ERRORMESSAGE.fields_by_name['hs_stack'].message_type = _ERRORMESSAGE_STACKELEMENT
 _NODEBUILDERREQUEST.fields_by_name['extra'].message_type = karps_dot_proto_dot_graph__pb2._OPEXTRA
 _NODEBUILDERREQUEST.fields_by_name['parents'].message_type = karps_dot_proto_dot_graph__pb2._NODE
 _NODEBUILDERRESPONSE.fields_by_name['error'].message_type = _ERRORMESSAGE
 _NODEBUILDERRESPONSE.fields_by_name['success'].message_type = karps_dot_proto_dot_graph__pb2._NODE
-_ERRORMESSAGE_STACKELEMENT.containing_type = _ERRORMESSAGE
-_ERRORMESSAGE.fields_by_name['hs_stack'].message_type = _ERRORMESSAGE_STACKELEMENT
-_CORERESPONSE.fields_by_name['error'].message_type = _ERRORMESSAGE
-DESCRIPTOR.message_types_by_name['PerformGraphTransform'] = _PERFORMGRAPHTRANSFORM
-DESCRIPTOR.message_types_by_name['GraphTransformResponse'] = _GRAPHTRANSFORMRESPONSE
-DESCRIPTOR.message_types_by_name['ResourceStatus'] = _RESOURCESTATUS
-DESCRIPTOR.message_types_by_name['AnalyzeResourcesRequest'] = _ANALYZERESOURCESREQUEST
-DESCRIPTOR.message_types_by_name['AnalyzeResourceResponse'] = _ANALYZERESOURCERESPONSE
+_GRAPHTRANSFORMREQUEST.fields_by_name['functional_graph'].message_type = karps_dot_proto_dot_graph__pb2._GRAPH
+_GRAPHTRANSFORMREQUEST.fields_by_name['requested_paths'].message_type = karps_dot_proto_dot_graph__pb2._PATH
+_GRAPHTRANSFORMRESPONSE.fields_by_name['pinned_graph'].message_type = karps_dot_proto_dot_graph__pb2._GRAPH
+_GRAPHTRANSFORMRESPONSE.fields_by_name['messages'].message_type = _ANALYSISMESSAGE
+_GRAPHTRANSFORMRESPONSE.fields_by_name['steps'].message_type = _COMPILERSTEP
+_GRAPHTRANSFORMRESPONSE.fields_by_name['error'].message_type = _ERRORMESSAGE
 DESCRIPTOR.message_types_by_name['NodeMapItem'] = _NODEMAPITEM
 DESCRIPTOR.message_types_by_name['CompilerStep'] = _COMPILERSTEP
 DESCRIPTOR.message_types_by_name['NodeId'] = _NODEID
 DESCRIPTOR.message_types_by_name['AnalysisMessage'] = _ANALYSISMESSAGE
+DESCRIPTOR.message_types_by_name['ErrorMessage'] = _ERRORMESSAGE
 DESCRIPTOR.message_types_by_name['NodeBuilderRequest'] = _NODEBUILDERREQUEST
 DESCRIPTOR.message_types_by_name['NodeBuilderResponse'] = _NODEBUILDERRESPONSE
-DESCRIPTOR.message_types_by_name['ErrorMessage'] = _ERRORMESSAGE
-DESCRIPTOR.message_types_by_name['CoreResponse'] = _CORERESPONSE
+DESCRIPTOR.message_types_by_name['GraphTransformRequest'] = _GRAPHTRANSFORMREQUEST
+DESCRIPTOR.message_types_by_name['GraphTransformResponse'] = _GRAPHTRANSFORMRESPONSE
 DESCRIPTOR.enum_types_by_name['CompilingPhase'] = _COMPILINGPHASE
 DESCRIPTOR.enum_types_by_name['MessageSeverity'] = _MESSAGESEVERITY
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
-
-PerformGraphTransform = _reflection.GeneratedProtocolMessageType('PerformGraphTransform', (_message.Message,), dict(
-  DESCRIPTOR = _PERFORMGRAPHTRANSFORM,
-  __module__ = 'karps.proto.api_internal_pb2'
-  # @@protoc_insertion_point(class_scope:karps.core.PerformGraphTransform)
-  ))
-_sym_db.RegisterMessage(PerformGraphTransform)
-
-GraphTransformResponse = _reflection.GeneratedProtocolMessageType('GraphTransformResponse', (_message.Message,), dict(
-  DESCRIPTOR = _GRAPHTRANSFORMRESPONSE,
-  __module__ = 'karps.proto.api_internal_pb2'
-  # @@protoc_insertion_point(class_scope:karps.core.GraphTransformResponse)
-  ))
-_sym_db.RegisterMessage(GraphTransformResponse)
-
-ResourceStatus = _reflection.GeneratedProtocolMessageType('ResourceStatus', (_message.Message,), dict(
-  DESCRIPTOR = _RESOURCESTATUS,
-  __module__ = 'karps.proto.api_internal_pb2'
-  # @@protoc_insertion_point(class_scope:karps.core.ResourceStatus)
-  ))
-_sym_db.RegisterMessage(ResourceStatus)
-
-AnalyzeResourcesRequest = _reflection.GeneratedProtocolMessageType('AnalyzeResourcesRequest', (_message.Message,), dict(
-  DESCRIPTOR = _ANALYZERESOURCESREQUEST,
-  __module__ = 'karps.proto.api_internal_pb2'
-  # @@protoc_insertion_point(class_scope:karps.core.AnalyzeResourcesRequest)
-  ))
-_sym_db.RegisterMessage(AnalyzeResourcesRequest)
-
-AnalyzeResourceResponse = _reflection.GeneratedProtocolMessageType('AnalyzeResourceResponse', (_message.Message,), dict(
-
-  FailedStatus = _reflection.GeneratedProtocolMessageType('FailedStatus', (_message.Message,), dict(
-    DESCRIPTOR = _ANALYZERESOURCERESPONSE_FAILEDSTATUS,
-    __module__ = 'karps.proto.api_internal_pb2'
-    # @@protoc_insertion_point(class_scope:karps.core.AnalyzeResourceResponse.FailedStatus)
-    ))
-  ,
-  DESCRIPTOR = _ANALYZERESOURCERESPONSE,
-  __module__ = 'karps.proto.api_internal_pb2'
-  # @@protoc_insertion_point(class_scope:karps.core.AnalyzeResourceResponse)
-  ))
-_sym_db.RegisterMessage(AnalyzeResourceResponse)
-_sym_db.RegisterMessage(AnalyzeResourceResponse.FailedStatus)
 
 NodeMapItem = _reflection.GeneratedProtocolMessageType('NodeMapItem', (_message.Message,), dict(
   DESCRIPTOR = _NODEMAPITEM,
@@ -967,20 +688,6 @@ AnalysisMessage = _reflection.GeneratedProtocolMessageType('AnalysisMessage', (_
   ))
 _sym_db.RegisterMessage(AnalysisMessage)
 
-NodeBuilderRequest = _reflection.GeneratedProtocolMessageType('NodeBuilderRequest', (_message.Message,), dict(
-  DESCRIPTOR = _NODEBUILDERREQUEST,
-  __module__ = 'karps.proto.api_internal_pb2'
-  # @@protoc_insertion_point(class_scope:karps.core.NodeBuilderRequest)
-  ))
-_sym_db.RegisterMessage(NodeBuilderRequest)
-
-NodeBuilderResponse = _reflection.GeneratedProtocolMessageType('NodeBuilderResponse', (_message.Message,), dict(
-  DESCRIPTOR = _NODEBUILDERRESPONSE,
-  __module__ = 'karps.proto.api_internal_pb2'
-  # @@protoc_insertion_point(class_scope:karps.core.NodeBuilderResponse)
-  ))
-_sym_db.RegisterMessage(NodeBuilderResponse)
-
 ErrorMessage = _reflection.GeneratedProtocolMessageType('ErrorMessage', (_message.Message,), dict(
 
   StackElement = _reflection.GeneratedProtocolMessageType('StackElement', (_message.Message,), dict(
@@ -996,54 +703,33 @@ ErrorMessage = _reflection.GeneratedProtocolMessageType('ErrorMessage', (_messag
 _sym_db.RegisterMessage(ErrorMessage)
 _sym_db.RegisterMessage(ErrorMessage.StackElement)
 
-CoreResponse = _reflection.GeneratedProtocolMessageType('CoreResponse', (_message.Message,), dict(
-  DESCRIPTOR = _CORERESPONSE,
+NodeBuilderRequest = _reflection.GeneratedProtocolMessageType('NodeBuilderRequest', (_message.Message,), dict(
+  DESCRIPTOR = _NODEBUILDERREQUEST,
   __module__ = 'karps.proto.api_internal_pb2'
-  # @@protoc_insertion_point(class_scope:karps.core.CoreResponse)
+  # @@protoc_insertion_point(class_scope:karps.core.NodeBuilderRequest)
   ))
-_sym_db.RegisterMessage(CoreResponse)
+_sym_db.RegisterMessage(NodeBuilderRequest)
 
+NodeBuilderResponse = _reflection.GeneratedProtocolMessageType('NodeBuilderResponse', (_message.Message,), dict(
+  DESCRIPTOR = _NODEBUILDERRESPONSE,
+  __module__ = 'karps.proto.api_internal_pb2'
+  # @@protoc_insertion_point(class_scope:karps.core.NodeBuilderResponse)
+  ))
+_sym_db.RegisterMessage(NodeBuilderResponse)
 
+GraphTransformRequest = _reflection.GeneratedProtocolMessageType('GraphTransformRequest', (_message.Message,), dict(
+  DESCRIPTOR = _GRAPHTRANSFORMREQUEST,
+  __module__ = 'karps.proto.api_internal_pb2'
+  # @@protoc_insertion_point(class_scope:karps.core.GraphTransformRequest)
+  ))
+_sym_db.RegisterMessage(GraphTransformRequest)
 
-_KARPSREST = _descriptor.ServiceDescriptor(
-  name='KarpsRest',
-  full_name='karps.core.KarpsRest',
-  file=DESCRIPTOR,
-  index=0,
-  options=None,
-  serialized_start=2611,
-  serialized_end=2907,
-  methods=[
-  _descriptor.MethodDescriptor(
-    name='CreateComputation',
-    full_name='karps.core.KarpsRest.CreateComputation',
-    index=0,
-    containing_service=None,
-    input_type=karps_dot_proto_dot_interface__pb2._CREATECOMPUTATIONREQUEST,
-    output_type=karps_dot_proto_dot_interface__pb2._CREATECOMPUTATIONRESPONSE,
-    options=None,
-  ),
-  _descriptor.MethodDescriptor(
-    name='ComputationStatus',
-    full_name='karps.core.KarpsRest.ComputationStatus',
-    index=1,
-    containing_service=None,
-    input_type=karps_dot_proto_dot_interface__pb2._COMPUTATIONSTATUSREQUEST,
-    output_type=karps_dot_proto_dot_computation__pb2._BATCHCOMPUTATIONRESULT,
-    options=None,
-  ),
-  _descriptor.MethodDescriptor(
-    name='ResourceStatus',
-    full_name='karps.core.KarpsRest.ResourceStatus',
-    index=2,
-    containing_service=None,
-    input_type=_ANALYZERESOURCESREQUEST,
-    output_type=_ANALYZERESOURCERESPONSE,
-    options=None,
-  ),
-])
-_sym_db.RegisterServiceDescriptor(_KARPSREST)
+GraphTransformResponse = _reflection.GeneratedProtocolMessageType('GraphTransformResponse', (_message.Message,), dict(
+  DESCRIPTOR = _GRAPHTRANSFORMRESPONSE,
+  __module__ = 'karps.proto.api_internal_pb2'
+  # @@protoc_insertion_point(class_scope:karps.core.GraphTransformResponse)
+  ))
+_sym_db.RegisterMessage(GraphTransformResponse)
 
-DESCRIPTOR.services_by_name['KarpsRest'] = _KARPSREST
 
 # @@protoc_insertion_point(module_scope)

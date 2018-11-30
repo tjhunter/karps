@@ -55,8 +55,8 @@ import Spark.Common.Utilities(sh)
 import Spark.Common.TypesStructures(DataType, SQLType, SQLType(unSQLType))
 import qualified Proto.Karps.Proto.Graph as PG
 import qualified Proto.Karps.Proto.Graph_Fields as PG
-import qualified Proto.Karps.Proto.Std as PS
-import qualified Proto.Karps.Proto.Std_Fields as PS
+import qualified Proto.Karps.Proto.Standard as PS
+import qualified Proto.Karps.Proto.Standard_Fields as PS
 import qualified Proto.Karps.Proto.Row as PR
 import qualified Proto.Karps.Proto.Row_Fields as PR
 import qualified Proto.Karps.Proto.StructuredTransform as PST

@@ -30,6 +30,10 @@ class Path(AbstractProtoWrapper):
     def __repr__(self):
         return "/" + "/".join(self.to_list())
 
+    @property
+    def as_proto(self):
+        return self._proto
+
     def to_list(self):
         return list(self._proto.path)
 
@@ -42,4 +46,3 @@ class Path(AbstractProtoWrapper):
         p2 = list(self._proto.path) + x
         res = Path(graph_pb2.Path(path=p2))
         return res
-

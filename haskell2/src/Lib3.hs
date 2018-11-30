@@ -17,7 +17,9 @@ _globalRegistryRef :: IORef NodeBuilderRegistry
 {-# NOINLINE _globalRegistryRef #-}
 _globalRegistryRef = unsafePerformIO (newIORef reg) where
   reg = traceHint "building node registry" $ buildNodeRegistry builtins
-  builtins = [literalBuilderD]
+  builtins = [
+    collectB,
+    literalBuilderD]
 
 accessRegistry :: IO NodeBuilderRegistry
 accessRegistry = readIORef _globalRegistryRef

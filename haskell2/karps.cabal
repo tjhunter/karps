@@ -35,16 +35,14 @@ library
       Proto.Karps.Proto.Computation_Fields
       Proto.Karps.Proto.Graph
       Proto.Karps.Proto.Graph_Fields
-      Proto.Karps.Proto.Interface
-      Proto.Karps.Proto.Interface_Fields
       Proto.Karps.Proto.Io
       Proto.Karps.Proto.Io_Fields
       Proto.Karps.Proto.Profiling
       Proto.Karps.Proto.Profiling_Fields
       Proto.Karps.Proto.Row
       Proto.Karps.Proto.Row_Fields
-      Proto.Karps.Proto.Std
-      Proto.Karps.Proto.Std_Fields
+      Proto.Karps.Proto.Standard
+      Proto.Karps.Proto.Standard_Fields
       Proto.Karps.Proto.StructuredTransform
       Proto.Karps.Proto.StructuredTransform_Fields
       Proto.Karps.Proto.Types

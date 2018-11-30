@@ -45,8 +45,8 @@ import Spark.Common.Utilities
 import Spark.Common.ProtoUtils
 import Spark.Common.TypesFunctions(arrayType')
 import Spark.Common.RowUtils(cellWithTypeToProto, rowArray)
-import qualified Proto.Karps.Proto.Std as PS
-import qualified Proto.Karps.Proto.Std_Fields as PS
+import qualified Proto.Karps.Proto.Standard as PS
+import qualified Proto.Karps.Proto.Standard_Fields as PS
 
 -- (internal)
 -- The serialized type of a node operation, as written in

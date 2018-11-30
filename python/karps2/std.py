@@ -31,16 +31,10 @@ def truncate(df, num_rows: int) -> pd.DataFrame:
     return df.iloc[:num_rows]
 
 
-def collect(df) -> pd.DataFrame:
+def collect(df):
     """
     Collect a dataframe (no-op in pandas).
     """
     if isinstance(df, AbstractColumn):
-        n = call_op("org.karps.Collect", parents=[df])
-        cwt = n.kp_eval_pandas()
-        return _cwt_to_pandas(cwt)
+        return call_op("org.karps.Collect", parents=[df])
     return df.copy()
-
-
-def _cwt_to_pandas(cwt) -> pd.DataFrame:
-    pass

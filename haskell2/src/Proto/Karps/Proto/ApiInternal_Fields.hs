@@ -33,17 +33,8 @@ import qualified Data.ProtoLens.Reexport.Lens.Labels as Lens.Labels
 import qualified Data.ProtoLens.Reexport.Text.Read as Text.Read
 import qualified Proto.Karps.Proto.Computation
 import qualified Proto.Karps.Proto.Graph
-import qualified Proto.Karps.Proto.Interface
-import qualified Proto.Karps.Proto.Io
 import qualified Proto.Tensorflow.Core.Framework.Graph
 
-availableNodes ::
-               forall f s t a b .
-                 (Lens.Labels.HasLens f s t "availableNodes" a b) =>
-                 Lens.Family2.LensLike f s t a b
-availableNodes
-  = Lens.Labels.lensOf
-      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "availableNodes")
 computation ::
             forall f s t a b . (Lens.Labels.HasLens f s t "computation" a b) =>
               Lens.Family2.LensLike f s t a b
@@ -68,12 +59,6 @@ extra ::
 extra
   = Lens.Labels.lensOf
       ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "extra")
-failures ::
-         forall f s t a b . (Lens.Labels.HasLens f s t "failures" a b) =>
-           Lens.Family2.LensLike f s t a b
-failures
-  = Lens.Labels.lensOf
-      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "failures")
 file ::
      forall f s t a b . (Lens.Labels.HasLens f s t "file" a b) =>
        Lens.Family2.LensLike f s t a b
@@ -111,13 +96,6 @@ hsStack ::
 hsStack
   = Lens.Labels.lensOf
       ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "hsStack")
-knownResources ::
-               forall f s t a b .
-                 (Lens.Labels.HasLens f s t "knownResources" a b) =>
-                 Lens.Family2.LensLike f s t a b
-knownResources
-  = Lens.Labels.lensOf
-      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "knownResources")
 level ::
       forall f s t a b . (Lens.Labels.HasLens f s t "level" a b) =>
         Lens.Family2.LensLike f s t a b
@@ -190,13 +168,6 @@ maybe'relevantId ::
 maybe'relevantId
   = Lens.Labels.lensOf
       ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "maybe'relevantId")
-maybe'resource ::
-               forall f s t a b .
-                 (Lens.Labels.HasLens f s t "maybe'resource" a b) =>
-                 Lens.Family2.LensLike f s t a b
-maybe'resource
-  = Lens.Labels.lensOf
-      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "maybe'resource")
 maybe'session ::
               forall f s t a b .
                 (Lens.Labels.HasLens f s t "maybe'session" a b) =>
@@ -204,12 +175,6 @@ maybe'session ::
 maybe'session
   = Lens.Labels.lensOf
       ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "maybe'session")
-maybe'stamp ::
-            forall f s t a b . (Lens.Labels.HasLens f s t "maybe'stamp" a b) =>
-              Lens.Family2.LensLike f s t a b
-maybe'stamp
-  = Lens.Labels.lensOf
-      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "maybe'stamp")
 maybe'success ::
               forall f s t a b .
                 (Lens.Labels.HasLens f s t "maybe'success" a b) =>
@@ -241,12 +206,6 @@ node ::
 node
   = Lens.Labels.lensOf
       ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "node")
-nodeMap ::
-        forall f s t a b . (Lens.Labels.HasLens f s t "nodeMap" a b) =>
-          Lens.Family2.LensLike f s t a b
-nodeMap
-  = Lens.Labels.lensOf
-      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "nodeMap")
 opName ::
        forall f s t a b . (Lens.Labels.HasLens f s t "opName" a b) =>
          Lens.Family2.LensLike f s t a b
@@ -296,18 +255,6 @@ requestedPaths ::
 requestedPaths
   = Lens.Labels.lensOf
       ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "requestedPaths")
-resource ::
-         forall f s t a b . (Lens.Labels.HasLens f s t "resource" a b) =>
-           Lens.Family2.LensLike f s t a b
-resource
-  = Lens.Labels.lensOf
-      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "resource")
-resources ::
-          forall f s t a b . (Lens.Labels.HasLens f s t "resources" a b) =>
-            Lens.Family2.LensLike f s t a b
-resources
-  = Lens.Labels.lensOf
-      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "resources")
 session ::
         forall f s t a b . (Lens.Labels.HasLens f s t "session" a b) =>
           Lens.Family2.LensLike f s t a b
@@ -321,12 +268,6 @@ stackTracePretty ::
 stackTracePretty
   = Lens.Labels.lensOf
       ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "stackTracePretty")
-stamp ::
-      forall f s t a b . (Lens.Labels.HasLens f s t "stamp" a b) =>
-        Lens.Family2.LensLike f s t a b
-stamp
-  = Lens.Labels.lensOf
-      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "stamp")
 startCol ::
          forall f s t a b . (Lens.Labels.HasLens f s t "startCol" a b) =>
            Lens.Family2.LensLike f s t a b
@@ -345,24 +286,12 @@ steps ::
 steps
   = Lens.Labels.lensOf
       ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "steps")
-succes ::
-       forall f s t a b . (Lens.Labels.HasLens f s t "succes" a b) =>
-         Lens.Family2.LensLike f s t a b
-succes
-  = Lens.Labels.lensOf
-      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "succes")
 success ::
         forall f s t a b . (Lens.Labels.HasLens f s t "success" a b) =>
           Lens.Family2.LensLike f s t a b
 success
   = Lens.Labels.lensOf
       ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "success")
-successes ::
-          forall f s t a b . (Lens.Labels.HasLens f s t "successes" a b) =>
-            Lens.Family2.LensLike f s t a b
-successes
-  = Lens.Labels.lensOf
-      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "successes")
 value ::
       forall f s t a b . (Lens.Labels.HasLens f s t "value" a b) =>
         Lens.Family2.LensLike f s t a b

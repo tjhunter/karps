@@ -32,7 +32,7 @@ import Spark.Common.ProtoUtils(FromProto(..), ToProto(..), extractMaybe, extract
 import Spark.Common.StructuresInternal(NodePath(..))
 import Spark.Common.TypesStructures(DataType)
 import Spark.Common.Try(Try(..), tryError)
-import Spark.Common.Utilities(sh, show')
+import Spark.Common.Utilities(sh, show', traceHint)
 
 import Lib3
 
@@ -113,14 +113,21 @@ data ParsedNode = ParsedNode {
 
 data NodeBuilderRequest = NodeBuilderRequest !OperatorName !OpExtra [ParsedNode]
 
+data GraphTransformRequest = GraphTransformRequest ![ParsedNode] ![NodePath]
+
 instance FromProto PI.NodeBuilderRequest NodeBuilderRequest where
   fromProto nbr = do
     let on = nbr ^. PI.opName
     oe <- fromProto (nbr ^. PI.extra)
     let z = nbr ^. PI.parents
     ps <- sequence $ fromProto <$> (nbr ^. PI.parents) :: Try [ParsedNode]
-    return $ NodeBuilderRequest on oe []
+    return $ NodeBuilderRequest on oe ps
 
+instance FromProto PI.GraphTransformRequest GraphTransformRequest where
+  fromProto gtr = do
+    nodes <- sequence $ fromProto <$> (gtr ^. PI.functionalGraph ^. PG.nodes)
+    paths <- sequence $ fromProto <$> (gtr ^. PI.requestedPaths)
+    return $ GraphTransformRequest nodes paths
 
 instance FromProto PG.Node ParsedNode where
   fromProto pn = do
@@ -164,7 +171,7 @@ build_node = transform_io f where
   f :: ByteString -> IO ByteString
   f bs = do
     registry <- accessRegistry
-    let out = case decodeMessage bs of
+    let out = case traceHint "build_node:decode_out" (decodeMessage bs) of
           Left txt -> error_msg (pack txt)
           Right (nbr :: PI.NodeBuilderRequest) -> case fromProto nbr >>= _build_node registry of
             Left ne -> error_msg' ne
@@ -177,7 +184,7 @@ _build_node registry (NodeBuilderRequest op_name extras parents) = do
   builder <- case registry `registryNode` op_name of
         Nothing -> tryError $ sformat ("_buildNode: could not find op name '"%sh%"' in the registry") op_name
         Just nb' -> pure nb'
-  let parent_shapes = f <$> parents where f pn = NodeShape (pnType pn) (pnLocality pn)
+  let parent_shapes = traceHint "_build_node: parent_shapes " $ f <$> (traceHint "_build_node: parents " $  parents) where f pn = NodeShape (pnType pn) (pnLocality pn)
   cni <- nbBuilder builder extras parent_shapes
   let ns = cniShape cni
   return $ ParsedNode {
@@ -189,7 +196,35 @@ _build_node registry (NodeBuilderRequest op_name extras parents) = do
       pnDeps = [],
       pnType = nsType ns
     }
---build_node_internal :: StructuredNodeBuilderRegistry -> OpName -> OpExtra -> [NodeShape] -> Try Node
+
+compile_graph :: CTrans
+compile_graph = transform_io f where
+  error_msg :: Text -> PI.GraphTransformResponse
+  error_msg ne = out_msg where
+      err_msg = (def :: PI.ErrorMessage) & PI.message .~ (pack "error message:" <> show' ne)
+      out_msg = (def :: PI.GraphTransformResponse) & PI.error .~ err_msg
+  error_msg' ne = out_msg where
+      out_msg = (def :: PI.GraphTransformResponse) & PI.error .~ toProto ne
+  f :: ByteString -> IO ByteString
+  f bs = do
+    registry <- accessRegistry
+    let out = case decodeMessage bs of
+          Left txt -> error_msg (pack txt)
+          Right (nbr :: PI.GraphTransformRequest) -> case fromProto nbr >>= _compile_graph registry of
+            Left ne -> error_msg' ne
+            Right (pns :: [ParsedNode]) ->
+                (def :: PI.GraphTransformResponse)
+                  & PI.pinnedGraph .~ (
+                      (def :: PG.Graph)
+                        & PG.nodes .~ (toProto <$> pns)
+                    )
+    return $ encodeMessage out
+
+
+_compile_graph :: NodeBuilderRegistry -> GraphTransformRequest -> Try [ParsedNode]
+_compile_graph reg (GraphTransformRequest nodes targets) =
+  -- TODO
+  pure $ traceHint "_compile_graph:nodes:" nodes
 
 foreign export ccall fibonacci_hs :: CInt -> CInt
 
@@ -198,3 +233,5 @@ foreign export ccall input_hs :: CInt -> Ptr CChar -> Ptr CInt -> IO (Ptr CChar)
 foreign export ccall my_transform1 :: CTrans
 
 foreign export ccall build_node :: CTrans
+
+foreign export ccall compile_graph :: CTrans

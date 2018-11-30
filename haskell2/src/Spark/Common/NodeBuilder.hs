@@ -42,6 +42,7 @@ import qualified Data.List.NonEmpty as N
 import Control.Arrow ((&&&))
 import Data.Text(Text, unpack)
 import Data.ProtoLens.Message(Message)
+import GHC.Stack(HasCallStack)
 
 import Spark.Common.OpStructures
 import Spark.Common.OpFunctions(convertToExtra, decodeExtra)
@@ -90,20 +91,20 @@ buildNodeRegistry l = NodeBuilderRegistry f where
   m = M.map N.head . myGroupBy $ (nbName &&& id) <$> l
   f ndn = M.lookup ndn m
 
-buildOpExtra :: Message a => Text -> (a -> Try CoreNodeInfo) -> NodeBuilder
+buildOpExtra :: (HasCallStack, Message a) => Text -> (a -> Try CoreNodeInfo) -> NodeBuilder
 buildOpExtra opName f = untypedBuilder $ TypedNodeBuilder opName f' where
   f' a [] = f a
   f' _ l = tryError $ "buildOpExtra: "<>show' opName<>": got extra parents: "<>show' l
 
 {-| Takes one argument, no extra.
 -}
-buildOp1 :: Text -> (NodeShape -> Try CoreNodeInfo) -> NodeBuilder
+buildOp1 :: HasCallStack => Text -> (NodeShape -> Try CoreNodeInfo) -> NodeBuilder
 buildOp1 opName f = NodeBuilder opName f' where
   f' _ [] = tryError $ "buildOp1: "<>show' opName<>": missing parents "
   f' _ [ns] = f ns
   f' _ l = tryError $ "buildOp1: "<>show' opName<>": got extra parents: "<>show' l
 
-buildOp1Extra :: Message a => Text -> (NodeShape -> a -> Try CoreNodeInfo) -> NodeBuilder
+buildOp1Extra :: HasCallStack => Message a => Text -> (NodeShape -> a -> Try CoreNodeInfo) -> NodeBuilder
 buildOp1Extra opName f = untypedBuilder $ TypedNodeBuilder opName f' where
   f' _ [] = tryError $ "buildOp1Extra: "<>show' opName<>": missing parents "
   f' a [ns] = f ns a
@@ -111,13 +112,13 @@ buildOp1Extra opName f = untypedBuilder $ TypedNodeBuilder opName f' where
 
 {-| Takes one argument, no extra.
 -}
-buildOp2 :: Text -> (NodeShape -> NodeShape -> Try CoreNodeInfo) -> NodeBuilder
+buildOp2 :: HasCallStack => Text -> (NodeShape -> NodeShape -> Try CoreNodeInfo) -> NodeBuilder
 buildOp2 opName f = NodeBuilder opName f' where
   f' _ [] = tryError $ "buildOp2: "<>show' opName<>": missing parents "
   f' _ [ns1, ns2] = f ns1 ns2
   f' _ l = tryError $ "buildOp2: "<>show' opName<>": got extra parents: "<>show' l
 
-buildOp2Extra :: Message a => Text -> (NodeShape -> NodeShape -> a -> Try CoreNodeInfo) -> NodeBuilder
+buildOp2Extra :: (HasCallStack, Message a) => Text -> (NodeShape -> NodeShape -> a -> Try CoreNodeInfo) -> NodeBuilder
 buildOp2Extra opName f = untypedBuilder $ TypedNodeBuilder opName f' where
   f' _ [] = tryError $ "buildOp2Extra: "<>show' opName<>": missing parents "
   f' a [ns1, ns2] = f ns1 ns2 a
@@ -125,27 +126,27 @@ buildOp2Extra opName f = untypedBuilder $ TypedNodeBuilder opName f' where
 
 {-| Takes one argument, no extra.
 -}
-buildOp3 :: Text -> (NodeShape -> NodeShape -> NodeShape -> Try CoreNodeInfo) -> NodeBuilder
+buildOp3 :: HasCallStack => Text -> (NodeShape -> NodeShape -> NodeShape -> Try CoreNodeInfo) -> NodeBuilder
 buildOp3 opName f = NodeBuilder opName f' where
   f' _ [ns1, ns2, ns3] = f ns1 ns2 ns3
   f' _ l = tryError $ "buildOp3: "<>show' opName<>": expected 3 parent nodes, but got: "<>show' l
 
 {-| Takes one dataframe, no extra.
 -}
-buildOpD :: Text -> (DataType -> Try CoreNodeInfo) -> NodeBuilder
+buildOpD :: HasCallStack => Text -> (DataType -> Try CoreNodeInfo) -> NodeBuilder
 -- TODO check that there is no extra
 buildOpD opName f = buildOp1 opName f' where
   f' (NodeShape dt Local) = tryError $ "buildOpD: "<>show' opName<>": expected distributed node, but got a local node of type "<>show' dt<>" instead."
   f' (NodeShape dt Distributed) = f dt
 
-buildOpDExtra :: Message a => Text -> (DataType -> a -> Try CoreNodeInfo) -> NodeBuilder
+buildOpDExtra :: (HasCallStack, Message a) => Text -> (DataType -> a -> Try CoreNodeInfo) -> NodeBuilder
 buildOpDExtra opName f = buildOp1Extra opName f' where
   f' (NodeShape dt Local) _ = tryError $ "buildOpDExtra: "<>show' opName<>": expected distributed node, but got a local node of type "<>show' dt<>" instead."
   f' (NodeShape dt Distributed) x = f dt x
 
 {-| Takes two dataframes, no extra.
 -}
-buildOpDD :: Text -> (DataType -> DataType -> Try CoreNodeInfo) -> NodeBuilder
+buildOpDD :: HasCallStack => Text -> (DataType -> DataType -> Try CoreNodeInfo) -> NodeBuilder
 -- TODO check that there is no extra
 buildOpDD opName f = buildOp2 opName f' where
   f' (NodeShape dt1 Distributed) (NodeShape dt2 Distributed) = f dt1 dt2

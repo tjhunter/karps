@@ -1,11 +1,11 @@
-{- This file was auto-generated from karps/proto/std.proto by the proto-lens-protoc program. -}
+{- This file was auto-generated from karps/proto/standard.proto by the proto-lens-protoc program. -}
 {-# LANGUAGE ScopedTypeVariables, DataKinds, TypeFamilies,
   UndecidableInstances, GeneralizedNewtypeDeriving,
   MultiParamTypeClasses, FlexibleContexts, FlexibleInstances,
   PatternSynonyms, MagicHash, NoImplicitPrelude, DataKinds #-}
 {-# OPTIONS_GHC -fno-warn-unused-imports#-}
 {-# OPTIONS_GHC -fno-warn-duplicate-exports#-}
-module Proto.Karps.Proto.Std_Fields where
+module Proto.Karps.Proto.Standard_Fields where
 import qualified Data.ProtoLens.Reexport.Prelude as Prelude
 import qualified Data.ProtoLens.Reexport.Data.Int as Data.Int
 import qualified Data.ProtoLens.Reexport.Data.Word as Data.Word
@@ -111,3 +111,9 @@ maybe'localPath ::
 maybe'localPath
   = Lens.Labels.lensOf
       ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "maybe'localPath")
+parquet ::
+        forall f s t a b . (Lens.Labels.HasLens f s t "parquet" a b) =>
+          Lens.Family2.LensLike f s t a b
+parquet
+  = Lens.Labels.lensOf
+      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "parquet")

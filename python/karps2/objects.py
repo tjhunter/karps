@@ -32,9 +32,9 @@ class AbstractColumn(object):
     Users should never have to create manually columns or dataframes, but rely on the framework
     for doing so.
     """
-    pass
 
-    def kp_as_dataframe(self): pass
+    def to_pandas(self):
+        return self.kp_session.eval_pandas(self.kp_as_dataframe())
 
 
 class AbstractNode(object):
@@ -100,9 +100,9 @@ class AbstractNode(object):
         return self._session
 
     def __repr__(self):
-        return "{p}{l}{o}:{dt}".format(
+        return "{p}{ll}{o}:{dt}".format(
             p=str(self.kp_path),
-            l="!" if self.kp_is_local else "@",
+            ll="!" if self.kp_is_local else "@",
             o=self.kp_op_name,
             dt=str(self.kp_type))
 
@@ -188,12 +188,12 @@ class Observable(AbstractNode, HasArithmeticOps):
 
 
 def make_dataframe(
-    session,
-    op_name: str,
-    op_type: DataType,
-    extra=None,
-    parents=None,
-    deps=None):
+        session,
+        op_name: str,
+        op_type: DataType,
+        extra=None,
+        parents=None,
+        deps=None):
     parents = parents or []
     deps = deps or []
     if isinstance(op_type, DataType):
@@ -211,7 +211,8 @@ def make_dataframe(
     return DataFrame(node_p, parents, deps, session)
 
 
-def call_op(op_name, extra=None, parents=None, deps=None, session=None):
+def call_op(op_name, extra=None, parents=None,
+            deps=None, session=None) -> AbstractNode:
     def clean(obj):
         if not isinstance(obj, AbstractNode):
             raise ValueError("{}:{}".format(type(obj), obj))
@@ -230,16 +231,13 @@ def call_op(op_name, extra=None, parents=None, deps=None, session=None):
     req = api.NodeBuilderRequest(op_name=op_name,
                                  extra=oe_p,
                                  parents=[p.kp_node_proto for p in parents])
-    resp0 = build_node_c(req.SerializeToString())
-    resp = api.NodeBuilderResponse()
-    resp.ParseFromString(resp0)
+    resp = build_node_c(req)
     if resp.error.message:
         raise ValueError(str(resp.error) + str(type(resp.error)) + str(resp))
     assert resp.success, resp
     n_p = resp.success
+    n_p.path.path.append(op_name.split(".")[-1])
     if n_p.locality == gpb.DISTRIBUTED:
         return DataFrame(n_p, parents, deps, session)
     else:
         return Observable(n_p, parents, deps, session)
-
-

@@ -7,8 +7,10 @@ from ctypes import cdll, byref
 import logging
 import os
 
+from ..proto import api_internal_pb2 as api
 
-__all__ = ['my_transform1', 'build_node_c']
+
+__all__ = ['my_transform1', 'build_node_c', 'compile_graph_c']
 
 logger = logging.getLogger('karps')
 
@@ -29,13 +31,17 @@ _lib = init_module()
 f = getattr(_lib, "fibonacci_hs")
 
 
-def expose_fun(fname):
+def expose_fun(fname, builder):
     fun = getattr(_lib, fname)
     CHARP = ctypes.POINTER(ctypes.c_char)
 
     fun.restype = CHARP
 
-    def wrapper(bs):
+    def wrapper(obj):
+        if isinstance(obj, bytes):
+            bs = obj
+        else:
+            bs = obj.SerializeToString()
         len_bs = len(bs)
         t = ctypes.c_char * len_bs
         ba_in = bytearray(bs)
@@ -44,11 +50,16 @@ def expose_fun(fname):
         out_ptr = fun(len_bs, buff_in, byref(out_len_c))
         out_len = int(out_len_c.value)
         out_bs = bytearray(out_ptr[:out_len])
+        if builder:
+            resp = builder()
+            resp.ParseFromString(out_bs)
+            return resp
         return out_bs
-
     return wrapper
 
 
-my_transform1 = expose_fun("my_transform1")
+my_transform1 = expose_fun("my_transform1", None)
 
-build_node_c = expose_fun("build_node")
+build_node_c = expose_fun("build_node", api.NodeBuilderResponse)
+
+compile_graph_c = expose_fun("compile_graph", api.GraphTransformResponse)

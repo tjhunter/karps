@@ -7,6 +7,7 @@ import "karps/proto/structured_transform.proto";
 import "karps/proto/graph.proto"; // For the locality.
 import "karps/proto/types.proto";
 
+
 // The standard library of messages.
 // Each of these messages corresponds to some extra op data that needs
 // to be provided to the relevant operator.
@@ -55,3 +56,8 @@ message Join {
     }
     JoinType joint_type = 1;
 };
+
+message DataLiteral {
+  SQLType data_type = 1;
+  bytes parquet = 2;
+}

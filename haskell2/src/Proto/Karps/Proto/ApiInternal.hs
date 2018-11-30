@@ -6,15 +6,13 @@
 {-# OPTIONS_GHC -fno-warn-unused-imports#-}
 {-# OPTIONS_GHC -fno-warn-duplicate-exports#-}
 module Proto.Karps.Proto.ApiInternal
-       (KarpsRest(..), AnalysisMessage(..), AnalyzeResourceResponse(..),
-        AnalyzeResourceResponse'FailedStatus(..),
-        AnalyzeResourcesRequest(..), CompilerStep(..), CompilingPhase(..),
+       (AnalysisMessage(..), CompilerStep(..), CompilingPhase(..),
         CompilingPhase(), CompilingPhase'UnrecognizedValue,
-        CoreResponse(..), ErrorMessage(..), ErrorMessage'StackElement(..),
-        GraphTransformResponse(..), MessageSeverity(..), MessageSeverity(),
+        ErrorMessage(..), ErrorMessage'StackElement(..),
+        GraphTransformRequest(..), GraphTransformResponse(..),
+        MessageSeverity(..), MessageSeverity(),
         MessageSeverity'UnrecognizedValue, NodeBuilderRequest(..),
-        NodeBuilderResponse(..), NodeId(..), NodeMapItem(..),
-        PerformGraphTransform(..), ResourceStatus(..))
+        NodeBuilderResponse(..), NodeId(..), NodeMapItem(..))
        where
 import qualified Data.ProtoLens.Reexport.Lens.Labels.Prism
        as Lens.Labels.Prism
@@ -45,8 +43,6 @@ import qualified Data.ProtoLens.Reexport.Lens.Labels as Lens.Labels
 import qualified Data.ProtoLens.Reexport.Text.Read as Text.Read
 import qualified Proto.Karps.Proto.Computation
 import qualified Proto.Karps.Proto.Graph
-import qualified Proto.Karps.Proto.Interface
-import qualified Proto.Karps.Proto.Io
 import qualified Proto.Tensorflow.Core.Framework.Graph
 
 {- | Fields :
@@ -262,272 +258,6 @@ instance Data.ProtoLens.Message AnalysisMessage where
         unknownFields
           = Lens.Family2.Unchecked.lens _AnalysisMessage'_unknownFields
               (\ x__ y__ -> x__{_AnalysisMessage'_unknownFields = y__})
-{- | Fields :
-
-    * 'Proto.Karps.Proto.ApiInternal_Fields.successes' @:: Lens' AnalyzeResourceResponse [ResourceStatus]@
-    * 'Proto.Karps.Proto.ApiInternal_Fields.failures' @:: Lens' AnalyzeResourceResponse
-  [AnalyzeResourceResponse'FailedStatus]@
- -}
-data AnalyzeResourceResponse = AnalyzeResourceResponse{_AnalyzeResourceResponse'successes
-                                                       :: ![ResourceStatus],
-                                                       _AnalyzeResourceResponse'failures ::
-                                                       ![AnalyzeResourceResponse'FailedStatus],
-                                                       _AnalyzeResourceResponse'_unknownFields ::
-                                                       !Data.ProtoLens.FieldSet}
-                                 deriving (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance (Lens.Labels.HasLens' f AnalyzeResourceResponse x a,
-          a ~ b) =>
-         Lens.Labels.HasLens f AnalyzeResourceResponse
-           AnalyzeResourceResponse
-           x
-           a
-           b
-         where
-        lensOf = Lens.Labels.lensOf'
-instance Prelude.Functor f =>
-         Lens.Labels.HasLens' f AnalyzeResourceResponse "successes"
-           ([ResourceStatus])
-         where
-        lensOf' _
-          = (Prelude..)
-              (Lens.Family2.Unchecked.lens _AnalyzeResourceResponse'successes
-                 (\ x__ y__ -> x__{_AnalyzeResourceResponse'successes = y__}))
-              Prelude.id
-instance Prelude.Functor f =>
-         Lens.Labels.HasLens' f AnalyzeResourceResponse "failures"
-           ([AnalyzeResourceResponse'FailedStatus])
-         where
-        lensOf' _
-          = (Prelude..)
-              (Lens.Family2.Unchecked.lens _AnalyzeResourceResponse'failures
-                 (\ x__ y__ -> x__{_AnalyzeResourceResponse'failures = y__}))
-              Prelude.id
-instance Data.Default.Class.Default AnalyzeResourceResponse where
-        def
-          = AnalyzeResourceResponse{_AnalyzeResourceResponse'successes = [],
-                                    _AnalyzeResourceResponse'failures = [],
-                                    _AnalyzeResourceResponse'_unknownFields = ([])}
-instance Data.ProtoLens.Message AnalyzeResourceResponse where
-        messageName _ = Data.Text.pack "karps.core.AnalyzeResourceResponse"
-        fieldsByTag
-          = let successes__field_descriptor
-                  = Data.ProtoLens.FieldDescriptor "successes"
-                      (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                         Data.ProtoLens.FieldTypeDescriptor ResourceStatus)
-                      (Data.ProtoLens.RepeatedField Data.ProtoLens.Unpacked
-                         (Lens.Labels.lensOf
-                            ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "successes")))
-                      :: Data.ProtoLens.FieldDescriptor AnalyzeResourceResponse
-                failures__field_descriptor
-                  = Data.ProtoLens.FieldDescriptor "failures"
-                      (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                         Data.ProtoLens.FieldTypeDescriptor
-                           AnalyzeResourceResponse'FailedStatus)
-                      (Data.ProtoLens.RepeatedField Data.ProtoLens.Unpacked
-                         (Lens.Labels.lensOf
-                            ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "failures")))
-                      :: Data.ProtoLens.FieldDescriptor AnalyzeResourceResponse
-              in
-              Data.Map.fromList
-                [(Data.ProtoLens.Tag 1, successes__field_descriptor),
-                 (Data.ProtoLens.Tag 2, failures__field_descriptor)]
-        unknownFields
-          = Lens.Family2.Unchecked.lens
-              _AnalyzeResourceResponse'_unknownFields
-              (\ x__ y__ -> x__{_AnalyzeResourceResponse'_unknownFields = y__})
-{- | Fields :
-
-    * 'Proto.Karps.Proto.ApiInternal_Fields.resource' @:: Lens' AnalyzeResourceResponse'FailedStatus
-  Proto.Karps.Proto.Io.ResourcePath@
-    * 'Proto.Karps.Proto.ApiInternal_Fields.maybe'resource' @:: Lens' AnalyzeResourceResponse'FailedStatus
-  (Prelude.Maybe Proto.Karps.Proto.Io.ResourcePath)@
-    * 'Proto.Karps.Proto.ApiInternal_Fields.error' @:: Lens' AnalyzeResourceResponse'FailedStatus Data.Text.Text@
- -}
-data AnalyzeResourceResponse'FailedStatus = AnalyzeResourceResponse'FailedStatus{_AnalyzeResourceResponse'FailedStatus'resource
-                                                                                 ::
-                                                                                 !(Prelude.Maybe
-                                                                                     Proto.Karps.Proto.Io.ResourcePath),
-                                                                                 _AnalyzeResourceResponse'FailedStatus'error
-                                                                                 :: !Data.Text.Text,
-                                                                                 _AnalyzeResourceResponse'FailedStatus'_unknownFields
-                                                                                 ::
-                                                                                 !Data.ProtoLens.FieldSet}
-                                              deriving (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance (Lens.Labels.HasLens' f
-            AnalyzeResourceResponse'FailedStatus x a,
-          a ~ b) =>
-         Lens.Labels.HasLens f AnalyzeResourceResponse'FailedStatus
-           AnalyzeResourceResponse'FailedStatus
-           x
-           a
-           b
-         where
-        lensOf = Lens.Labels.lensOf'
-instance Prelude.Functor f =>
-         Lens.Labels.HasLens' f AnalyzeResourceResponse'FailedStatus
-           "resource"
-           (Proto.Karps.Proto.Io.ResourcePath)
-         where
-        lensOf' _
-          = (Prelude..)
-              (Lens.Family2.Unchecked.lens
-                 _AnalyzeResourceResponse'FailedStatus'resource
-                 (\ x__ y__ ->
-                    x__{_AnalyzeResourceResponse'FailedStatus'resource = y__}))
-              (Data.ProtoLens.maybeLens Data.Default.Class.def)
-instance Prelude.Functor f =>
-         Lens.Labels.HasLens' f AnalyzeResourceResponse'FailedStatus
-           "maybe'resource"
-           (Prelude.Maybe Proto.Karps.Proto.Io.ResourcePath)
-         where
-        lensOf' _
-          = (Prelude..)
-              (Lens.Family2.Unchecked.lens
-                 _AnalyzeResourceResponse'FailedStatus'resource
-                 (\ x__ y__ ->
-                    x__{_AnalyzeResourceResponse'FailedStatus'resource = y__}))
-              Prelude.id
-instance Prelude.Functor f =>
-         Lens.Labels.HasLens' f AnalyzeResourceResponse'FailedStatus "error"
-           (Data.Text.Text)
-         where
-        lensOf' _
-          = (Prelude..)
-              (Lens.Family2.Unchecked.lens
-                 _AnalyzeResourceResponse'FailedStatus'error
-                 (\ x__ y__ ->
-                    x__{_AnalyzeResourceResponse'FailedStatus'error = y__}))
-              Prelude.id
-instance Data.Default.Class.Default
-           AnalyzeResourceResponse'FailedStatus
-         where
-        def
-          = AnalyzeResourceResponse'FailedStatus{_AnalyzeResourceResponse'FailedStatus'resource
-                                                   = Prelude.Nothing,
-                                                 _AnalyzeResourceResponse'FailedStatus'error =
-                                                   Data.ProtoLens.fieldDefault,
-                                                 _AnalyzeResourceResponse'FailedStatus'_unknownFields
-                                                   = ([])}
-instance Data.ProtoLens.Message
-           AnalyzeResourceResponse'FailedStatus
-         where
-        messageName _
-          = Data.Text.pack "karps.core.AnalyzeResourceResponse.FailedStatus"
-        fieldsByTag
-          = let resource__field_descriptor
-                  = Data.ProtoLens.FieldDescriptor "resource"
-                      (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                         Data.ProtoLens.FieldTypeDescriptor
-                           Proto.Karps.Proto.Io.ResourcePath)
-                      (Data.ProtoLens.OptionalField
-                         (Lens.Labels.lensOf
-                            ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "maybe'resource")))
-                      ::
-                      Data.ProtoLens.FieldDescriptor AnalyzeResourceResponse'FailedStatus
-                error__field_descriptor
-                  = Data.ProtoLens.FieldDescriptor "error"
-                      (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                         Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-                      (Data.ProtoLens.PlainField Data.ProtoLens.Optional
-                         (Lens.Labels.lensOf
-                            ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "error")))
-                      ::
-                      Data.ProtoLens.FieldDescriptor AnalyzeResourceResponse'FailedStatus
-              in
-              Data.Map.fromList
-                [(Data.ProtoLens.Tag 1, resource__field_descriptor),
-                 (Data.ProtoLens.Tag 2, error__field_descriptor)]
-        unknownFields
-          = Lens.Family2.Unchecked.lens
-              _AnalyzeResourceResponse'FailedStatus'_unknownFields
-              (\ x__ y__ ->
-                 x__{_AnalyzeResourceResponse'FailedStatus'_unknownFields = y__})
-{- | Fields :
-
-    * 'Proto.Karps.Proto.ApiInternal_Fields.resources' @:: Lens' AnalyzeResourcesRequest [Proto.Karps.Proto.Io.ResourcePath]@
-    * 'Proto.Karps.Proto.ApiInternal_Fields.session' @:: Lens' AnalyzeResourcesRequest
-  Proto.Karps.Proto.Computation.SessionId@
-    * 'Proto.Karps.Proto.ApiInternal_Fields.maybe'session' @:: Lens' AnalyzeResourcesRequest
-  (Prelude.Maybe Proto.Karps.Proto.Computation.SessionId)@
- -}
-data AnalyzeResourcesRequest = AnalyzeResourcesRequest{_AnalyzeResourcesRequest'resources
-                                                       :: ![Proto.Karps.Proto.Io.ResourcePath],
-                                                       _AnalyzeResourcesRequest'session ::
-                                                       !(Prelude.Maybe
-                                                           Proto.Karps.Proto.Computation.SessionId),
-                                                       _AnalyzeResourcesRequest'_unknownFields ::
-                                                       !Data.ProtoLens.FieldSet}
-                                 deriving (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance (Lens.Labels.HasLens' f AnalyzeResourcesRequest x a,
-          a ~ b) =>
-         Lens.Labels.HasLens f AnalyzeResourcesRequest
-           AnalyzeResourcesRequest
-           x
-           a
-           b
-         where
-        lensOf = Lens.Labels.lensOf'
-instance Prelude.Functor f =>
-         Lens.Labels.HasLens' f AnalyzeResourcesRequest "resources"
-           ([Proto.Karps.Proto.Io.ResourcePath])
-         where
-        lensOf' _
-          = (Prelude..)
-              (Lens.Family2.Unchecked.lens _AnalyzeResourcesRequest'resources
-                 (\ x__ y__ -> x__{_AnalyzeResourcesRequest'resources = y__}))
-              Prelude.id
-instance Prelude.Functor f =>
-         Lens.Labels.HasLens' f AnalyzeResourcesRequest "session"
-           (Proto.Karps.Proto.Computation.SessionId)
-         where
-        lensOf' _
-          = (Prelude..)
-              (Lens.Family2.Unchecked.lens _AnalyzeResourcesRequest'session
-                 (\ x__ y__ -> x__{_AnalyzeResourcesRequest'session = y__}))
-              (Data.ProtoLens.maybeLens Data.Default.Class.def)
-instance Prelude.Functor f =>
-         Lens.Labels.HasLens' f AnalyzeResourcesRequest "maybe'session"
-           (Prelude.Maybe Proto.Karps.Proto.Computation.SessionId)
-         where
-        lensOf' _
-          = (Prelude..)
-              (Lens.Family2.Unchecked.lens _AnalyzeResourcesRequest'session
-                 (\ x__ y__ -> x__{_AnalyzeResourcesRequest'session = y__}))
-              Prelude.id
-instance Data.Default.Class.Default AnalyzeResourcesRequest where
-        def
-          = AnalyzeResourcesRequest{_AnalyzeResourcesRequest'resources = [],
-                                    _AnalyzeResourcesRequest'session = Prelude.Nothing,
-                                    _AnalyzeResourcesRequest'_unknownFields = ([])}
-instance Data.ProtoLens.Message AnalyzeResourcesRequest where
-        messageName _ = Data.Text.pack "karps.core.AnalyzeResourcesRequest"
-        fieldsByTag
-          = let resources__field_descriptor
-                  = Data.ProtoLens.FieldDescriptor "resources"
-                      (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                         Data.ProtoLens.FieldTypeDescriptor
-                           Proto.Karps.Proto.Io.ResourcePath)
-                      (Data.ProtoLens.RepeatedField Data.ProtoLens.Unpacked
-                         (Lens.Labels.lensOf
-                            ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "resources")))
-                      :: Data.ProtoLens.FieldDescriptor AnalyzeResourcesRequest
-                session__field_descriptor
-                  = Data.ProtoLens.FieldDescriptor "session"
-                      (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                         Data.ProtoLens.FieldTypeDescriptor
-                           Proto.Karps.Proto.Computation.SessionId)
-                      (Data.ProtoLens.OptionalField
-                         (Lens.Labels.lensOf
-                            ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "maybe'session")))
-                      :: Data.ProtoLens.FieldDescriptor AnalyzeResourcesRequest
-              in
-              Data.Map.fromList
-                [(Data.ProtoLens.Tag 1, resources__field_descriptor),
-                 (Data.ProtoLens.Tag 2, session__field_descriptor)]
-        unknownFields
-          = Lens.Family2.Unchecked.lens
-              _AnalyzeResourcesRequest'_unknownFields
-              (\ x__ y__ -> x__{_AnalyzeResourcesRequest'_unknownFields = y__})
 {- | Fields :
 
     * 'Proto.Karps.Proto.ApiInternal_Fields.phase' @:: Lens' CompilerStep CompilingPhase@
@@ -779,78 +509,6 @@ instance Data.ProtoLens.FieldDefault CompilingPhase where
         fieldDefault = INITIAL
 {- | Fields :
 
-    * 'Proto.Karps.Proto.ApiInternal_Fields.error' @:: Lens' CoreResponse ErrorMessage@
-    * 'Proto.Karps.Proto.ApiInternal_Fields.maybe'error' @:: Lens' CoreResponse (Prelude.Maybe ErrorMessage)@
-    * 'Proto.Karps.Proto.ApiInternal_Fields.succes' @:: Lens' CoreResponse Data.ByteString.ByteString@
- -}
-data CoreResponse = CoreResponse{_CoreResponse'error ::
-                                 !(Prelude.Maybe ErrorMessage),
-                                 _CoreResponse'succes :: !Data.ByteString.ByteString,
-                                 _CoreResponse'_unknownFields :: !Data.ProtoLens.FieldSet}
-                      deriving (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance (Lens.Labels.HasLens' f CoreResponse x a, a ~ b) =>
-         Lens.Labels.HasLens f CoreResponse CoreResponse x a b
-         where
-        lensOf = Lens.Labels.lensOf'
-instance Prelude.Functor f =>
-         Lens.Labels.HasLens' f CoreResponse "error" (ErrorMessage)
-         where
-        lensOf' _
-          = (Prelude..)
-              (Lens.Family2.Unchecked.lens _CoreResponse'error
-                 (\ x__ y__ -> x__{_CoreResponse'error = y__}))
-              (Data.ProtoLens.maybeLens Data.Default.Class.def)
-instance Prelude.Functor f =>
-         Lens.Labels.HasLens' f CoreResponse "maybe'error"
-           (Prelude.Maybe ErrorMessage)
-         where
-        lensOf' _
-          = (Prelude..)
-              (Lens.Family2.Unchecked.lens _CoreResponse'error
-                 (\ x__ y__ -> x__{_CoreResponse'error = y__}))
-              Prelude.id
-instance Prelude.Functor f =>
-         Lens.Labels.HasLens' f CoreResponse "succes"
-           (Data.ByteString.ByteString)
-         where
-        lensOf' _
-          = (Prelude..)
-              (Lens.Family2.Unchecked.lens _CoreResponse'succes
-                 (\ x__ y__ -> x__{_CoreResponse'succes = y__}))
-              Prelude.id
-instance Data.Default.Class.Default CoreResponse where
-        def
-          = CoreResponse{_CoreResponse'error = Prelude.Nothing,
-                         _CoreResponse'succes = Data.ProtoLens.fieldDefault,
-                         _CoreResponse'_unknownFields = ([])}
-instance Data.ProtoLens.Message CoreResponse where
-        messageName _ = Data.Text.pack "karps.core.CoreResponse"
-        fieldsByTag
-          = let error__field_descriptor
-                  = Data.ProtoLens.FieldDescriptor "error"
-                      (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                         Data.ProtoLens.FieldTypeDescriptor ErrorMessage)
-                      (Data.ProtoLens.OptionalField
-                         (Lens.Labels.lensOf
-                            ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "maybe'error")))
-                      :: Data.ProtoLens.FieldDescriptor CoreResponse
-                succes__field_descriptor
-                  = Data.ProtoLens.FieldDescriptor "succes"
-                      (Data.ProtoLens.ScalarField Data.ProtoLens.BytesField ::
-                         Data.ProtoLens.FieldTypeDescriptor Data.ByteString.ByteString)
-                      (Data.ProtoLens.PlainField Data.ProtoLens.Optional
-                         (Lens.Labels.lensOf
-                            ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "succes")))
-                      :: Data.ProtoLens.FieldDescriptor CoreResponse
-              in
-              Data.Map.fromList
-                [(Data.ProtoLens.Tag 1, error__field_descriptor),
-                 (Data.ProtoLens.Tag 2, succes__field_descriptor)]
-        unknownFields
-          = Lens.Family2.Unchecked.lens _CoreResponse'_unknownFields
-              (\ x__ y__ -> x__{_CoreResponse'_unknownFields = y__})
-{- | Fields :
-
     * 'Proto.Karps.Proto.ApiInternal_Fields.message' @:: Lens' ErrorMessage Data.Text.Text@
     * 'Proto.Karps.Proto.ApiInternal_Fields.hsStack' @:: Lens' ErrorMessage [ErrorMessage'StackElement]@
     * 'Proto.Karps.Proto.ApiInternal_Fields.path' @:: Lens' ErrorMessage [Data.Text.Text]@
@@ -1097,22 +755,106 @@ instance Data.ProtoLens.Message ErrorMessage'StackElement where
               (\ x__ y__ -> x__{_ErrorMessage'StackElement'_unknownFields = y__})
 {- | Fields :
 
+    * 'Proto.Karps.Proto.ApiInternal_Fields.functionalGraph' @:: Lens' GraphTransformRequest Proto.Karps.Proto.Graph.Graph@
+    * 'Proto.Karps.Proto.ApiInternal_Fields.maybe'functionalGraph' @:: Lens' GraphTransformRequest
+  (Prelude.Maybe Proto.Karps.Proto.Graph.Graph)@
+    * 'Proto.Karps.Proto.ApiInternal_Fields.requestedPaths' @:: Lens' GraphTransformRequest [Proto.Karps.Proto.Graph.Path]@
+ -}
+data GraphTransformRequest = GraphTransformRequest{_GraphTransformRequest'functionalGraph
+                                                   ::
+                                                   !(Prelude.Maybe Proto.Karps.Proto.Graph.Graph),
+                                                   _GraphTransformRequest'requestedPaths ::
+                                                   ![Proto.Karps.Proto.Graph.Path],
+                                                   _GraphTransformRequest'_unknownFields ::
+                                                   !Data.ProtoLens.FieldSet}
+                               deriving (Prelude.Show, Prelude.Eq, Prelude.Ord)
+instance (Lens.Labels.HasLens' f GraphTransformRequest x a,
+          a ~ b) =>
+         Lens.Labels.HasLens f GraphTransformRequest GraphTransformRequest x
+           a
+           b
+         where
+        lensOf = Lens.Labels.lensOf'
+instance Prelude.Functor f =>
+         Lens.Labels.HasLens' f GraphTransformRequest "functionalGraph"
+           (Proto.Karps.Proto.Graph.Graph)
+         where
+        lensOf' _
+          = (Prelude..)
+              (Lens.Family2.Unchecked.lens _GraphTransformRequest'functionalGraph
+                 (\ x__ y__ -> x__{_GraphTransformRequest'functionalGraph = y__}))
+              (Data.ProtoLens.maybeLens Data.Default.Class.def)
+instance Prelude.Functor f =>
+         Lens.Labels.HasLens' f GraphTransformRequest
+           "maybe'functionalGraph"
+           (Prelude.Maybe Proto.Karps.Proto.Graph.Graph)
+         where
+        lensOf' _
+          = (Prelude..)
+              (Lens.Family2.Unchecked.lens _GraphTransformRequest'functionalGraph
+                 (\ x__ y__ -> x__{_GraphTransformRequest'functionalGraph = y__}))
+              Prelude.id
+instance Prelude.Functor f =>
+         Lens.Labels.HasLens' f GraphTransformRequest "requestedPaths"
+           ([Proto.Karps.Proto.Graph.Path])
+         where
+        lensOf' _
+          = (Prelude..)
+              (Lens.Family2.Unchecked.lens _GraphTransformRequest'requestedPaths
+                 (\ x__ y__ -> x__{_GraphTransformRequest'requestedPaths = y__}))
+              Prelude.id
+instance Data.Default.Class.Default GraphTransformRequest where
+        def
+          = GraphTransformRequest{_GraphTransformRequest'functionalGraph =
+                                    Prelude.Nothing,
+                                  _GraphTransformRequest'requestedPaths = [],
+                                  _GraphTransformRequest'_unknownFields = ([])}
+instance Data.ProtoLens.Message GraphTransformRequest where
+        messageName _ = Data.Text.pack "karps.core.GraphTransformRequest"
+        fieldsByTag
+          = let functionalGraph__field_descriptor
+                  = Data.ProtoLens.FieldDescriptor "functional_graph"
+                      (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                         Data.ProtoLens.FieldTypeDescriptor Proto.Karps.Proto.Graph.Graph)
+                      (Data.ProtoLens.OptionalField
+                         (Lens.Labels.lensOf
+                            ((Lens.Labels.proxy#) ::
+                               (Lens.Labels.Proxy#) "maybe'functionalGraph")))
+                      :: Data.ProtoLens.FieldDescriptor GraphTransformRequest
+                requestedPaths__field_descriptor
+                  = Data.ProtoLens.FieldDescriptor "requested_paths"
+                      (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                         Data.ProtoLens.FieldTypeDescriptor Proto.Karps.Proto.Graph.Path)
+                      (Data.ProtoLens.RepeatedField Data.ProtoLens.Unpacked
+                         (Lens.Labels.lensOf
+                            ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "requestedPaths")))
+                      :: Data.ProtoLens.FieldDescriptor GraphTransformRequest
+              in
+              Data.Map.fromList
+                [(Data.ProtoLens.Tag 3, functionalGraph__field_descriptor),
+                 (Data.ProtoLens.Tag 5, requestedPaths__field_descriptor)]
+        unknownFields
+          = Lens.Family2.Unchecked.lens _GraphTransformRequest'_unknownFields
+              (\ x__ y__ -> x__{_GraphTransformRequest'_unknownFields = y__})
+{- | Fields :
+
     * 'Proto.Karps.Proto.ApiInternal_Fields.pinnedGraph' @:: Lens' GraphTransformResponse Proto.Karps.Proto.Graph.Graph@
     * 'Proto.Karps.Proto.ApiInternal_Fields.maybe'pinnedGraph' @:: Lens' GraphTransformResponse
   (Prelude.Maybe Proto.Karps.Proto.Graph.Graph)@
-    * 'Proto.Karps.Proto.ApiInternal_Fields.nodeMap' @:: Lens' GraphTransformResponse [NodeMapItem]@
     * 'Proto.Karps.Proto.ApiInternal_Fields.messages' @:: Lens' GraphTransformResponse [AnalysisMessage]@
     * 'Proto.Karps.Proto.ApiInternal_Fields.steps' @:: Lens' GraphTransformResponse [CompilerStep]@
+    * 'Proto.Karps.Proto.ApiInternal_Fields.error' @:: Lens' GraphTransformResponse ErrorMessage@
+    * 'Proto.Karps.Proto.ApiInternal_Fields.maybe'error' @:: Lens' GraphTransformResponse (Prelude.Maybe ErrorMessage)@
  -}
 data GraphTransformResponse = GraphTransformResponse{_GraphTransformResponse'pinnedGraph
                                                      ::
                                                      !(Prelude.Maybe Proto.Karps.Proto.Graph.Graph),
-                                                     _GraphTransformResponse'nodeMap ::
-                                                     ![NodeMapItem],
                                                      _GraphTransformResponse'messages ::
                                                      ![AnalysisMessage],
                                                      _GraphTransformResponse'steps ::
                                                      ![CompilerStep],
+                                                     _GraphTransformResponse'error ::
+                                                     !(Prelude.Maybe ErrorMessage),
                                                      _GraphTransformResponse'_unknownFields ::
                                                      !Data.ProtoLens.FieldSet}
                                 deriving (Prelude.Show, Prelude.Eq, Prelude.Ord)
@@ -1143,15 +885,6 @@ instance Prelude.Functor f =>
                  (\ x__ y__ -> x__{_GraphTransformResponse'pinnedGraph = y__}))
               Prelude.id
 instance Prelude.Functor f =>
-         Lens.Labels.HasLens' f GraphTransformResponse "nodeMap"
-           ([NodeMapItem])
-         where
-        lensOf' _
-          = (Prelude..)
-              (Lens.Family2.Unchecked.lens _GraphTransformResponse'nodeMap
-                 (\ x__ y__ -> x__{_GraphTransformResponse'nodeMap = y__}))
-              Prelude.id
-instance Prelude.Functor f =>
          Lens.Labels.HasLens' f GraphTransformResponse "messages"
            ([AnalysisMessage])
          where
@@ -1169,13 +902,31 @@ instance Prelude.Functor f =>
               (Lens.Family2.Unchecked.lens _GraphTransformResponse'steps
                  (\ x__ y__ -> x__{_GraphTransformResponse'steps = y__}))
               Prelude.id
+instance Prelude.Functor f =>
+         Lens.Labels.HasLens' f GraphTransformResponse "error"
+           (ErrorMessage)
+         where
+        lensOf' _
+          = (Prelude..)
+              (Lens.Family2.Unchecked.lens _GraphTransformResponse'error
+                 (\ x__ y__ -> x__{_GraphTransformResponse'error = y__}))
+              (Data.ProtoLens.maybeLens Data.Default.Class.def)
+instance Prelude.Functor f =>
+         Lens.Labels.HasLens' f GraphTransformResponse "maybe'error"
+           (Prelude.Maybe ErrorMessage)
+         where
+        lensOf' _
+          = (Prelude..)
+              (Lens.Family2.Unchecked.lens _GraphTransformResponse'error
+                 (\ x__ y__ -> x__{_GraphTransformResponse'error = y__}))
+              Prelude.id
 instance Data.Default.Class.Default GraphTransformResponse where
         def
           = GraphTransformResponse{_GraphTransformResponse'pinnedGraph =
                                      Prelude.Nothing,
-                                   _GraphTransformResponse'nodeMap = [],
                                    _GraphTransformResponse'messages = [],
                                    _GraphTransformResponse'steps = [],
+                                   _GraphTransformResponse'error = Prelude.Nothing,
                                    _GraphTransformResponse'_unknownFields = ([])}
 instance Data.ProtoLens.Message GraphTransformResponse where
         messageName _ = Data.Text.pack "karps.core.GraphTransformResponse"
@@ -1188,14 +939,6 @@ instance Data.ProtoLens.Message GraphTransformResponse where
                          (Lens.Labels.lensOf
                             ((Lens.Labels.proxy#) ::
                                (Lens.Labels.Proxy#) "maybe'pinnedGraph")))
-                      :: Data.ProtoLens.FieldDescriptor GraphTransformResponse
-                nodeMap__field_descriptor
-                  = Data.ProtoLens.FieldDescriptor "node_map"
-                      (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                         Data.ProtoLens.FieldTypeDescriptor NodeMapItem)
-                      (Data.ProtoLens.RepeatedField Data.ProtoLens.Unpacked
-                         (Lens.Labels.lensOf
-                            ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "nodeMap")))
                       :: Data.ProtoLens.FieldDescriptor GraphTransformResponse
                 messages__field_descriptor
                   = Data.ProtoLens.FieldDescriptor "messages"
@@ -1213,12 +956,20 @@ instance Data.ProtoLens.Message GraphTransformResponse where
                          (Lens.Labels.lensOf
                             ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "steps")))
                       :: Data.ProtoLens.FieldDescriptor GraphTransformResponse
+                error__field_descriptor
+                  = Data.ProtoLens.FieldDescriptor "error"
+                      (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                         Data.ProtoLens.FieldTypeDescriptor ErrorMessage)
+                      (Data.ProtoLens.OptionalField
+                         (Lens.Labels.lensOf
+                            ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "maybe'error")))
+                      :: Data.ProtoLens.FieldDescriptor GraphTransformResponse
               in
               Data.Map.fromList
                 [(Data.ProtoLens.Tag 1, pinnedGraph__field_descriptor),
-                 (Data.ProtoLens.Tag 2, nodeMap__field_descriptor),
                  (Data.ProtoLens.Tag 3, messages__field_descriptor),
-                 (Data.ProtoLens.Tag 4, steps__field_descriptor)]
+                 (Data.ProtoLens.Tag 4, steps__field_descriptor),
+                 (Data.ProtoLens.Tag 5, error__field_descriptor)]
         unknownFields
           = Lens.Family2.Unchecked.lens
               _GraphTransformResponse'_unknownFields
@@ -1665,327 +1416,3 @@ instance Data.ProtoLens.Message NodeMapItem where
         unknownFields
           = Lens.Family2.Unchecked.lens _NodeMapItem'_unknownFields
               (\ x__ y__ -> x__{_NodeMapItem'_unknownFields = y__})
-{- | Fields :
-
-    * 'Proto.Karps.Proto.ApiInternal_Fields.session' @:: Lens' PerformGraphTransform Proto.Karps.Proto.Computation.SessionId@
-    * 'Proto.Karps.Proto.ApiInternal_Fields.maybe'session' @:: Lens' PerformGraphTransform
-  (Prelude.Maybe Proto.Karps.Proto.Computation.SessionId)@
-    * 'Proto.Karps.Proto.ApiInternal_Fields.computation' @:: Lens' PerformGraphTransform
-  Proto.Karps.Proto.Computation.ComputationId@
-    * 'Proto.Karps.Proto.ApiInternal_Fields.maybe'computation' @:: Lens' PerformGraphTransform
-  (Prelude.Maybe Proto.Karps.Proto.Computation.ComputationId)@
-    * 'Proto.Karps.Proto.ApiInternal_Fields.functionalGraph' @:: Lens' PerformGraphTransform Proto.Karps.Proto.Graph.Graph@
-    * 'Proto.Karps.Proto.ApiInternal_Fields.maybe'functionalGraph' @:: Lens' PerformGraphTransform
-  (Prelude.Maybe Proto.Karps.Proto.Graph.Graph)@
-    * 'Proto.Karps.Proto.ApiInternal_Fields.availableNodes' @:: Lens' PerformGraphTransform [NodeMapItem]@
-    * 'Proto.Karps.Proto.ApiInternal_Fields.requestedPaths' @:: Lens' PerformGraphTransform [Proto.Karps.Proto.Graph.Path]@
-    * 'Proto.Karps.Proto.ApiInternal_Fields.knownResources' @:: Lens' PerformGraphTransform [ResourceStatus]@
- -}
-data PerformGraphTransform = PerformGraphTransform{_PerformGraphTransform'session
-                                                   ::
-                                                   !(Prelude.Maybe
-                                                       Proto.Karps.Proto.Computation.SessionId),
-                                                   _PerformGraphTransform'computation ::
-                                                   !(Prelude.Maybe
-                                                       Proto.Karps.Proto.Computation.ComputationId),
-                                                   _PerformGraphTransform'functionalGraph ::
-                                                   !(Prelude.Maybe Proto.Karps.Proto.Graph.Graph),
-                                                   _PerformGraphTransform'availableNodes ::
-                                                   ![NodeMapItem],
-                                                   _PerformGraphTransform'requestedPaths ::
-                                                   ![Proto.Karps.Proto.Graph.Path],
-                                                   _PerformGraphTransform'knownResources ::
-                                                   ![ResourceStatus],
-                                                   _PerformGraphTransform'_unknownFields ::
-                                                   !Data.ProtoLens.FieldSet}
-                               deriving (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance (Lens.Labels.HasLens' f PerformGraphTransform x a,
-          a ~ b) =>
-         Lens.Labels.HasLens f PerformGraphTransform PerformGraphTransform x
-           a
-           b
-         where
-        lensOf = Lens.Labels.lensOf'
-instance Prelude.Functor f =>
-         Lens.Labels.HasLens' f PerformGraphTransform "session"
-           (Proto.Karps.Proto.Computation.SessionId)
-         where
-        lensOf' _
-          = (Prelude..)
-              (Lens.Family2.Unchecked.lens _PerformGraphTransform'session
-                 (\ x__ y__ -> x__{_PerformGraphTransform'session = y__}))
-              (Data.ProtoLens.maybeLens Data.Default.Class.def)
-instance Prelude.Functor f =>
-         Lens.Labels.HasLens' f PerformGraphTransform "maybe'session"
-           (Prelude.Maybe Proto.Karps.Proto.Computation.SessionId)
-         where
-        lensOf' _
-          = (Prelude..)
-              (Lens.Family2.Unchecked.lens _PerformGraphTransform'session
-                 (\ x__ y__ -> x__{_PerformGraphTransform'session = y__}))
-              Prelude.id
-instance Prelude.Functor f =>
-         Lens.Labels.HasLens' f PerformGraphTransform "computation"
-           (Proto.Karps.Proto.Computation.ComputationId)
-         where
-        lensOf' _
-          = (Prelude..)
-              (Lens.Family2.Unchecked.lens _PerformGraphTransform'computation
-                 (\ x__ y__ -> x__{_PerformGraphTransform'computation = y__}))
-              (Data.ProtoLens.maybeLens Data.Default.Class.def)
-instance Prelude.Functor f =>
-         Lens.Labels.HasLens' f PerformGraphTransform "maybe'computation"
-           (Prelude.Maybe Proto.Karps.Proto.Computation.ComputationId)
-         where
-        lensOf' _
-          = (Prelude..)
-              (Lens.Family2.Unchecked.lens _PerformGraphTransform'computation
-                 (\ x__ y__ -> x__{_PerformGraphTransform'computation = y__}))
-              Prelude.id
-instance Prelude.Functor f =>
-         Lens.Labels.HasLens' f PerformGraphTransform "functionalGraph"
-           (Proto.Karps.Proto.Graph.Graph)
-         where
-        lensOf' _
-          = (Prelude..)
-              (Lens.Family2.Unchecked.lens _PerformGraphTransform'functionalGraph
-                 (\ x__ y__ -> x__{_PerformGraphTransform'functionalGraph = y__}))
-              (Data.ProtoLens.maybeLens Data.Default.Class.def)
-instance Prelude.Functor f =>
-         Lens.Labels.HasLens' f PerformGraphTransform
-           "maybe'functionalGraph"
-           (Prelude.Maybe Proto.Karps.Proto.Graph.Graph)
-         where
-        lensOf' _
-          = (Prelude..)
-              (Lens.Family2.Unchecked.lens _PerformGraphTransform'functionalGraph
-                 (\ x__ y__ -> x__{_PerformGraphTransform'functionalGraph = y__}))
-              Prelude.id
-instance Prelude.Functor f =>
-         Lens.Labels.HasLens' f PerformGraphTransform "availableNodes"
-           ([NodeMapItem])
-         where
-        lensOf' _
-          = (Prelude..)
-              (Lens.Family2.Unchecked.lens _PerformGraphTransform'availableNodes
-                 (\ x__ y__ -> x__{_PerformGraphTransform'availableNodes = y__}))
-              Prelude.id
-instance Prelude.Functor f =>
-         Lens.Labels.HasLens' f PerformGraphTransform "requestedPaths"
-           ([Proto.Karps.Proto.Graph.Path])
-         where
-        lensOf' _
-          = (Prelude..)
-              (Lens.Family2.Unchecked.lens _PerformGraphTransform'requestedPaths
-                 (\ x__ y__ -> x__{_PerformGraphTransform'requestedPaths = y__}))
-              Prelude.id
-instance Prelude.Functor f =>
-         Lens.Labels.HasLens' f PerformGraphTransform "knownResources"
-           ([ResourceStatus])
-         where
-        lensOf' _
-          = (Prelude..)
-              (Lens.Family2.Unchecked.lens _PerformGraphTransform'knownResources
-                 (\ x__ y__ -> x__{_PerformGraphTransform'knownResources = y__}))
-              Prelude.id
-instance Data.Default.Class.Default PerformGraphTransform where
-        def
-          = PerformGraphTransform{_PerformGraphTransform'session =
-                                    Prelude.Nothing,
-                                  _PerformGraphTransform'computation = Prelude.Nothing,
-                                  _PerformGraphTransform'functionalGraph = Prelude.Nothing,
-                                  _PerformGraphTransform'availableNodes = [],
-                                  _PerformGraphTransform'requestedPaths = [],
-                                  _PerformGraphTransform'knownResources = [],
-                                  _PerformGraphTransform'_unknownFields = ([])}
-instance Data.ProtoLens.Message PerformGraphTransform where
-        messageName _ = Data.Text.pack "karps.core.PerformGraphTransform"
-        fieldsByTag
-          = let session__field_descriptor
-                  = Data.ProtoLens.FieldDescriptor "session"
-                      (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                         Data.ProtoLens.FieldTypeDescriptor
-                           Proto.Karps.Proto.Computation.SessionId)
-                      (Data.ProtoLens.OptionalField
-                         (Lens.Labels.lensOf
-                            ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "maybe'session")))
-                      :: Data.ProtoLens.FieldDescriptor PerformGraphTransform
-                computation__field_descriptor
-                  = Data.ProtoLens.FieldDescriptor "computation"
-                      (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                         Data.ProtoLens.FieldTypeDescriptor
-                           Proto.Karps.Proto.Computation.ComputationId)
-                      (Data.ProtoLens.OptionalField
-                         (Lens.Labels.lensOf
-                            ((Lens.Labels.proxy#) ::
-                               (Lens.Labels.Proxy#) "maybe'computation")))
-                      :: Data.ProtoLens.FieldDescriptor PerformGraphTransform
-                functionalGraph__field_descriptor
-                  = Data.ProtoLens.FieldDescriptor "functional_graph"
-                      (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                         Data.ProtoLens.FieldTypeDescriptor Proto.Karps.Proto.Graph.Graph)
-                      (Data.ProtoLens.OptionalField
-                         (Lens.Labels.lensOf
-                            ((Lens.Labels.proxy#) ::
-                               (Lens.Labels.Proxy#) "maybe'functionalGraph")))
-                      :: Data.ProtoLens.FieldDescriptor PerformGraphTransform
-                availableNodes__field_descriptor
-                  = Data.ProtoLens.FieldDescriptor "available_nodes"
-                      (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                         Data.ProtoLens.FieldTypeDescriptor NodeMapItem)
-                      (Data.ProtoLens.RepeatedField Data.ProtoLens.Unpacked
-                         (Lens.Labels.lensOf
-                            ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "availableNodes")))
-                      :: Data.ProtoLens.FieldDescriptor PerformGraphTransform
-                requestedPaths__field_descriptor
-                  = Data.ProtoLens.FieldDescriptor "requested_paths"
-                      (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                         Data.ProtoLens.FieldTypeDescriptor Proto.Karps.Proto.Graph.Path)
-                      (Data.ProtoLens.RepeatedField Data.ProtoLens.Unpacked
-                         (Lens.Labels.lensOf
-                            ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "requestedPaths")))
-                      :: Data.ProtoLens.FieldDescriptor PerformGraphTransform
-                knownResources__field_descriptor
-                  = Data.ProtoLens.FieldDescriptor "known_resources"
-                      (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                         Data.ProtoLens.FieldTypeDescriptor ResourceStatus)
-                      (Data.ProtoLens.RepeatedField Data.ProtoLens.Unpacked
-                         (Lens.Labels.lensOf
-                            ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "knownResources")))
-                      :: Data.ProtoLens.FieldDescriptor PerformGraphTransform
-              in
-              Data.Map.fromList
-                [(Data.ProtoLens.Tag 1, session__field_descriptor),
-                 (Data.ProtoLens.Tag 2, computation__field_descriptor),
-                 (Data.ProtoLens.Tag 3, functionalGraph__field_descriptor),
-                 (Data.ProtoLens.Tag 4, availableNodes__field_descriptor),
-                 (Data.ProtoLens.Tag 5, requestedPaths__field_descriptor),
-                 (Data.ProtoLens.Tag 6, knownResources__field_descriptor)]
-        unknownFields
-          = Lens.Family2.Unchecked.lens _PerformGraphTransform'_unknownFields
-              (\ x__ y__ -> x__{_PerformGraphTransform'_unknownFields = y__})
-{- | Fields :
-
-    * 'Proto.Karps.Proto.ApiInternal_Fields.resource' @:: Lens' ResourceStatus Proto.Karps.Proto.Io.ResourcePath@
-    * 'Proto.Karps.Proto.ApiInternal_Fields.maybe'resource' @:: Lens' ResourceStatus
-  (Prelude.Maybe Proto.Karps.Proto.Io.ResourcePath)@
-    * 'Proto.Karps.Proto.ApiInternal_Fields.stamp' @:: Lens' ResourceStatus Proto.Karps.Proto.Io.ResourceStamp@
-    * 'Proto.Karps.Proto.ApiInternal_Fields.maybe'stamp' @:: Lens' ResourceStatus
-  (Prelude.Maybe Proto.Karps.Proto.Io.ResourceStamp)@
- -}
-data ResourceStatus = ResourceStatus{_ResourceStatus'resource ::
-                                     !(Prelude.Maybe Proto.Karps.Proto.Io.ResourcePath),
-                                     _ResourceStatus'stamp ::
-                                     !(Prelude.Maybe Proto.Karps.Proto.Io.ResourceStamp),
-                                     _ResourceStatus'_unknownFields :: !Data.ProtoLens.FieldSet}
-                        deriving (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance (Lens.Labels.HasLens' f ResourceStatus x a, a ~ b) =>
-         Lens.Labels.HasLens f ResourceStatus ResourceStatus x a b
-         where
-        lensOf = Lens.Labels.lensOf'
-instance Prelude.Functor f =>
-         Lens.Labels.HasLens' f ResourceStatus "resource"
-           (Proto.Karps.Proto.Io.ResourcePath)
-         where
-        lensOf' _
-          = (Prelude..)
-              (Lens.Family2.Unchecked.lens _ResourceStatus'resource
-                 (\ x__ y__ -> x__{_ResourceStatus'resource = y__}))
-              (Data.ProtoLens.maybeLens Data.Default.Class.def)
-instance Prelude.Functor f =>
-         Lens.Labels.HasLens' f ResourceStatus "maybe'resource"
-           (Prelude.Maybe Proto.Karps.Proto.Io.ResourcePath)
-         where
-        lensOf' _
-          = (Prelude..)
-              (Lens.Family2.Unchecked.lens _ResourceStatus'resource
-                 (\ x__ y__ -> x__{_ResourceStatus'resource = y__}))
-              Prelude.id
-instance Prelude.Functor f =>
-         Lens.Labels.HasLens' f ResourceStatus "stamp"
-           (Proto.Karps.Proto.Io.ResourceStamp)
-         where
-        lensOf' _
-          = (Prelude..)
-              (Lens.Family2.Unchecked.lens _ResourceStatus'stamp
-                 (\ x__ y__ -> x__{_ResourceStatus'stamp = y__}))
-              (Data.ProtoLens.maybeLens Data.Default.Class.def)
-instance Prelude.Functor f =>
-         Lens.Labels.HasLens' f ResourceStatus "maybe'stamp"
-           (Prelude.Maybe Proto.Karps.Proto.Io.ResourceStamp)
-         where
-        lensOf' _
-          = (Prelude..)
-              (Lens.Family2.Unchecked.lens _ResourceStatus'stamp
-                 (\ x__ y__ -> x__{_ResourceStatus'stamp = y__}))
-              Prelude.id
-instance Data.Default.Class.Default ResourceStatus where
-        def
-          = ResourceStatus{_ResourceStatus'resource = Prelude.Nothing,
-                           _ResourceStatus'stamp = Prelude.Nothing,
-                           _ResourceStatus'_unknownFields = ([])}
-instance Data.ProtoLens.Message ResourceStatus where
-        messageName _ = Data.Text.pack "karps.core.ResourceStatus"
-        fieldsByTag
-          = let resource__field_descriptor
-                  = Data.ProtoLens.FieldDescriptor "resource"
-                      (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                         Data.ProtoLens.FieldTypeDescriptor
-                           Proto.Karps.Proto.Io.ResourcePath)
-                      (Data.ProtoLens.OptionalField
-                         (Lens.Labels.lensOf
-                            ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "maybe'resource")))
-                      :: Data.ProtoLens.FieldDescriptor ResourceStatus
-                stamp__field_descriptor
-                  = Data.ProtoLens.FieldDescriptor "stamp"
-                      (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                         Data.ProtoLens.FieldTypeDescriptor
-                           Proto.Karps.Proto.Io.ResourceStamp)
-                      (Data.ProtoLens.OptionalField
-                         (Lens.Labels.lensOf
-                            ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "maybe'stamp")))
-                      :: Data.ProtoLens.FieldDescriptor ResourceStatus
-              in
-              Data.Map.fromList
-                [(Data.ProtoLens.Tag 1, resource__field_descriptor),
-                 (Data.ProtoLens.Tag 2, stamp__field_descriptor)]
-        unknownFields
-          = Lens.Family2.Unchecked.lens _ResourceStatus'_unknownFields
-              (\ x__ y__ -> x__{_ResourceStatus'_unknownFields = y__})
-data KarpsRest = KarpsRest{}
-                   deriving ()
-instance Data.ProtoLens.Service.Types.Service KarpsRest where
-        type ServiceName KarpsRest = "KarpsRest"
-        type ServicePackage KarpsRest = "karps.core"
-        type ServiceMethods KarpsRest =
-             '["computationStatus", "createComputation", "resourceStatus"]
-instance Data.ProtoLens.Service.Types.HasMethodImpl KarpsRest
-           "createComputation"
-         where
-        type MethodName KarpsRest "createComputation" = "CreateComputation"
-        type MethodInput KarpsRest "createComputation" =
-             Proto.Karps.Proto.Interface.CreateComputationRequest
-        type MethodOutput KarpsRest "createComputation" =
-             Proto.Karps.Proto.Interface.CreateComputationResponse
-        type MethodStreamingType KarpsRest "createComputation" =
-             'Data.ProtoLens.Service.Types.NonStreaming
-instance Data.ProtoLens.Service.Types.HasMethodImpl KarpsRest
-           "computationStatus"
-         where
-        type MethodName KarpsRest "computationStatus" = "ComputationStatus"
-        type MethodInput KarpsRest "computationStatus" =
-             Proto.Karps.Proto.Interface.ComputationStatusRequest
-        type MethodOutput KarpsRest "computationStatus" =
-             Proto.Karps.Proto.Computation.BatchComputationResult
-        type MethodStreamingType KarpsRest "computationStatus" =
-             'Data.ProtoLens.Service.Types.NonStreaming
-instance Data.ProtoLens.Service.Types.HasMethodImpl KarpsRest
-           "resourceStatus"
-         where
-        type MethodName KarpsRest "resourceStatus" = "ResourceStatus"
-        type MethodInput KarpsRest "resourceStatus" =
-             AnalyzeResourcesRequest
-        type MethodOutput KarpsRest "resourceStatus" =
-             AnalyzeResourceResponse
-        type MethodStreamingType KarpsRest "resourceStatus" =
-             'Data.ProtoLens.Service.Types.NonStreaming

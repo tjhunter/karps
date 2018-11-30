@@ -1,10 +1,15 @@
 import logging
 import os
+import pandas as pd
+import tempfile
 
-from .proto import types_pb2
-from .types import DataType
+from .proto import types_pb2, check_proto_error, api_internal_pb2 as api, graph_pb2, std_pb2 as std
+from .types import DataType, as_sql_type
 from .row import as_cell
-from .objects import call_op
+from .objects import call_op, DataFrame, Observable, AbstractNode
+from .std import collect
+from .c_core import compile_graph_c
+from .spark import execute_graph
 
 __all__ = ['Session', 'ProcessContext']
 
@@ -17,9 +22,10 @@ class Session(object):
     A session encapsulates all the state that is communicated between the frontend and the backend.
     """
 
-    def __init__(self, work_dir, spark=None):
+    def __init__(self, work_dir, spark=None, spark_db='karps_default'):
         self._work_dir = work_dir
         self._spark = spark
+        self._spark_db = spark_db
         if not os.path.exists(work_dir):
             logger.debug("Creating dir {}", work_dir)
             os.makedirs(work_dir)
@@ -28,10 +34,37 @@ class Session(object):
         """
         Creates a new dataframe from the given object
         """
+        if isinstance(obj, pd.DataFrame):
+            proto = _pandas_proto(obj)
+            return call_op("org.karps.DataLiteral", extra=proto, session=self)
         cwt = _build_cwt(obj, schema)
         # In the case of the dataframe, the top level should be an array.
         assert cwt.type.is_array_type, cwt.type
         return call_op("org.karps.DistributedLiteral", extra=cwt._proto, session=self)
+
+    def eval_pandas(self, df):
+        if isinstance(df, pd.DataFrame):
+            return df
+        return self._eval(df, return_pandas=True)
+
+    def _eval(self, obj, return_pandas):
+        if return_pandas:
+            assert isinstance(obj, DataFrame)
+            obj = collect(obj)
+        else:
+            assert isinstance(obj, Observable)
+        nodes = _collect_graph(obj)
+        nodes_proto = [n.kp_node_proto for n in nodes]
+        print("_eval:nodes_proto:", nodes_proto)
+        req = api.GraphTransformRequest(
+            functional_graph=graph_pb2.Graph(nodes=nodes_proto),
+            requested_paths=[obj.kp_path.as_proto]
+        )
+        resp = compile_graph_c(req)
+        check_proto_error(resp)
+        print("_eval:resp:", resp.pinned_graph.nodes)
+        res = execute_graph(resp.pinned_graph.nodes, self._spark, [str(obj.kp_path)])
+        return list(res.values())[0]
 
 
 def set_default_context(session: Session):
@@ -80,3 +113,32 @@ def _build_cwt(obj, schema):
         # assert len(obj) > 0, "object has zero length: %s" % obj
         cwt = as_cell(obj, schema=None)
     return cwt
+
+
+def _pandas_proto(pdf: pd.DataFrame) -> std.DataLiteral:
+    tpe = zip(list(pdf.dtypes.index), list(pdf.dtypes))
+    pdt = as_sql_type(tpe)
+    d = tempfile.mkdtemp()
+    f = os.path.join(d, "data.parquet")
+    print(f)
+    pdf.to_parquet(f, compression='snappy')
+    with open(f, 'rb') as o:
+        ba = bytearray(o.read())
+    return std.DataLiteral(
+        data_type=pdt,
+        parquet=ba
+    )
+
+
+def _collect_graph(start: AbstractNode):
+    current = {}
+
+    def explore(n: AbstractNode):
+        nid = id(n)
+        if nid in current:
+            return
+        current[nid] = n
+        for p in n.kp_parents:
+            explore(p)
+    explore(start)
+    return current.values()

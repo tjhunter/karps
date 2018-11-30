@@ -1,12 +1,12 @@
-{- This file was auto-generated from karps/proto/std.proto by the proto-lens-protoc program. -}
+{- This file was auto-generated from karps/proto/standard.proto by the proto-lens-protoc program. -}
 {-# LANGUAGE ScopedTypeVariables, DataKinds, TypeFamilies,
   UndecidableInstances, GeneralizedNewtypeDeriving,
   MultiParamTypeClasses, FlexibleContexts, FlexibleInstances,
   PatternSynonyms, MagicHash, NoImplicitPrelude, DataKinds #-}
 {-# OPTIONS_GHC -fno-warn-unused-imports#-}
 {-# OPTIONS_GHC -fno-warn-duplicate-exports#-}
-module Proto.Karps.Proto.Std
-       (Join(..), Join'JoinType(..), Join'JoinType(),
+module Proto.Karps.Proto.Standard
+       (DataLiteral(..), Join(..), Join'JoinType(..), Join'JoinType(),
         Join'JoinType'UnrecognizedValue, LocalPointer(..),
         LocalStructuredTransform(..), Placeholder(..), Shuffle(..),
         StructuredReduce(..), StructuredTransform(..))
@@ -45,7 +45,80 @@ import qualified Proto.Karps.Proto.Types
 
 {- | Fields :
 
-    * 'Proto.Karps.Proto.Std_Fields.jointType' @:: Lens' Join Join'JoinType@
+    * 'Proto.Karps.Proto.Standard_Fields.dataType' @:: Lens' DataLiteral Proto.Karps.Proto.Types.SQLType@
+    * 'Proto.Karps.Proto.Standard_Fields.maybe'dataType' @:: Lens' DataLiteral (Prelude.Maybe Proto.Karps.Proto.Types.SQLType)@
+    * 'Proto.Karps.Proto.Standard_Fields.parquet' @:: Lens' DataLiteral Data.ByteString.ByteString@
+ -}
+data DataLiteral = DataLiteral{_DataLiteral'dataType ::
+                               !(Prelude.Maybe Proto.Karps.Proto.Types.SQLType),
+                               _DataLiteral'parquet :: !Data.ByteString.ByteString,
+                               _DataLiteral'_unknownFields :: !Data.ProtoLens.FieldSet}
+                     deriving (Prelude.Show, Prelude.Eq, Prelude.Ord)
+instance (Lens.Labels.HasLens' f DataLiteral x a, a ~ b) =>
+         Lens.Labels.HasLens f DataLiteral DataLiteral x a b
+         where
+        lensOf = Lens.Labels.lensOf'
+instance Prelude.Functor f =>
+         Lens.Labels.HasLens' f DataLiteral "dataType"
+           (Proto.Karps.Proto.Types.SQLType)
+         where
+        lensOf' _
+          = (Prelude..)
+              (Lens.Family2.Unchecked.lens _DataLiteral'dataType
+                 (\ x__ y__ -> x__{_DataLiteral'dataType = y__}))
+              (Data.ProtoLens.maybeLens Data.Default.Class.def)
+instance Prelude.Functor f =>
+         Lens.Labels.HasLens' f DataLiteral "maybe'dataType"
+           (Prelude.Maybe Proto.Karps.Proto.Types.SQLType)
+         where
+        lensOf' _
+          = (Prelude..)
+              (Lens.Family2.Unchecked.lens _DataLiteral'dataType
+                 (\ x__ y__ -> x__{_DataLiteral'dataType = y__}))
+              Prelude.id
+instance Prelude.Functor f =>
+         Lens.Labels.HasLens' f DataLiteral "parquet"
+           (Data.ByteString.ByteString)
+         where
+        lensOf' _
+          = (Prelude..)
+              (Lens.Family2.Unchecked.lens _DataLiteral'parquet
+                 (\ x__ y__ -> x__{_DataLiteral'parquet = y__}))
+              Prelude.id
+instance Data.Default.Class.Default DataLiteral where
+        def
+          = DataLiteral{_DataLiteral'dataType = Prelude.Nothing,
+                        _DataLiteral'parquet = Data.ProtoLens.fieldDefault,
+                        _DataLiteral'_unknownFields = ([])}
+instance Data.ProtoLens.Message DataLiteral where
+        messageName _ = Data.Text.pack "karps.core.DataLiteral"
+        fieldsByTag
+          = let dataType__field_descriptor
+                  = Data.ProtoLens.FieldDescriptor "data_type"
+                      (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                         Data.ProtoLens.FieldTypeDescriptor Proto.Karps.Proto.Types.SQLType)
+                      (Data.ProtoLens.OptionalField
+                         (Lens.Labels.lensOf
+                            ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "maybe'dataType")))
+                      :: Data.ProtoLens.FieldDescriptor DataLiteral
+                parquet__field_descriptor
+                  = Data.ProtoLens.FieldDescriptor "parquet"
+                      (Data.ProtoLens.ScalarField Data.ProtoLens.BytesField ::
+                         Data.ProtoLens.FieldTypeDescriptor Data.ByteString.ByteString)
+                      (Data.ProtoLens.PlainField Data.ProtoLens.Optional
+                         (Lens.Labels.lensOf
+                            ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "parquet")))
+                      :: Data.ProtoLens.FieldDescriptor DataLiteral
+              in
+              Data.Map.fromList
+                [(Data.ProtoLens.Tag 1, dataType__field_descriptor),
+                 (Data.ProtoLens.Tag 2, parquet__field_descriptor)]
+        unknownFields
+          = Lens.Family2.Unchecked.lens _DataLiteral'_unknownFields
+              (\ x__ y__ -> x__{_DataLiteral'_unknownFields = y__})
+{- | Fields :
+
+    * 'Proto.Karps.Proto.Standard_Fields.jointType' @:: Lens' Join Join'JoinType@
  -}
 data Join = Join{_Join'jointType :: !Join'JoinType,
                  _Join'_unknownFields :: !Data.ProtoLens.FieldSet}
@@ -138,13 +211,13 @@ instance Data.ProtoLens.FieldDefault Join'JoinType where
         fieldDefault = Join'INNER
 {- | Fields :
 
-    * 'Proto.Karps.Proto.Std_Fields.computation' @:: Lens' LocalPointer Proto.Karps.Proto.Computation.ComputationId@
-    * 'Proto.Karps.Proto.Std_Fields.maybe'computation' @:: Lens' LocalPointer
+    * 'Proto.Karps.Proto.Standard_Fields.computation' @:: Lens' LocalPointer Proto.Karps.Proto.Computation.ComputationId@
+    * 'Proto.Karps.Proto.Standard_Fields.maybe'computation' @:: Lens' LocalPointer
   (Prelude.Maybe Proto.Karps.Proto.Computation.ComputationId)@
-    * 'Proto.Karps.Proto.Std_Fields.localPath' @:: Lens' LocalPointer Proto.Karps.Proto.Graph.Path@
-    * 'Proto.Karps.Proto.Std_Fields.maybe'localPath' @:: Lens' LocalPointer (Prelude.Maybe Proto.Karps.Proto.Graph.Path)@
-    * 'Proto.Karps.Proto.Std_Fields.dataType' @:: Lens' LocalPointer Proto.Karps.Proto.Types.SQLType@
-    * 'Proto.Karps.Proto.Std_Fields.maybe'dataType' @:: Lens' LocalPointer (Prelude.Maybe Proto.Karps.Proto.Types.SQLType)@
+    * 'Proto.Karps.Proto.Standard_Fields.localPath' @:: Lens' LocalPointer Proto.Karps.Proto.Graph.Path@
+    * 'Proto.Karps.Proto.Standard_Fields.maybe'localPath' @:: Lens' LocalPointer (Prelude.Maybe Proto.Karps.Proto.Graph.Path)@
+    * 'Proto.Karps.Proto.Standard_Fields.dataType' @:: Lens' LocalPointer Proto.Karps.Proto.Types.SQLType@
+    * 'Proto.Karps.Proto.Standard_Fields.maybe'dataType' @:: Lens' LocalPointer (Prelude.Maybe Proto.Karps.Proto.Types.SQLType)@
  -}
 data LocalPointer = LocalPointer{_LocalPointer'computation ::
                                  !(Prelude.Maybe Proto.Karps.Proto.Computation.ComputationId),
@@ -257,9 +330,9 @@ instance Data.ProtoLens.Message LocalPointer where
               (\ x__ y__ -> x__{_LocalPointer'_unknownFields = y__})
 {- | Fields :
 
-    * 'Proto.Karps.Proto.Std_Fields.colOp' @:: Lens' LocalStructuredTransform
+    * 'Proto.Karps.Proto.Standard_Fields.colOp' @:: Lens' LocalStructuredTransform
   Proto.Karps.Proto.StructuredTransform.Column@
-    * 'Proto.Karps.Proto.Std_Fields.maybe'colOp' @:: Lens' LocalStructuredTransform
+    * 'Proto.Karps.Proto.Standard_Fields.maybe'colOp' @:: Lens' LocalStructuredTransform
   (Prelude.Maybe Proto.Karps.Proto.StructuredTransform.Column)@
  -}
 data LocalStructuredTransform = LocalStructuredTransform{_LocalStructuredTransform'colOp
@@ -322,9 +395,9 @@ instance Data.ProtoLens.Message LocalStructuredTransform where
               (\ x__ y__ -> x__{_LocalStructuredTransform'_unknownFields = y__})
 {- | Fields :
 
-    * 'Proto.Karps.Proto.Std_Fields.locality' @:: Lens' Placeholder Proto.Karps.Proto.Graph.Locality@
-    * 'Proto.Karps.Proto.Std_Fields.dataType' @:: Lens' Placeholder Proto.Karps.Proto.Types.SQLType@
-    * 'Proto.Karps.Proto.Std_Fields.maybe'dataType' @:: Lens' Placeholder (Prelude.Maybe Proto.Karps.Proto.Types.SQLType)@
+    * 'Proto.Karps.Proto.Standard_Fields.locality' @:: Lens' Placeholder Proto.Karps.Proto.Graph.Locality@
+    * 'Proto.Karps.Proto.Standard_Fields.dataType' @:: Lens' Placeholder Proto.Karps.Proto.Types.SQLType@
+    * 'Proto.Karps.Proto.Standard_Fields.maybe'dataType' @:: Lens' Placeholder (Prelude.Maybe Proto.Karps.Proto.Types.SQLType)@
  -}
 data Placeholder = Placeholder{_Placeholder'locality ::
                                !Proto.Karps.Proto.Graph.Locality,
@@ -397,8 +470,8 @@ instance Data.ProtoLens.Message Placeholder where
               (\ x__ y__ -> x__{_Placeholder'_unknownFields = y__})
 {- | Fields :
 
-    * 'Proto.Karps.Proto.Std_Fields.aggOp' @:: Lens' Shuffle Proto.Karps.Proto.StructuredTransform.Aggregation@
-    * 'Proto.Karps.Proto.Std_Fields.maybe'aggOp' @:: Lens' Shuffle
+    * 'Proto.Karps.Proto.Standard_Fields.aggOp' @:: Lens' Shuffle Proto.Karps.Proto.StructuredTransform.Aggregation@
+    * 'Proto.Karps.Proto.Standard_Fields.maybe'aggOp' @:: Lens' Shuffle
   (Prelude.Maybe Proto.Karps.Proto.StructuredTransform.Aggregation)@
  -}
 data Shuffle = Shuffle{_Shuffle'aggOp ::
@@ -450,9 +523,9 @@ instance Data.ProtoLens.Message Shuffle where
               (\ x__ y__ -> x__{_Shuffle'_unknownFields = y__})
 {- | Fields :
 
-    * 'Proto.Karps.Proto.Std_Fields.aggOp' @:: Lens' StructuredReduce
+    * 'Proto.Karps.Proto.Standard_Fields.aggOp' @:: Lens' StructuredReduce
   Proto.Karps.Proto.StructuredTransform.Aggregation@
-    * 'Proto.Karps.Proto.Std_Fields.maybe'aggOp' @:: Lens' StructuredReduce
+    * 'Proto.Karps.Proto.Standard_Fields.maybe'aggOp' @:: Lens' StructuredReduce
   (Prelude.Maybe Proto.Karps.Proto.StructuredTransform.Aggregation)@
  -}
 data StructuredReduce = StructuredReduce{_StructuredReduce'aggOp ::
@@ -506,9 +579,9 @@ instance Data.ProtoLens.Message StructuredReduce where
               (\ x__ y__ -> x__{_StructuredReduce'_unknownFields = y__})
 {- | Fields :
 
-    * 'Proto.Karps.Proto.Std_Fields.colOp' @:: Lens' StructuredTransform
+    * 'Proto.Karps.Proto.Standard_Fields.colOp' @:: Lens' StructuredTransform
   Proto.Karps.Proto.StructuredTransform.Column@
-    * 'Proto.Karps.Proto.Std_Fields.maybe'colOp' @:: Lens' StructuredTransform
+    * 'Proto.Karps.Proto.Standard_Fields.maybe'colOp' @:: Lens' StructuredTransform
   (Prelude.Maybe Proto.Karps.Proto.StructuredTransform.Column)@
  -}
 data StructuredTransform = StructuredTransform{_StructuredTransform'colOp
