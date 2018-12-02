@@ -19,6 +19,7 @@ module Spark.Common.ComputeDag(
   graphToComputeGraph,
   graphVertexData,
   mapVertices,
+  mapVertices',
   mapVertexData,
   buildCGraph,
   graphDataLexico,
@@ -115,6 +116,15 @@ mapVertices f cd = ComputeDag {
 
 mapVertexData :: (Show v, Show v', Show e) => (v -> v') -> ComputeDag v e -> ComputeDag v' e
 mapVertexData f = mapVertices (f . vertexData)
+
+mapVertices' :: forall m v e v2. (HasCallStack, Show v, Show e, Show v2, Monad m) =>
+  ComputeDag v e -> -- The start graph
+  (Vertex v -> m v2) -> -- The transform
+  m (ComputeDag v2 e)
+mapVertices' cg fun = computeGraphMapVertices cg' f where
+  cg' = mapVertices id cg -- Does not change the Id
+  f x _ = fun x
+
 
 {-| Updates the inner graph of a compute graph.
 -}

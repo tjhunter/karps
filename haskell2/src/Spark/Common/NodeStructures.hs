@@ -45,7 +45,9 @@ data OperatorNode = OperatorNode {
   {-| The core node information. -}
   onNodeInfo :: !CoreNodeInfo,
   {-| The name of the associated operator -}
-  onOpName :: !OperatorName
+  onOpName :: !OperatorName,
+  {-| The extra data associated to this node -}
+  onExtra :: !OpExtra
 } deriving (Eq)
 
 onShape :: OperatorNode -> NodeShape
@@ -159,4 +161,4 @@ instance ToProto PG.Node ParsedNode where
       Nothing -> base
 
 instance Show OperatorNode where
-  show (OperatorNode _ np _ _) = "OperatorNode[" ++ T.unpack (prettyNodePath np) ++ "]"
+  show (OperatorNode _ np _ _ _) = "OperatorNode[" ++ T.unpack (prettyNodePath np) ++ "]"

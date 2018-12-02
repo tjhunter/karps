@@ -2,6 +2,7 @@ import numpy as np
 
 from .proto import types_pb2 as pb
 from .utils import AbstractProtoWrapper
+from .spark import sp_types
 
 __all__ = ['DataType', 'IntegerType', 'DoubleType', 'BooleanType',
            'ArrayType', 'StructField', 'StructType',
@@ -172,7 +173,16 @@ def _builtin_types():
         DoubleType(): [float, np.double, np.float64, 'double', 'float64']
 #        StringType(): [str, 'str', np.str]
     }
-    all_types = [(str(bt), pbt) for (pbt, lt) in base.items() for bt in lt]
+    spark = {}
+    if sp_types:
+        spark = {
+            IntegerType(): [sp_types.IntegerType()],
+            DoubleType(): [sp_types.DoubleType()]
+        }
+
+    def f(dct):
+        return [(str(bt), pbt) for (pbt, lt) in dct.items() for bt in lt]
+    all_types = f(base) + f(spark)
     return dict(all_types)
 
 

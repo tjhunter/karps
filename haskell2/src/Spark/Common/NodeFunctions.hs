@@ -164,25 +164,27 @@ to be roughly unique with high probability.
 buildOpNodeInScope ::
   CoreNodeInfo ->
   OperatorName ->
+  OpExtra ->
   NodePath ->
   [NodeId] -> -- Parents
   [NodeId] -> -- Deps
   OperatorNode
-buildOpNodeInScope cni oname scope_path parent_ids dep_ids =
+buildOpNodeInScope cni oname extra scope_path parent_ids dep_ids =
   OperatorNode {
     onId = id2,
     onPath = xpath,
     onNodeInfo = cni,
-    onOpName = oname
+    onOpName = oname,
+    onExtra = extra
   } where
-    --(OpExtra bs_extra _ _) = extra
-    CoreNodeInfo ns extra = cni
+    (OpExtra bs_extra _ _) = extra
+    CoreNodeInfo ns _ = cni
     bs_shape = encodeUtf8 $ show' ns -- TODO could be optimized
     -- l :: [ByteString]
     l = ["parents"] <> (unNodeId <$> parent_ids)
         <> ["deps"] <> (unNodeId <$> dep_ids)
         <> ["ns"] <> [bs_shape]
-        <> ["extra"] <> [] -- FIXME missing the content!!
+        <> ["extra"] <> [bs_extra]
         <> ["op"] <> [encodeUtf8 (unOperatorName oname)]
     s1 = SHA.init
     s2 = SHA.updates s1 l
@@ -193,18 +195,19 @@ buildOpNodeInScope cni oname scope_path parent_ids dep_ids =
 buildOpNode ::
   CoreNodeInfo ->
   OperatorName ->
+  OpExtra ->
   NodePath ->
   [NodeId] -> -- Parents
   [NodeId] -> -- Deps
   OperatorNode
-buildOpNode cni oname path parent_ids dep_ids =
-  (buildOpNodeInScope cni oname path parent_ids dep_ids) { onPath = path }
+buildOpNode cni oname extra path parent_ids dep_ids =
+  (buildOpNodeInScope cni oname extra path parent_ids dep_ids) { onPath = path }
 
 _defaultName :: OperatorName -> NodeId -> NodeName
 _defaultName (OperatorName ndn) nid = NodeName n where
       namePieces = T.splitOn (".") ndn
       lastOpt = (listToMaybe . reverse) namePieces
-      l = fromMaybe ("???") lastOpt
+      l = fromMaybe "unknown" lastOpt
       idt = T.take 6 . decodeUtf8 . unNodeId $ nid
       n = T.concat [T.toLower l, T.pack "_", idt]
 

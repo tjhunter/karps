@@ -1,8 +1,11 @@
 import gevent
 from gevent.event import Event
 import logging
+import pandas as pd
+import os
+import tempfile
 
-from ..proto import graph_pb2
+from ..proto import graph_pb2, standard_pb2 as std
 
 __all__ = ['execute_graph']
 
@@ -19,15 +22,17 @@ class AsyncNode(object):
         self._spark = spark
         self.event = Event()
         self.result = None
-        print("Path {} has been created".format(self.path))
+        logger.debug("Path {} has been created".format(self.path))
 
     def trigger(self):
-        print("Path {} has been triggered".format(self.path))
+        logger.debug("Path {} has been triggered".format(self.path))
         for d in self._deps:
             d.event.wait()
-        print("Path {} is executing for node {}".format(self.path, self.node))
-        self.result = 1
+        # logger.debug("Path {} is executing for node {}".format(self.path, self.node))
+        action = _actions[self.node.op_name]
+        action(self._spark, self, self._deps)
         self.event.set()
+        logger.debug("Path {} is done executing".format(self.path))
         return self
 
 
@@ -67,3 +72,40 @@ def execute_graph(actions: [graph_pb2.Node], spark, returns):
     return dict([(p, d[p]) for p in returns])
 
 
+def _table_name(node):
+    return "ks_" + str(node.node_id.value[:8])
+
+
+def _collect_pandas(spark, anode, parents):
+    parent_table = _table_name(parents[0].node)
+    query = "select * from {}".format(parent_table)
+    logger.debug("_collect_pandas: Running statement: {}".format(query))
+    sdf = spark.sql(query)
+    logger.debug("_collect_pandas: got table {}".format(sdf))
+    pdf = sdf.toPandas()
+    anode.result = pdf
+
+
+def _materialize_pandas(spark, anode, parents):
+    assert not parents, anode
+    msg = std.DataLiteral()
+    msg.ParseFromString(anode.node.op_extra.content)
+    pdf = _pandas_from_proto(msg)
+    sdf = spark.createDataFrame(pdf)
+    table = _table_name(anode.node)
+    sdf.registerTempTable(table)
+
+
+def _pandas_from_proto(proto: std.DataLiteral) -> pd.DataFrame:
+    d = tempfile.mkdtemp()
+    fname = os.path.join(d, "data.parquet")
+    with open(fname, 'wb') as f:
+        f.write(bytes(proto.parquet))
+    pdf = pd.read_parquet(fname)
+    return pdf
+
+
+_actions = {
+    'spark.CollectPandas': _collect_pandas,
+    'spark.MaterializePandas': _materialize_pandas
+}

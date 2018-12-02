@@ -1,9 +1,7 @@
 {-# LANGUAGE ForeignFunctionInterface #-}
 
 
-module Lib
-    ( someFunc
-    ) where
+module Lib () where
 
 import Foreign.C.Types
 import Foreign.C.String
@@ -37,37 +35,11 @@ import Spark.Common.TypesStructures(DataType)
 import Spark.Common.Try
 import Spark.Common.Utilities(sh, show', traceHint)
 import Spark.Compiler.Compiler
+import Spark.Compiler.Structures
 import Spark.Common.DAGStructures(Vertex(..), VertexId(..), Edge(..))
 import Spark.Common.StructuresInternal(NodeId, ComputationID, NodePath, prettyNodePath)
 
 import Lib3
-
-someFunc :: IO ()
-someFunc = putStrLn "someFunc"
-
-fibonacci_hs :: CInt -> CInt
-fibonacci_hs = fromIntegral . fibonacci . fromIntegral
-
-input_hs :: CInt -> Ptr CChar -> Ptr CInt -> IO (Ptr CChar)
-input_hs l p l_out = do
-  let len = (fromIntegral l) :: Int
-  putStrLn $ "len=" ++ (show len)
-  putStrLn $ "p=" ++ (show p)
-  bs <- packCStringLen((p, len))
-  putStrLn $ "bs=" ++ (show bs)
-  let txt = decodeUtf8 bs
-  putStrLn $ "txt=" ++ (show txt)
-  poke l_out l
-  putStrLn $ "l_out=" ++ (show l_out)
-  let out = (pack "Hi there ") <> txt
-  let out_bs = encodeUtf8 out
-  BS.useAsCStringLen out_bs $ \(cs, cl) -> do
-    let out_len = (fromIntegral cl) :: Int
-    poke l_out (fromIntegral out_len)
-    -- poke l_out (fromIntegral out_len)
-    out_p <- mallocArray out_len
-    copyArray out_p cs out_len
-    return out_p
 
 type CTrans = CInt -> Ptr CChar -> Ptr CInt -> IO (Ptr CChar)
 
@@ -162,8 +134,8 @@ _buildNode registry (NodeBuilderRequest op_name extras parents pathpol nidpol) =
   parent_nids <- _extractNid parents
   let dep_nids = [] -- TODO: deps
   let on' = case pathpol of
-              UseScope scope -> buildOpNodeInScope cni op_name scope parent_nids dep_nids
-              UsePath p -> buildOpNode cni op_name p parent_nids dep_nids
+              UseScope scope -> buildOpNodeInScope cni op_name extras scope parent_nids dep_nids
+              UsePath p -> buildOpNode cni op_name extras p parent_nids dep_nids
   let on = case nidpol of
               ReuseId nid' -> on' { onId = nid' }
               RecomputeId -> on'
@@ -178,18 +150,6 @@ _buildNode registry (NodeBuilderRequest op_name extras parents pathpol nidpol) =
       pnId = pure $ onId on
     })
 
-_opNodeToParseNode :: OperatorNode -> [NodePath] -> [NodePath] -> ParsedNode
-_opNodeToParseNode on parents deps = ParsedNode {
-    pnLocality = nsLocality . onShape $ on,
-    pnPath = onPath on,
-    pnOpName = "!!!",
-    pnExtra = emptyExtra, -- FIXME
-    pnParents = parents,
-    pnDeps = deps,
-    pnType = nsType . onShape $ on,
-    pnId = pure $ onId on
-  }
-
 _extractNid :: [ParsedNode] -> Try [NodeId]
 _extractNid l = x
   where
@@ -201,22 +161,19 @@ _extractNid l = x
 
 compile_graph :: CTrans
 compile_graph = transform_io f where
-  error_msg :: Text -> PI.GraphTransformResponse
-  error_msg ne = out_msg where
-      err_msg = (def :: PI.ErrorMessage) & PI.message .~ (pack "error message:" <> show' ne)
-      out_msg = (def :: PI.GraphTransformResponse) & PI.error .~ err_msg
-  error_msg' ne = out_msg where
-      out_msg = (def :: PI.GraphTransformResponse) & PI.error .~ toProto ne
-
   f :: ByteString -> IO ByteString
   f bs = do
     registry <- accessRegistry
     let out = case decodeMessage bs of
-          Left txt -> error_msg (pack txt)
+          Left txt -> _transformError $ nodeError (pack txt)
           Right (nbr :: PI.GraphTransformRequest) -> case fromProto nbr >>= _transformGraphFast registry of
-            Left ne -> error_msg' ne
+            Left ne -> _transformError ne
             Right (r :: PI.GraphTransformResponse) -> r
     return $ encodeMessage out
+
+_transformError :: NodeError -> PI.GraphTransformResponse
+_transformError ne = out_msg where
+    out_msg = (def :: PI.GraphTransformResponse) & PI.error .~ toProto ne
 
 -- Parses the compute graph.
 -- It relies on the fact that the IDs have already been computed
@@ -241,20 +198,24 @@ _transformGraphFast reg (GraphTransformRequest g requestedPaths) = do
   -- Transform this graph to load the content of the nodes.
   cg'' <- traceHint ("_loadGraphFast: cg=") $ computeGraphMapVertices cg' (_buildNodeInGraph reg)
   let cg = mapVertexData fst cg''
-  return $ _transformResponse cg
+  return $ _compile cg
 
+_compile :: ComputeGraph -> PI.GraphTransformResponse
+_compile cg =
+  case performTransform cg of
+    Right (GraphTransformSuccess cg2 steps) ->
+      _addCompilingPhases (_transformResponse cg2) steps
+    Left (GraphTransformFailure ne steps) ->
+      _addCompilingPhases (_transformError ne) steps
+
+
+_addCompilingPhases :: PI.GraphTransformResponse -> [(PI.CompilingPhase, ComputeGraph)] -> PI.GraphTransformResponse
+_addCompilingPhases gtr l = gtr
 
 _transformResponse :: ComputeGraph -> PI.GraphTransformResponse
 _transformResponse cg =
   (def :: PI.GraphTransformResponse)
-    & PI.pinnedGraph .~ ((def :: PG.Graph)
-        & PG.nodes .~ l) where
-          cg2 = computeGraphMapVerticesI cg f where
-            f :: OperatorNode -> [(ParsedNode, StructureEdge)] -> ParsedNode
-            f on l2 = _opNodeToParseNode on parents deps where
-              parents = [pnPath pn | (pn, ParentEdge) <- l2]
-              deps = [pnPath pn | (pn, LogicalEdge) <- l2]
-          l = toProto . vertexData <$> V.toList (cdVertices cg2)
+    & PI.pinnedGraph .~ (toProto cg)
 
 _buildNodeInGraph :: NodeBuilderRegistry -> ParsedNode -> [((OperatorNode, ParsedNode), StructureEdge)] -> Try (OperatorNode, ParsedNode)
 _buildNodeInGraph reg pn l = case (pnId pn) of
@@ -262,11 +223,6 @@ _buildNodeInGraph reg pn l = case (pnId pn) of
   Just nid -> _buildNode reg nbr where
         nbr = NodeBuilderRequest (pnOpName pn) (pnExtra pn) (snd . fst <$> l) (UsePath (pnPath pn)) (ReuseId nid)
 
-foreign export ccall fibonacci_hs :: CInt -> CInt
-
-foreign export ccall input_hs :: CInt -> Ptr CChar -> Ptr CInt -> IO (Ptr CChar)
-
-foreign export ccall my_transform1 :: CTrans
 
 foreign export ccall build_node :: CTrans
 

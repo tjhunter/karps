@@ -34,18 +34,11 @@ message SparkAction {
     karps.core.SQLType data_type = 1;
   }
 
-  // The path of the node that uniquely identifies the 
-  // computation being run.
-  karps.core.Path path = 1;
-
   // The name of the output table (if outputing anything).
   // This table is going to be registered as a temp view
   // and will be the way the other commands will refer to
   // the content of this view.
   string table_name = 2;
-
-  // All the actions that must be completed before this action executes.
-  repeated karps.core.Path dependencies = 3;
 
   // The set of actions that are authorized in the Spark backend.
   oneof action {
@@ -54,9 +47,4 @@ message SparkAction {
     ExtractPandas extract_pandas = 6;
     ExtractCell extract_cell = 7;
   }
-}
-
-// A graph of computations that can be executed by Spark.
-message SparkGraph {
-  repeated SparkAction actions = 1;
 }

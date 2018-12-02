@@ -78,8 +78,12 @@ library
       Spark.Common.TypesFunctions
       Spark.Common.Utilities
       Spark.Compiler.Compiler
+      Spark.Compiler.OutputSpark
+      Spark.Compiler.Structures
       Spark.Standard.Base
+      Spark.Standard.Spark
   other-modules:
+  ld-options: -static
   hs-source-dirs:
       src
   build-depends:

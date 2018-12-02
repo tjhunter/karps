@@ -28,7 +28,6 @@ def init_module():
 
 
 _lib = init_module()
-f = getattr(_lib, "fibonacci_hs")
 
 
 def expose_fun(fname, builder):
@@ -57,8 +56,6 @@ def expose_fun(fname, builder):
         return out_bs
     return wrapper
 
-
-my_transform1 = expose_fun("my_transform1", None)
 
 build_node_c = expose_fun("build_node", api.NodeBuilderResponse)
 

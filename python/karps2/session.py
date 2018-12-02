@@ -22,7 +22,7 @@ class Session(object):
     A session encapsulates all the state that is communicated between the frontend and the backend.
     """
 
-    def __init__(self, work_dir, spark=None, spark_db='karps_default'):
+    def __init__(self, work_dir, spark=None, spark_db=None):
         self._work_dir = work_dir
         self._spark = spark
         self._spark_db = spark_db
@@ -56,14 +56,14 @@ class Session(object):
             assert isinstance(obj, Observable)
         nodes = _collect_graph(obj)
         nodes_proto = [n.kp_node_proto for n in nodes]
-        print("_eval:nodes_proto:", nodes_proto)
+        #logger.debug("_eval:nodes_proto: {}".format(nodes_proto))
         req = api.GraphTransformRequest(
             functional_graph=graph_pb2.Graph(nodes=nodes_proto),
             requested_paths=[obj.kp_path.as_proto]
         )
         resp = compile_graph_c(req)
         check_proto_error(resp)
-        print("_eval:resp:", resp.pinned_graph.nodes)
+        #logger.debug("_eval:resp: {}".format(resp.pinned_graph.nodes))
         res = execute_graph(resp.pinned_graph.nodes, self._spark, [str(obj.kp_path)])
         return list(res.values())[0]
 
