@@ -6,96 +6,23 @@
 
 module Spark.Common.NodeStructures where
 
+import Data.ProtoLens(def)
 import Data.Vector(Vector)
 import qualified Data.Vector as V
 import qualified Data.Text as T
+import Lens.Micro
 
+import Spark.Common.ProtoUtils
 import Spark.Common.RowStructures
 import Spark.Common.OpStructures
 import Spark.Common.StructuresInternal
+import Spark.Common.Try(Try)
 import Spark.Common.TypesStructures
-
-{-| (internal) The main data structure that represents a data node in the
-computation graph.
-
-This data structure forms the backbone of computation graphs expressed
-with spark operations.
-
-loc is a typed locality tag.
-a is the type of the data, as seen by the Haskell compiler. If erased, it
-will be a Cell type.
--}
--- TODO: separate the topology info from the node info. It will help when
--- building the graphs.
-data ComputeNode loc a = ComputeNode {
-  -- | The id of the node.
-  --
-  -- Non strict because it may be expensive.
-  _cnNodeId :: NodeId,
-  -- The following fields are used to build a unique ID to
-  -- a compute node:
-
-  -- | The operation associated to this node.
-  _cnOp :: !NodeOp,
-  -- | The type of the node
-  _cnType :: !DataType,
-  -- | The direct parents of the node. The order of the parents is important
-  -- for the semantics of the operation.
-  _cnParents :: !(Vector UntypedNode),
-  -- | A set of extra dependencies that can be added to force an order between
-  -- the nodes.
-  --
-  -- The order is not important, they are sorted by ID.
-  --
-  -- TODO(kps) add this one to the id
-  _cnLogicalDeps :: !(Vector UntypedNode),
-  -- | The locality of this node.
-  --
-  -- TODO(kps) add this one to the id
-  _cnLocality :: !Locality,
-  -- Attributes that are not included in the id
-  -- These attributes are mostly for the user to relate to the nodes.
-  -- They are not necessary for the computation.
-  --
-  -- | The name
-  _cnName :: !(Maybe NodeName),
-  -- | A set of nodes considered as the logical input for this node.
-  -- This has no influence on the calculation of the id and is used
-  -- for organization purposes only.
-  _cnLogicalParents :: !(Maybe (Vector UntypedNode)),
-  -- | The path of this oned in a computation flow.
-  --
-  -- This path includes the node name.
-  -- Not strict because it may be expensive to compute.
-  -- By default it only contains the name of the node (i.e. the node is
-  -- attached to the root)
-  _cnPath :: NodePath
-} deriving (Eq)
-
-{-| Converts a compute node to an operator node.
--}
-nodeOpNode :: ComputeNode loc a -> OperatorNode
-nodeOpNode cn = OperatorNode {
-      onId = _cnNodeId cn,
-      onPath = _cnPath cn,
-      onNodeInfo = CoreNodeInfo {
-        cniShape = NodeShape {
-          nsType = _cnType cn,
-          nsLocality = _cnLocality cn
-        },
-        cniOp = _cnOp cn
-      }
-    }
-
-
-nodeContext :: ComputeNode loc a -> NodeContext
-nodeContext cn = NodeContext {
-    ncParents = nodeOpNode <$> V.toList (_cnParents cn),
-    ncLogicalDeps = nodeOpNode <$> V.toList (_cnLogicalDeps cn)
-  }
+import qualified Proto.Karps.Proto.Graph as PG
+import qualified Proto.Karps.Proto.Graph_Fields as PG
 
 -- (internal) Phantom type tags for the locality
-data LocUnknown
+-- data LocUnknown
 
 {-| (internal/developer)
 The core data structure that represents an operator.
@@ -118,7 +45,6 @@ data OperatorNode = OperatorNode {
   {-| The core node information. -}
   onNodeInfo :: !CoreNodeInfo
 } deriving (Eq)
--- Some helper functions:
 
 onShape :: OperatorNode -> NodeShape
 onShape = cniShape . onNodeInfo
@@ -138,18 +64,20 @@ This information is enough to calculate most information relative
 to a node.
 
 This is the local context of the compute DAG.
+
+TODO: remove?
 -}
 data NodeContext = NodeContext {
   ncParents :: ![OperatorNode],
   ncLogicalDeps :: ![OperatorNode]
 }
 
--- (developer) The type for which we drop all the information expressed in
--- types.
---
--- This is useful to express parent dependencies (pending a more type-safe
--- interface)
-type UntypedNode = ComputeNode LocUnknown Cell
+-- -- (developer) The type for which we drop all the information expressed in
+-- -- types.
+-- --
+-- -- This is useful to express parent dependencies (pending a more type-safe
+-- -- interface)
+-- type UntypedNode = ComputeNode LocUnknown Cell
 
 
 {-| The different paths of edges in the compute DAG of nodes, at the
@@ -159,7 +87,7 @@ start of computations.
    the id.
 
 -}
-data NodeEdge = ScopeEdge | DataStructureEdge StructureEdge deriving (Show, Eq)
+-- data NodeEdge = ScopeEdge | DataStructureEdge StructureEdge deriving (Show, Eq)
 
 {-| The edges in a compute DAG, after name resolution (which is where most of
 the checks and computations are being done)
@@ -171,10 +99,62 @@ the checks and computations are being done)
 -}
 data StructureEdge = ParentEdge | LogicalEdge deriving (Show, Eq)
 
-{-| A typed wrapper around the locality.
--}
-data TypedLocality loc = TypedLocality { unTypedLocality :: !Locality } deriving (Eq, Show)
+-- {-| A typed wrapper around the locality.
+-- -}
+-- data TypedLocality loc = TypedLocality { unTypedLocality :: !Locality } deriving (Eq, Show)
 
+-- The parsing representation of a node.
+-- This is what comes in and out of protobuf.
+data ParsedNode = ParsedNode {
+  pnLocality :: !Locality,
+  pnPath :: !NodePath,
+  pnOpName :: !OperatorName,
+  pnExtra :: !OpExtra,
+  pnParents :: ![NodePath],
+  pnDeps :: ![NodePath],
+  pnType :: !DataType,
+  -- It is not required by the standard.
+  -- Returned when constructing nodes.
+  pnId :: !(Maybe NodeId)
+} deriving (Show)
+
+instance FromProto PG.Node ParsedNode where
+  fromProto pn = do
+    p <- extractMaybe' pn PG.maybe'path "path"
+    extra <- extractMaybe' pn PG.maybe'opExtra "op_extra"
+    parents' <- sequence $ fromProto <$> (pn ^. PG.parents)
+    deps <- sequence $ fromProto <$> (pn ^. PG.logicalDependencies)
+    dt <- extractMaybe' pn PG.maybe'inferedType "infered_type"
+    oname <- fromProto $ pn ^. PG.opName
+    nid <- case fromProto <$> (pn ^. PG.maybe'nodeId) of
+      Nothing -> pure Nothing
+      Just (Right x) -> pure (Just x)
+      Just (Left e) -> Left e
+    loc <- fromProto $ pn ^. PG.locality
+    return ParsedNode {
+      pnLocality = loc,
+      pnPath = p,
+      pnOpName = oname,
+      pnExtra = extra,
+      pnParents = parents',
+      pnDeps = deps,
+      pnType = dt,
+      pnId = nid
+    }
+
+instance ToProto PG.Node ParsedNode where
+  toProto pn = x where
+    base = (def :: PG.Node)
+         & PG.locality .~ toProto (pnLocality pn)
+         & PG.path .~ toProto (pnPath pn)
+         & PG.opName .~ toProto (pnOpName pn)
+         & PG.opExtra .~ toProto (pnExtra pn)
+         & PG.parents .~ (toProto <$> pnParents pn)
+         & PG.logicalDependencies .~ (toProto <$> pnDeps pn)
+         & PG.inferedType .~ toProto (pnType pn)
+    x = case pnId pn of
+      Just nid -> base & PG.nodeId .~ toProto nid
+      Nothing -> base
 
 instance Show OperatorNode where
   show (OperatorNode _ np _) = "OperatorNode[" ++ T.unpack (prettyNodePath np) ++ "]"

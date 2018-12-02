@@ -8,6 +8,30 @@ __all__ = ['DataType', 'IntegerType', 'DoubleType', 'BooleanType',
            'merge_proto_types', 'merge_types', 'as_sql_type']
 
 
+def _repr_proto(p):
+    x = None
+    if p.basic_type == pb.SQLType.INT:
+        x = "int"
+    elif p.basic_type == pb.SQLType.DOUBLE:
+        x = "double"
+    elif p.basic_type == pb.SQLType.STRING:
+        x = "string"
+    elif p.basic_type == pb.SQLType.BOOL:
+        x = "bool"
+    elif p.array_type != _none_proto_type:
+        x = "[" + _repr_proto(p.array_type) + "]"
+    elif p.HasField("struct_type"):
+        x = "{" + ", ".join([_repr_proto_field(f) for f in p.struct_type.fields]) + "}"
+    assert x, p
+    if p.nullable:
+        x += "?"
+    return x
+
+
+def _repr_proto_field(p):
+    return "{}:{}".format(p.field_name, _repr_proto(p.field_type))
+
+
 class DataType(AbstractProtoWrapper):
 
     def __init__(self, _proto: pb.SQLType):
@@ -144,18 +168,19 @@ _none_proto_type = pb.SQLType()
 
 def _builtin_types():
     base = {
-        pb.SQLType.INT: [int, np.int, np.int32, 'int', 'int32'],
-        pb.SQLType.DOUBLE: [float, np.double, np.float64, 'double', 'float64'],
-        pb.SQLType.STRING: [str, 'str', np.str]
+        IntegerType(): [int, np.int, np.int32, 'int', 'int32'],
+        DoubleType(): [float, np.double, np.float64, 'double', 'float64']
+#        StringType(): [str, 'str', np.str]
     }
-    all_types = [(bt, pbt) for (pbt, lt) in base.items() for bt in lt]
+    all_types = [(str(bt), pbt) for (pbt, lt) in base.items() for bt in lt]
     return dict(all_types)
 
 
 _known_types = _builtin_types()
+print("_known_types", _known_types)
 
 
-def as_sql_type(tpe):
+def as_sql_type(tpe) -> DataType:
     if isinstance(tpe, list):
         assert tpe, 'List cannot be empty'
 
@@ -163,15 +188,17 @@ def as_sql_type(tpe):
             assert isinstance(fname, str), (type(fname), fname)
             # Unknown field type, but we fix the field name.
             t = as_sql_type(ftype)
-            return pb.StructField(field_name=fname, field_type=t)
+            assert isinstance(t, DataType), (t, type(t), ftype)
+            return StructField(t._proto, field_name=fname)
         fields = [f(fname, ftype) for (fname, ftype) in tpe]
-        return pb.StructType(fields=fields)
+        return StructType(fields)
     if isinstance(tpe, dict):
         ll = sorted(list(tpe.items()), key=lambda x: x[0])
         return as_sql_type(ll)
-    if tpe in _known_types:
-        return _known_types[tpe]
-    raise ValueError("Unknown type {}".format(tpe))
+    stpe = str(tpe)
+    if stpe in _known_types:
+        return _known_types[stpe]
+    raise ValueError("Unknown type {}:{}".format(stpe, type(tpe)))
 
 
 
@@ -216,27 +243,3 @@ def merge_proto_types(tp1, tp2):
             struct_type=pb.StructType(fields=l),
             nullable=tp1.nullable or tp2.nullable)
     raise Exception("Cannot merge incompatible types %s and %s" % (tp1, tp2))
-
-
-def _repr_proto(p):
-    x = None
-    if p.basic_type == pb.SQLType.INT:
-        x = "int"
-    elif p.basic_type == pb.SQLType.DOUBLE:
-        x = "double"
-    elif p.basic_type == pb.SQLType.STRING:
-        x = "string"
-    elif p.basic_type == pb.SQLType.BOOL:
-        x = "bool"
-    elif p.array_type != _none_proto_type:
-        x = "[" + _repr_proto(p.array_type) + "]"
-    elif p.HasField("struct_type"):
-        x = "{" + ", ".join([_repr_proto_field(f) for f in p.struct_type.fields]) + "}"
-    assert x, p
-    if p.nullable:
-        x += "?"
-    return x
-
-
-def _repr_proto_field(p):
-    return "{}:{}".format(p.field_name, _repr_proto(p.field_type))

@@ -121,6 +121,13 @@ maybe'inferedType ::
 maybe'inferedType
   = Lens.Labels.lensOf
       ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "maybe'inferedType")
+maybe'nodeId ::
+             forall f s t a b .
+               (Lens.Labels.HasLens f s t "maybe'nodeId" a b) =>
+               Lens.Family2.LensLike f s t a b
+maybe'nodeId
+  = Lens.Labels.lensOf
+      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "maybe'nodeId")
 maybe'opExtra ::
               forall f s t a b .
                 (Lens.Labels.HasLens f s t "maybe'opExtra" a b) =>
@@ -134,6 +141,12 @@ maybe'path ::
 maybe'path
   = Lens.Labels.lensOf
       ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "maybe'path")
+nodeId ::
+       forall f s t a b . (Lens.Labels.HasLens f s t "nodeId" a b) =>
+         Lens.Family2.LensLike f s t a b
+nodeId
+  = Lens.Labels.lensOf
+      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "nodeId")
 nodes ::
       forall f s t a b . (Lens.Labels.HasLens f s t "nodes" a b) =>
         Lens.Family2.LensLike f s t a b
@@ -170,3 +183,9 @@ phaseName ::
 phaseName
   = Lens.Labels.lensOf
       ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "phaseName")
+value ::
+      forall f s t a b . (Lens.Labels.HasLens f s t "value" a b) =>
+        Lens.Family2.LensLike f s t a b
+value
+  = Lens.Labels.lensOf
+      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "value")

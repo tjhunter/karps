@@ -41,6 +41,8 @@ library
       Proto.Karps.Proto.Profiling_Fields
       Proto.Karps.Proto.Row
       Proto.Karps.Proto.Row_Fields
+      Proto.Karps.Proto.Spark
+      Proto.Karps.Proto.Spark_Fields
       Proto.Karps.Proto.Standard
       Proto.Karps.Proto.Standard_Fields
       Proto.Karps.Proto.StructuredTransform
@@ -75,6 +77,7 @@ library
       Spark.Common.TypesStructuresRepr
       Spark.Common.TypesFunctions
       Spark.Common.Utilities
+      Spark.Compiler.Compiler
       Spark.Standard.Base
   other-modules:
   hs-source-dirs:
@@ -94,6 +97,7 @@ library
       mtl,
       proto-lens >= 0.3 && < 0.4,
       proto-lens-protoc >= 0.3 && < 0.4,
+      simple-sql-parser,
       text,
       text-format,
       transformers,

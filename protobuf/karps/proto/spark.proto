@@ -1,0 +1,62 @@
+// Messages relevant for the Spark computation backend.
+// The commands that are being run on the Spark side are
+// fairly simple, most of the logic being in the SQL 
+// queries that are generated.
+
+syntax = "proto3";
+
+package karps.spark;
+
+import "karps/proto/graph.proto";
+import "karps/proto/types.proto";
+
+message SparkAction {
+
+  // Loads inlined data into Spark as a table.
+  message LoadFromInline {
+    bytes parquet = 1;
+  }
+
+  // Executes a SQL statement inside Spark.
+  message ExecuteSQL {
+    string statement = 1;
+  }
+
+  // Extracts as a pandas object.
+  // This simply calls .toPandas() on a dataframe.
+  message ExtractPandas {
+
+  }
+
+  // Extracts as a CellWithType object (and checks that
+  // there is only a single cell with the appropriate format)
+  message ExtractCell {
+    karps.core.SQLType data_type = 1;
+  }
+
+  // The path of the node that uniquely identifies the 
+  // computation being run.
+  karps.core.Path path = 1;
+
+  // The name of the output table (if outputing anything).
+  // This table is going to be registered as a temp view
+  // and will be the way the other commands will refer to
+  // the content of this view.
+  string table_name = 2;
+
+  // All the actions that must be completed before this action executes.
+  repeated karps.core.Path dependencies = 3;
+
+  // The set of actions that are authorized in the Spark backend.
+  oneof action {
+    LoadFromInline load_inline = 4;
+    ExecuteSQL exec_sql = 5;
+    ExtractPandas extract_pandas = 6;
+    ExtractCell extract_cell = 7;
+  }
+}
+
+// A graph of computations that can be executed by Spark.
+message SparkGraph {
+  repeated SparkAction actions = 1;
+}

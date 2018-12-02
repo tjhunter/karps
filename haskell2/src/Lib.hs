@@ -26,13 +26,19 @@ import qualified Proto.Karps.Proto.Graph as PG
 import qualified Proto.Karps.Proto.Graph_Fields as PG
 import qualified Proto.Karps.Proto.ApiInternal as PI
 import qualified Proto.Karps.Proto.ApiInternal_Fields as PI
+import Spark.Common.ComputeDag(buildCGraphFromList, computeGraphMapVertices, mapVertexData, cdVertices, computeGraphMapVerticesI)
 import Spark.Common.NodeBuilder(NodeBuilderRegistry, registryNode, nbBuilder)
-import Spark.Common.OpStructures(CoreNodeInfo(..), OpExtra, OperatorName, Locality(..), NodeShape(..), localityToProto)
+import Spark.Common.NodeFunctions(buildOpNodeInScope, buildOpNode)
+import Spark.Common.NodeStructures
+import Spark.Common.OpStructures
 import Spark.Common.ProtoUtils(FromProto(..), ToProto(..), extractMaybe, extractMaybe')
-import Spark.Common.StructuresInternal(NodePath(..))
+import Spark.Common.StructuresInternal(NodePath(..), NodeId)
 import Spark.Common.TypesStructures(DataType)
-import Spark.Common.Try(Try(..), tryError)
+import Spark.Common.Try
 import Spark.Common.Utilities(sh, show', traceHint)
+import Spark.Compiler.Compiler
+import Spark.Common.DAGStructures(Vertex(..), VertexId(..), Edge(..))
+import Spark.Common.StructuresInternal(NodeId, ComputationID, NodePath, prettyNodePath)
 
 import Lib3
 
@@ -101,63 +107,29 @@ my_transform1 = transform_simple f where
 
 -- Node building
 
-data ParsedNode = ParsedNode {
-  pnLocality :: !Locality,
-  pnPath :: !NodePath,
-  pnOpName :: !OperatorName,
-  pnExtra :: !OpExtra,
-  pnParents :: ![NodePath],
-  pnDeps :: ![NodePath],
-  pnType :: !DataType
-} deriving (Show)
+data PathRequest = UseScope !NodePath | UsePath !NodePath
 
-data NodeBuilderRequest = NodeBuilderRequest !OperatorName !OpExtra [ParsedNode]
+data NIdRequest = RecomputeId | ReuseId NodeId
 
-data GraphTransformRequest = GraphTransformRequest ![ParsedNode] ![NodePath]
+data NodeBuilderRequest = NodeBuilderRequest !OperatorName !OpExtra [ParsedNode] PathRequest NIdRequest
+
+data GraphTransformRequest = GraphTransformRequest !PG.Graph ![NodePath]
 
 instance FromProto PI.NodeBuilderRequest NodeBuilderRequest where
   fromProto nbr = do
-    let on = nbr ^. PI.opName
+    on <- fromProto $ nbr ^. PI.opName
     oe <- fromProto (nbr ^. PI.extra)
     let z = nbr ^. PI.parents
     ps <- sequence $ fromProto <$> (nbr ^. PI.parents) :: Try [ParsedNode]
-    return $ NodeBuilderRequest on oe ps
+    p <- fromProto $ nbr ^. PI.requestedScope
+    return $ NodeBuilderRequest on oe ps (UseScope p) RecomputeId
 
 instance FromProto PI.GraphTransformRequest GraphTransformRequest where
   fromProto gtr = do
-    nodes <- sequence $ fromProto <$> (gtr ^. PI.functionalGraph ^. PG.nodes)
+    let g = gtr ^. PI.functionalGraph
     paths <- sequence $ fromProto <$> (gtr ^. PI.requestedPaths)
-    return $ GraphTransformRequest nodes paths
+    return $ GraphTransformRequest g paths
 
-instance FromProto PG.Node ParsedNode where
-  fromProto pn = do
-    p <- extractMaybe' pn PG.maybe'path "path"
-    extra <- extractMaybe' pn PG.maybe'opExtra "op_extra"
-    parents' <- sequence $ fromProto <$> (pn ^. PG.parents)
-    deps <- sequence $ fromProto <$> (pn ^. PG.logicalDependencies)
-    dt <- extractMaybe' pn PG.maybe'inferedType "infered_type"
-    let loc = case pn ^. PG.locality of
-          PG.DISTRIBUTED -> Distributed
-          PG.LOCAL -> Local
-    return ParsedNode {
-      pnLocality = loc,
-      pnPath = p,
-      pnOpName = pn ^. PG.opName,
-      pnExtra = extra,
-      pnParents = parents',
-      pnDeps = deps,
-      pnType = dt
-    }
-
-instance ToProto PG.Node ParsedNode where
-  toProto pn = (def :: PG.Node)
-     & PG.locality .~ localityToProto (pnLocality pn)
-     & PG.path .~ toProto (pnPath pn)
-     & PG.opName .~ pnOpName pn
-     & PG.opExtra .~ toProto (pnExtra pn)
-     & PG.parents .~ (toProto <$> pnParents pn)
-     & PG.logicalDependencies .~ (toProto <$> pnDeps pn)
-     & PG.inferedType .~ toProto (pnType pn)
 
 build_node :: CTrans
 build_node = transform_io f where
@@ -173,29 +145,59 @@ build_node = transform_io f where
     registry <- accessRegistry
     let out = case traceHint "build_node:decode_out" (decodeMessage bs) of
           Left txt -> error_msg (pack txt)
-          Right (nbr :: PI.NodeBuilderRequest) -> case fromProto nbr >>= _build_node registry of
+          Right (nbr :: PI.NodeBuilderRequest) -> case snd <$> (fromProto nbr >>= (_buildNode registry)) of
             Left ne -> error_msg' ne
             Right (pn :: ParsedNode) ->
                 (def :: PI.NodeBuilderResponse) & PI.success .~ toProto pn
     return $ encodeMessage out
 
-_build_node :: NodeBuilderRegistry -> NodeBuilderRequest -> Try ParsedNode
-_build_node registry (NodeBuilderRequest op_name extras parents) = do
+_buildNode :: NodeBuilderRegistry -> NodeBuilderRequest -> Try (OperatorNode, ParsedNode)
+_buildNode registry (NodeBuilderRequest op_name extras parents pathpol nidpol) = do
   builder <- case registry `registryNode` op_name of
         Nothing -> tryError $ sformat ("_buildNode: could not find op name '"%sh%"' in the registry") op_name
         Just nb' -> pure nb'
-  let parent_shapes = traceHint "_build_node: parent_shapes " $ f <$> (traceHint "_build_node: parents " $  parents) where f pn = NodeShape (pnType pn) (pnLocality pn)
+  let parent_shapes = f <$> parents where f pn = NodeShape (pnType pn) (pnLocality pn)
   cni <- nbBuilder builder extras parent_shapes
   let ns = cniShape cni
-  return $ ParsedNode {
+  parent_nids <- _extractNid parents
+  let dep_nids = [] -- TODO: deps
+  let on' = case pathpol of
+              UseScope scope -> buildOpNodeInScope cni scope parent_nids dep_nids
+              UsePath p -> buildOpNode cni p parent_nids dep_nids
+  let on = case nidpol of
+              ReuseId nid' -> on' { onId = nid' }
+              RecomputeId -> on'
+  return $ (on, ParsedNode {
       pnLocality = nsLocality ns,
-      pnPath = NodePath V.empty,
+      pnPath = onPath on,
       pnOpName = op_name,
       pnExtra = extras,
       pnParents = pnPath <$> parents,
       pnDeps = [],
-      pnType = nsType ns
-    }
+      pnType = nsType ns,
+      pnId = pure $ onId on
+    })
+
+_opNodeToParseNode :: OperatorNode -> [NodePath] -> [NodePath] -> ParsedNode
+_opNodeToParseNode on parents deps = ParsedNode {
+    pnLocality = nsLocality . onShape $ on,
+    pnPath = onPath on,
+    pnOpName = "!!!",
+    pnExtra = emptyExtra, -- FIXME
+    pnParents = parents,
+    pnDeps = deps,
+    pnType = nsType . onShape $ on,
+    pnId = pure $ onId on
+  }
+
+_extractNid :: [ParsedNode] -> Try [NodeId]
+_extractNid l = x
+  where
+    f :: Maybe NodeId -> Try NodeId
+    f Nothing = tryError $ sformat ("_buildNode: some node IDs are missing")
+    f (Just nid) = pure nid
+    x = sequence $ f . pnId <$> l
+
 
 compile_graph :: CTrans
 compile_graph = transform_io f where
@@ -205,26 +207,60 @@ compile_graph = transform_io f where
       out_msg = (def :: PI.GraphTransformResponse) & PI.error .~ err_msg
   error_msg' ne = out_msg where
       out_msg = (def :: PI.GraphTransformResponse) & PI.error .~ toProto ne
+
   f :: ByteString -> IO ByteString
   f bs = do
     registry <- accessRegistry
     let out = case decodeMessage bs of
           Left txt -> error_msg (pack txt)
-          Right (nbr :: PI.GraphTransformRequest) -> case fromProto nbr >>= _compile_graph registry of
+          Right (nbr :: PI.GraphTransformRequest) -> case fromProto nbr >>= _transformGraphFast registry of
             Left ne -> error_msg' ne
-            Right (pns :: [ParsedNode]) ->
-                (def :: PI.GraphTransformResponse)
-                  & PI.pinnedGraph .~ (
-                      (def :: PG.Graph)
-                        & PG.nodes .~ (toProto <$> pns)
-                    )
+            Right (r :: PI.GraphTransformResponse) -> r
     return $ encodeMessage out
 
+-- Parses the compute graph.
+-- It relies on the fact that the IDs have already been computed
+-- The final graph may be malformed.
+_transformGraphFast ::
+  NodeBuilderRegistry -> GraphTransformRequest -> Try PI.GraphTransformResponse
+_transformGraphFast reg (GraphTransformRequest g requestedPaths) = do
+  -- Parse the nodes
+  nodes <- sequence $ fromProto <$> (g ^. PG.nodes)
+  -- Build the edges from the nodes.
+  let edges = concatMap f nodes where
+       f node = f' ParentEdge (pnPath node) (pnParents node)
+            ++ f' LogicalEdge (pnPath node) (pnDeps node)
+       f' :: StructureEdge -> NodePath -> [NodePath] -> [Edge StructureEdge]
+       f' et p ps = [Edge (pathToVId p) (pathToVId p') et | p' <- ps]
+  let vertices = f <$> nodes where
+        f n = Vertex (pathToVId (pnPath n)) n
+  let requestedVIds = pathToVId <$> requestedPaths
+  -- Make a first graph with the parsed nodes
+  -- TODO: what should the inputs be?
+  cg' <- traceHint ("_loadGraphFast: cg'=") $ tryEither $ buildCGraphFromList vertices edges [] requestedVIds
+  -- Transform this graph to load the content of the nodes.
+  cg'' <- traceHint ("_loadGraphFast: cg=") $ computeGraphMapVertices cg' (_buildNodeInGraph reg)
+  let cg = mapVertexData fst cg''
+  return $ _transformResponse cg
 
-_compile_graph :: NodeBuilderRegistry -> GraphTransformRequest -> Try [ParsedNode]
-_compile_graph reg (GraphTransformRequest nodes targets) =
-  -- TODO
-  pure $ traceHint "_compile_graph:nodes:" nodes
+
+_transformResponse :: ComputeGraph -> PI.GraphTransformResponse
+_transformResponse cg =
+  (def :: PI.GraphTransformResponse)
+    & PI.pinnedGraph .~ ((def :: PG.Graph)
+        & PG.nodes .~ l) where
+          cg2 = computeGraphMapVerticesI cg f where
+            f :: OperatorNode -> [(ParsedNode, StructureEdge)] -> ParsedNode
+            f on l2 = _opNodeToParseNode on parents deps where
+              parents = [pnPath pn | (pn, ParentEdge) <- l2]
+              deps = [pnPath pn | (pn, LogicalEdge) <- l2]
+          l = toProto . vertexData <$> V.toList (cdVertices cg2)
+
+_buildNodeInGraph :: NodeBuilderRegistry -> ParsedNode -> [((OperatorNode, ParsedNode), StructureEdge)] -> Try (OperatorNode, ParsedNode)
+_buildNodeInGraph reg pn l = case (pnId pn) of
+  Nothing -> tryError $ "_buildNodeInGraph: missing node id for node " <> (show' pn)
+  Just nid -> _buildNode reg nbr where
+        nbr = NodeBuilderRequest (pnOpName pn) (pnExtra pn) (snd . fst <$> l) (UsePath (pnPath pn)) (ReuseId nid)
 
 foreign export ccall fibonacci_hs :: CInt -> CInt
 

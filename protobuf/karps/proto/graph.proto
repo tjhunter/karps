@@ -10,6 +10,12 @@ enum Locality {
   DISTRIBUTED = 1;
 };
 
+// Internal node id. Should not be used by the user (only paths for them).
+message NodeId {
+    string value = 1;
+}
+
+
 // A node in a computation graph.
 message Node {
   Locality locality = 1;
@@ -19,6 +25,7 @@ message Node {
   repeated Path parents = 5;
   repeated Path logical_dependencies = 6;
   SQLType infered_type = 7;
+  NodeId node_id = 8;
 };
 
 message Graph {

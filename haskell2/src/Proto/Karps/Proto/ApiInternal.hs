@@ -12,7 +12,7 @@ module Proto.Karps.Proto.ApiInternal
         GraphTransformRequest(..), GraphTransformResponse(..),
         MessageSeverity(..), MessageSeverity(),
         MessageSeverity'UnrecognizedValue, NodeBuilderRequest(..),
-        NodeBuilderResponse(..), NodeId(..), NodeMapItem(..))
+        NodeBuilderResponse(..), NodeMapItem(..))
        where
 import qualified Data.ProtoLens.Reexport.Lens.Labels.Prism
        as Lens.Labels.Prism
@@ -43,6 +43,7 @@ import qualified Data.ProtoLens.Reexport.Lens.Labels as Lens.Labels
 import qualified Data.ProtoLens.Reexport.Text.Read as Text.Read
 import qualified Proto.Karps.Proto.Computation
 import qualified Proto.Karps.Proto.Graph
+import qualified Proto.Karps.Proto.Spark
 import qualified Proto.Tensorflow.Core.Framework.Graph
 
 {- | Fields :
@@ -53,8 +54,9 @@ import qualified Proto.Tensorflow.Core.Framework.Graph
     * 'Proto.Karps.Proto.ApiInternal_Fields.session' @:: Lens' AnalysisMessage Proto.Karps.Proto.Computation.SessionId@
     * 'Proto.Karps.Proto.ApiInternal_Fields.maybe'session' @:: Lens' AnalysisMessage
   (Prelude.Maybe Proto.Karps.Proto.Computation.SessionId)@
-    * 'Proto.Karps.Proto.ApiInternal_Fields.relevantId' @:: Lens' AnalysisMessage NodeId@
-    * 'Proto.Karps.Proto.ApiInternal_Fields.maybe'relevantId' @:: Lens' AnalysisMessage (Prelude.Maybe NodeId)@
+    * 'Proto.Karps.Proto.ApiInternal_Fields.relevantId' @:: Lens' AnalysisMessage Proto.Karps.Proto.Graph.NodeId@
+    * 'Proto.Karps.Proto.ApiInternal_Fields.maybe'relevantId' @:: Lens' AnalysisMessage
+  (Prelude.Maybe Proto.Karps.Proto.Graph.NodeId)@
     * 'Proto.Karps.Proto.ApiInternal_Fields.path' @:: Lens' AnalysisMessage Proto.Karps.Proto.Graph.Path@
     * 'Proto.Karps.Proto.ApiInternal_Fields.maybe'path' @:: Lens' AnalysisMessage (Prelude.Maybe Proto.Karps.Proto.Graph.Path)@
     * 'Proto.Karps.Proto.ApiInternal_Fields.content' @:: Lens' AnalysisMessage Data.Text.Text@
@@ -66,7 +68,8 @@ data AnalysisMessage = AnalysisMessage{_AnalysisMessage'computation
                                        !(Prelude.Maybe Proto.Karps.Proto.Computation.ComputationId),
                                        _AnalysisMessage'session ::
                                        !(Prelude.Maybe Proto.Karps.Proto.Computation.SessionId),
-                                       _AnalysisMessage'relevantId :: !(Prelude.Maybe NodeId),
+                                       _AnalysisMessage'relevantId ::
+                                       !(Prelude.Maybe Proto.Karps.Proto.Graph.NodeId),
                                        _AnalysisMessage'path ::
                                        !(Prelude.Maybe Proto.Karps.Proto.Graph.Path),
                                        _AnalysisMessage'content :: !Data.Text.Text,
@@ -115,7 +118,8 @@ instance Prelude.Functor f =>
                  (\ x__ y__ -> x__{_AnalysisMessage'session = y__}))
               Prelude.id
 instance Prelude.Functor f =>
-         Lens.Labels.HasLens' f AnalysisMessage "relevantId" (NodeId)
+         Lens.Labels.HasLens' f AnalysisMessage "relevantId"
+           (Proto.Karps.Proto.Graph.NodeId)
          where
         lensOf' _
           = (Prelude..)
@@ -124,7 +128,7 @@ instance Prelude.Functor f =>
               (Data.ProtoLens.maybeLens Data.Default.Class.def)
 instance Prelude.Functor f =>
          Lens.Labels.HasLens' f AnalysisMessage "maybe'relevantId"
-           (Prelude.Maybe NodeId)
+           (Prelude.Maybe Proto.Karps.Proto.Graph.NodeId)
          where
         lensOf' _
           = (Prelude..)
@@ -209,7 +213,7 @@ instance Data.ProtoLens.Message AnalysisMessage where
                 relevantId__field_descriptor
                   = Data.ProtoLens.FieldDescriptor "relevant_id"
                       (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                         Data.ProtoLens.FieldTypeDescriptor NodeId)
+                         Data.ProtoLens.FieldTypeDescriptor Proto.Karps.Proto.Graph.NodeId)
                       (Data.ProtoLens.OptionalField
                          (Lens.Labels.lensOf
                             ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "maybe'relevantId")))
@@ -845,6 +849,9 @@ instance Data.ProtoLens.Message GraphTransformRequest where
     * 'Proto.Karps.Proto.ApiInternal_Fields.steps' @:: Lens' GraphTransformResponse [CompilerStep]@
     * 'Proto.Karps.Proto.ApiInternal_Fields.error' @:: Lens' GraphTransformResponse ErrorMessage@
     * 'Proto.Karps.Proto.ApiInternal_Fields.maybe'error' @:: Lens' GraphTransformResponse (Prelude.Maybe ErrorMessage)@
+    * 'Proto.Karps.Proto.ApiInternal_Fields.spark' @:: Lens' GraphTransformResponse Proto.Karps.Proto.Spark.SparkGraph@
+    * 'Proto.Karps.Proto.ApiInternal_Fields.maybe'spark' @:: Lens' GraphTransformResponse
+  (Prelude.Maybe Proto.Karps.Proto.Spark.SparkGraph)@
  -}
 data GraphTransformResponse = GraphTransformResponse{_GraphTransformResponse'pinnedGraph
                                                      ::
@@ -855,6 +862,9 @@ data GraphTransformResponse = GraphTransformResponse{_GraphTransformResponse'pin
                                                      ![CompilerStep],
                                                      _GraphTransformResponse'error ::
                                                      !(Prelude.Maybe ErrorMessage),
+                                                     _GraphTransformResponse'spark ::
+                                                     !(Prelude.Maybe
+                                                         Proto.Karps.Proto.Spark.SparkGraph),
                                                      _GraphTransformResponse'_unknownFields ::
                                                      !Data.ProtoLens.FieldSet}
                                 deriving (Prelude.Show, Prelude.Eq, Prelude.Ord)
@@ -920,6 +930,24 @@ instance Prelude.Functor f =>
               (Lens.Family2.Unchecked.lens _GraphTransformResponse'error
                  (\ x__ y__ -> x__{_GraphTransformResponse'error = y__}))
               Prelude.id
+instance Prelude.Functor f =>
+         Lens.Labels.HasLens' f GraphTransformResponse "spark"
+           (Proto.Karps.Proto.Spark.SparkGraph)
+         where
+        lensOf' _
+          = (Prelude..)
+              (Lens.Family2.Unchecked.lens _GraphTransformResponse'spark
+                 (\ x__ y__ -> x__{_GraphTransformResponse'spark = y__}))
+              (Data.ProtoLens.maybeLens Data.Default.Class.def)
+instance Prelude.Functor f =>
+         Lens.Labels.HasLens' f GraphTransformResponse "maybe'spark"
+           (Prelude.Maybe Proto.Karps.Proto.Spark.SparkGraph)
+         where
+        lensOf' _
+          = (Prelude..)
+              (Lens.Family2.Unchecked.lens _GraphTransformResponse'spark
+                 (\ x__ y__ -> x__{_GraphTransformResponse'spark = y__}))
+              Prelude.id
 instance Data.Default.Class.Default GraphTransformResponse where
         def
           = GraphTransformResponse{_GraphTransformResponse'pinnedGraph =
@@ -927,6 +955,7 @@ instance Data.Default.Class.Default GraphTransformResponse where
                                    _GraphTransformResponse'messages = [],
                                    _GraphTransformResponse'steps = [],
                                    _GraphTransformResponse'error = Prelude.Nothing,
+                                   _GraphTransformResponse'spark = Prelude.Nothing,
                                    _GraphTransformResponse'_unknownFields = ([])}
 instance Data.ProtoLens.Message GraphTransformResponse where
         messageName _ = Data.Text.pack "karps.core.GraphTransformResponse"
@@ -964,12 +993,22 @@ instance Data.ProtoLens.Message GraphTransformResponse where
                          (Lens.Labels.lensOf
                             ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "maybe'error")))
                       :: Data.ProtoLens.FieldDescriptor GraphTransformResponse
+                spark__field_descriptor
+                  = Data.ProtoLens.FieldDescriptor "spark"
+                      (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                         Data.ProtoLens.FieldTypeDescriptor
+                           Proto.Karps.Proto.Spark.SparkGraph)
+                      (Data.ProtoLens.OptionalField
+                         (Lens.Labels.lensOf
+                            ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "maybe'spark")))
+                      :: Data.ProtoLens.FieldDescriptor GraphTransformResponse
               in
               Data.Map.fromList
                 [(Data.ProtoLens.Tag 1, pinnedGraph__field_descriptor),
                  (Data.ProtoLens.Tag 3, messages__field_descriptor),
                  (Data.ProtoLens.Tag 4, steps__field_descriptor),
-                 (Data.ProtoLens.Tag 5, error__field_descriptor)]
+                 (Data.ProtoLens.Tag 5, error__field_descriptor),
+                 (Data.ProtoLens.Tag 6, spark__field_descriptor)]
         unknownFields
           = Lens.Family2.Unchecked.lens
               _GraphTransformResponse'_unknownFields
@@ -1050,6 +1089,9 @@ instance Data.ProtoLens.FieldDefault MessageSeverity where
     * 'Proto.Karps.Proto.ApiInternal_Fields.maybe'extra' @:: Lens' NodeBuilderRequest
   (Prelude.Maybe Proto.Karps.Proto.Graph.OpExtra)@
     * 'Proto.Karps.Proto.ApiInternal_Fields.parents' @:: Lens' NodeBuilderRequest [Proto.Karps.Proto.Graph.Node]@
+    * 'Proto.Karps.Proto.ApiInternal_Fields.requestedScope' @:: Lens' NodeBuilderRequest Proto.Karps.Proto.Graph.Path@
+    * 'Proto.Karps.Proto.ApiInternal_Fields.maybe'requestedScope' @:: Lens' NodeBuilderRequest
+  (Prelude.Maybe Proto.Karps.Proto.Graph.Path)@
  -}
 data NodeBuilderRequest = NodeBuilderRequest{_NodeBuilderRequest'opName
                                              :: !Data.Text.Text,
@@ -1057,6 +1099,8 @@ data NodeBuilderRequest = NodeBuilderRequest{_NodeBuilderRequest'opName
                                              !(Prelude.Maybe Proto.Karps.Proto.Graph.OpExtra),
                                              _NodeBuilderRequest'parents ::
                                              ![Proto.Karps.Proto.Graph.Node],
+                                             _NodeBuilderRequest'requestedScope ::
+                                             !(Prelude.Maybe Proto.Karps.Proto.Graph.Path),
                                              _NodeBuilderRequest'_unknownFields ::
                                              !Data.ProtoLens.FieldSet}
                             deriving (Prelude.Show, Prelude.Eq, Prelude.Ord)
@@ -1099,12 +1143,31 @@ instance Prelude.Functor f =>
               (Lens.Family2.Unchecked.lens _NodeBuilderRequest'parents
                  (\ x__ y__ -> x__{_NodeBuilderRequest'parents = y__}))
               Prelude.id
+instance Prelude.Functor f =>
+         Lens.Labels.HasLens' f NodeBuilderRequest "requestedScope"
+           (Proto.Karps.Proto.Graph.Path)
+         where
+        lensOf' _
+          = (Prelude..)
+              (Lens.Family2.Unchecked.lens _NodeBuilderRequest'requestedScope
+                 (\ x__ y__ -> x__{_NodeBuilderRequest'requestedScope = y__}))
+              (Data.ProtoLens.maybeLens Data.Default.Class.def)
+instance Prelude.Functor f =>
+         Lens.Labels.HasLens' f NodeBuilderRequest "maybe'requestedScope"
+           (Prelude.Maybe Proto.Karps.Proto.Graph.Path)
+         where
+        lensOf' _
+          = (Prelude..)
+              (Lens.Family2.Unchecked.lens _NodeBuilderRequest'requestedScope
+                 (\ x__ y__ -> x__{_NodeBuilderRequest'requestedScope = y__}))
+              Prelude.id
 instance Data.Default.Class.Default NodeBuilderRequest where
         def
           = NodeBuilderRequest{_NodeBuilderRequest'opName =
                                  Data.ProtoLens.fieldDefault,
                                _NodeBuilderRequest'extra = Prelude.Nothing,
                                _NodeBuilderRequest'parents = [],
+                               _NodeBuilderRequest'requestedScope = Prelude.Nothing,
                                _NodeBuilderRequest'_unknownFields = ([])}
 instance Data.ProtoLens.Message NodeBuilderRequest where
         messageName _ = Data.Text.pack "karps.core.NodeBuilderRequest"
@@ -1133,11 +1196,21 @@ instance Data.ProtoLens.Message NodeBuilderRequest where
                          (Lens.Labels.lensOf
                             ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "parents")))
                       :: Data.ProtoLens.FieldDescriptor NodeBuilderRequest
+                requestedScope__field_descriptor
+                  = Data.ProtoLens.FieldDescriptor "requested_scope"
+                      (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                         Data.ProtoLens.FieldTypeDescriptor Proto.Karps.Proto.Graph.Path)
+                      (Data.ProtoLens.OptionalField
+                         (Lens.Labels.lensOf
+                            ((Lens.Labels.proxy#) ::
+                               (Lens.Labels.Proxy#) "maybe'requestedScope")))
+                      :: Data.ProtoLens.FieldDescriptor NodeBuilderRequest
               in
               Data.Map.fromList
                 [(Data.ProtoLens.Tag 1, opName__field_descriptor),
                  (Data.ProtoLens.Tag 2, extra__field_descriptor),
-                 (Data.ProtoLens.Tag 3, parents__field_descriptor)]
+                 (Data.ProtoLens.Tag 3, parents__field_descriptor),
+                 (Data.ProtoLens.Tag 4, requestedScope__field_descriptor)]
         unknownFields
           = Lens.Family2.Unchecked.lens _NodeBuilderRequest'_unknownFields
               (\ x__ y__ -> x__{_NodeBuilderRequest'_unknownFields = y__})
@@ -1228,47 +1301,8 @@ instance Data.ProtoLens.Message NodeBuilderResponse where
               (\ x__ y__ -> x__{_NodeBuilderResponse'_unknownFields = y__})
 {- | Fields :
 
-    * 'Proto.Karps.Proto.ApiInternal_Fields.value' @:: Lens' NodeId Data.Text.Text@
- -}
-data NodeId = NodeId{_NodeId'value :: !Data.Text.Text,
-                     _NodeId'_unknownFields :: !Data.ProtoLens.FieldSet}
-                deriving (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance (Lens.Labels.HasLens' f NodeId x a, a ~ b) =>
-         Lens.Labels.HasLens f NodeId NodeId x a b
-         where
-        lensOf = Lens.Labels.lensOf'
-instance Prelude.Functor f =>
-         Lens.Labels.HasLens' f NodeId "value" (Data.Text.Text)
-         where
-        lensOf' _
-          = (Prelude..)
-              (Lens.Family2.Unchecked.lens _NodeId'value
-                 (\ x__ y__ -> x__{_NodeId'value = y__}))
-              Prelude.id
-instance Data.Default.Class.Default NodeId where
-        def
-          = NodeId{_NodeId'value = Data.ProtoLens.fieldDefault,
-                   _NodeId'_unknownFields = ([])}
-instance Data.ProtoLens.Message NodeId where
-        messageName _ = Data.Text.pack "karps.core.NodeId"
-        fieldsByTag
-          = let value__field_descriptor
-                  = Data.ProtoLens.FieldDescriptor "value"
-                      (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                         Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-                      (Data.ProtoLens.PlainField Data.ProtoLens.Optional
-                         (Lens.Labels.lensOf
-                            ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "value")))
-                      :: Data.ProtoLens.FieldDescriptor NodeId
-              in
-              Data.Map.fromList [(Data.ProtoLens.Tag 1, value__field_descriptor)]
-        unknownFields
-          = Lens.Family2.Unchecked.lens _NodeId'_unknownFields
-              (\ x__ y__ -> x__{_NodeId'_unknownFields = y__})
-{- | Fields :
-
-    * 'Proto.Karps.Proto.ApiInternal_Fields.node' @:: Lens' NodeMapItem NodeId@
-    * 'Proto.Karps.Proto.ApiInternal_Fields.maybe'node' @:: Lens' NodeMapItem (Prelude.Maybe NodeId)@
+    * 'Proto.Karps.Proto.ApiInternal_Fields.node' @:: Lens' NodeMapItem Proto.Karps.Proto.Graph.NodeId@
+    * 'Proto.Karps.Proto.ApiInternal_Fields.maybe'node' @:: Lens' NodeMapItem (Prelude.Maybe Proto.Karps.Proto.Graph.NodeId)@
     * 'Proto.Karps.Proto.ApiInternal_Fields.path' @:: Lens' NodeMapItem Proto.Karps.Proto.Graph.Path@
     * 'Proto.Karps.Proto.ApiInternal_Fields.maybe'path' @:: Lens' NodeMapItem (Prelude.Maybe Proto.Karps.Proto.Graph.Path)@
     * 'Proto.Karps.Proto.ApiInternal_Fields.computation' @:: Lens' NodeMapItem Proto.Karps.Proto.Computation.ComputationId@
@@ -1279,7 +1313,7 @@ instance Data.ProtoLens.Message NodeId where
   (Prelude.Maybe Proto.Karps.Proto.Computation.SessionId)@
  -}
 data NodeMapItem = NodeMapItem{_NodeMapItem'node ::
-                               !(Prelude.Maybe NodeId),
+                               !(Prelude.Maybe Proto.Karps.Proto.Graph.NodeId),
                                _NodeMapItem'path :: !(Prelude.Maybe Proto.Karps.Proto.Graph.Path),
                                _NodeMapItem'computation ::
                                !(Prelude.Maybe Proto.Karps.Proto.Computation.ComputationId),
@@ -1292,7 +1326,8 @@ instance (Lens.Labels.HasLens' f NodeMapItem x a, a ~ b) =>
          where
         lensOf = Lens.Labels.lensOf'
 instance Prelude.Functor f =>
-         Lens.Labels.HasLens' f NodeMapItem "node" (NodeId)
+         Lens.Labels.HasLens' f NodeMapItem "node"
+           (Proto.Karps.Proto.Graph.NodeId)
          where
         lensOf' _
           = (Prelude..)
@@ -1301,7 +1336,7 @@ instance Prelude.Functor f =>
               (Data.ProtoLens.maybeLens Data.Default.Class.def)
 instance Prelude.Functor f =>
          Lens.Labels.HasLens' f NodeMapItem "maybe'node"
-           (Prelude.Maybe NodeId)
+           (Prelude.Maybe Proto.Karps.Proto.Graph.NodeId)
          where
         lensOf' _
           = (Prelude..)
@@ -1375,7 +1410,7 @@ instance Data.ProtoLens.Message NodeMapItem where
           = let node__field_descriptor
                   = Data.ProtoLens.FieldDescriptor "node"
                       (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                         Data.ProtoLens.FieldTypeDescriptor NodeId)
+                         Data.ProtoLens.FieldTypeDescriptor Proto.Karps.Proto.Graph.NodeId)
                       (Data.ProtoLens.OptionalField
                          (Lens.Labels.lensOf
                             ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "maybe'node")))

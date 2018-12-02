@@ -1,13 +1,18 @@
 module Spark.Standard.Base(
   collectB,
+  dataLiteralB,
   literalBuilderD
 ) where
 
 import Formatting
+import Lens.Family2 ((&), (.~), (^.))
 
 import qualified Proto.Karps.Proto.Row as PRow
-import Spark.Common.OpStructures(CoreNodeInfo(..), NodeOp(..), NodeShape(..), Locality(..), StandardOperator(..), emptyExtra)
+import qualified Proto.Karps.Proto.Standard as PS
+import qualified Proto.Karps.Proto.Standard_Fields as PS
 import Spark.Common.NodeBuilder(NodeBuilder, buildOpExtra, buildOpD)
+import Spark.Common.OpStructures(CoreNodeInfo(..), NodeOp(..), NodeShape(..), Locality(..), StandardOperator(..), OpExtra(..), emptyExtra)
+import Spark.Common.ProtoUtils
 import Spark.Common.RowStructures
 import Spark.Common.RowUtils(cellWithTypeFromProto)
 import Spark.Common.Try
@@ -32,3 +37,18 @@ collectB = buildOpD n f where
           dt' = StrictType (ArrayType dt)
           so = StandardOperator n dt' emptyExtra
           no = NodeLocalOp so
+
+dataLiteralB :: NodeBuilder
+dataLiteralB = buildOpExtra n f where
+  n = "org.karps.DataLiteral"
+  f :: PS.DataLiteral -> Try CoreNodeInfo
+  f dl = do
+    let parquet = dl ^. PS.parquet
+    dt <- extractMaybe' dl PS.maybe'dataType "data_type"
+    let ns = NodeShape dt Distributed
+    let oe = OpExtra parquet "" ""
+    let so = StandardOperator n dt oe
+    return $ CoreNodeInfo {
+        cniShape = ns,
+        cniOp = NodeDistributedOp so
+      }

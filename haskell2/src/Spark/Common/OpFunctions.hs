@@ -52,43 +52,43 @@ import qualified Proto.Karps.Proto.Standard_Fields as PS
 -- The serialized type of a node operation, as written in
 -- the JSON and proto description.
 simpleShowOp :: NodeOp -> T.Text
-simpleShowOp (NodeLocalOp op') = soName op'
-simpleShowOp (NodeDistributedOp op') = soName op'
-simpleShowOp (NodeLocalLit _ _) = nameLocalLiteral
-simpleShowOp (NodeOpaqueAggregator op') = soName op'
+simpleShowOp (NodeLocalOp op') = unOperatorName $ soName op'
+simpleShowOp (NodeDistributedOp op') = unOperatorName $ soName op'
+simpleShowOp (NodeLocalLit _ _) = unOperatorName $ nameLocalLiteral
+simpleShowOp (NodeOpaqueAggregator op') = unOperatorName $ soName op'
 -- simpleShowOp (NodeAggregatorReduction ua) =
 --   _jsonShowAggTrans . uaoInitialOuter $ ua
 simpleShowOp (NodeAggregatorLocalReduction ua) = _jsonShowSGO . uaoMergeBuffer $ ua
-simpleShowOp (NodeStructuredTransform _) = nameStructuredTransform
-simpleShowOp (NodeLocalStructuredTransform _) = nameLocalStructuredTransform
-simpleShowOp (NodeDistributedLit _ _) = nameDistributedLiteral
-simpleShowOp (NodeGroupedReduction _) = nameGroupedReduction
-simpleShowOp (NodeReduction _) = nameReduction
-simpleShowOp NodeBroadcastJoin = nameBroadcastJoin
-simpleShowOp (NodePointer _) = namePointer
+simpleShowOp (NodeStructuredTransform _) = unOperatorName nameStructuredTransform
+simpleShowOp (NodeLocalStructuredTransform _) = unOperatorName nameLocalStructuredTransform
+simpleShowOp (NodeDistributedLit _ _) = unOperatorName nameDistributedLiteral
+simpleShowOp (NodeGroupedReduction _) = unOperatorName nameGroupedReduction
+simpleShowOp (NodeReduction _) = unOperatorName nameReduction
+simpleShowOp NodeBroadcastJoin = unOperatorName nameBroadcastJoin
+simpleShowOp (NodePointer _) = unOperatorName namePointer
 
-nameLocalLiteral :: T.Text
+nameLocalLiteral :: OperatorName
 nameLocalLiteral = "org.spark.LocalLiteral"
 
-nameStructuredTransform :: T.Text
+nameStructuredTransform :: OperatorName
 nameStructuredTransform = "org.spark.StructuredTransform"
 
-nameLocalStructuredTransform :: T.Text
+nameLocalStructuredTransform :: OperatorName
 nameLocalStructuredTransform = "org.spark.LocalStructuredTransform"
 
-nameDistributedLiteral :: T.Text
+nameDistributedLiteral :: OperatorName
 nameDistributedLiteral = "org.spark.DistributedLiteral"
 
-nameGroupedReduction :: T.Text
+nameGroupedReduction :: OperatorName
 nameGroupedReduction = "org.spark.GroupedReduction"
 
-nameReduction :: T.Text
+nameReduction :: OperatorName
 nameReduction = "org.spark.StructuredReduce"
 
-nameBroadcastJoin :: T.Text
+nameBroadcastJoin :: OperatorName
 nameBroadcastJoin = "org.spark.BroadcastJoin"
 
-namePointer :: T.Text
+namePointer :: OperatorName
 namePointer = "org.spark.PlaceholderCache"
 
 decodeExtra :: Message x => OpExtra -> Try x
@@ -134,12 +134,12 @@ prettyShowColOp (ColStruct s) =
   "struct(" <> T.intercalate "," (prettyShowColOp . tfValue <$> V.toList s) <> ")"
 
 _jsonShowAggTrans :: AggTransform -> Text
-_jsonShowAggTrans (OpaqueAggTransform op') = soName op'
+_jsonShowAggTrans (OpaqueAggTransform op') = unOperatorName $ soName op'
 _jsonShowAggTrans (InnerAggOp _) = "org.spark.StructuredReduction"
 
 
 _jsonShowSGO :: SemiGroupOperator -> Text
-_jsonShowSGO (OpaqueSemiGroupLaw so) = soName so
+_jsonShowSGO (OpaqueSemiGroupLaw so) = unOperatorName $ soName so
 _jsonShowSGO (UdafSemiGroupOperator ucn) = ucn
 _jsonShowSGO (ColumnSemiGroupLaw sfn) = sfn
 
@@ -152,11 +152,11 @@ _prettyShowAggOp (AggStruct v) =
   "struct(" <> T.intercalate "," (_prettyShowAggOp . afValue <$> V.toList v) <> ")"
 
 _prettyShowAggTrans :: AggTransform -> Text
-_prettyShowAggTrans (OpaqueAggTransform op') = soName op'
+_prettyShowAggTrans (OpaqueAggTransform op') = unOperatorName $ soName op'
 _prettyShowAggTrans (InnerAggOp ao) = _prettyShowAggOp ao
 
 _prettyShowSGO :: SemiGroupOperator -> Text
-_prettyShowSGO (OpaqueSemiGroupLaw so) = soName so
+_prettyShowSGO (OpaqueSemiGroupLaw so) = unOperatorName $ soName so
 _prettyShowSGO (UdafSemiGroupOperator ucn) = ucn
 _prettyShowSGO (ColumnSemiGroupLaw sfn) = sfn
 

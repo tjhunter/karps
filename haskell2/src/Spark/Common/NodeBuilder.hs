@@ -8,7 +8,6 @@ module Spark.Common.NodeBuilder(
   BuilderFunction,
   NodeBuilder(..),
   NodeBuilderRegistry,
-  NodeDefName,
   -- Basic tools
   cniStandardOp,
   cniStandardOp',
@@ -55,12 +54,12 @@ data (which may be empty) and a context of all the parents' shapes.
 -}
 type BuilderFunction = OpExtra -> [NodeShape] -> Try CoreNodeInfo
 
-type NodeDefName = Text
+-- type NodeDefName = Text
 
 {-| Describes how to build a node.
 -}
 data NodeBuilder = NodeBuilder {
-  nbName :: !NodeDefName,
+  nbName :: !OperatorName,
   nbBuilder :: !BuilderFunction
 }
 
@@ -68,22 +67,22 @@ data NodeBuilder = NodeBuilder {
 standard interface to build nodes from a set of existing nodes.
 -}
 data NodeBuilderRegistry = NodeBuilderRegistry {
-  _registryNode :: NodeDefName -> Maybe NodeBuilder
+  _registryNode :: OperatorName -> Maybe NodeBuilder
 }
 
 {-| This is the typed interface to building nodes.
 
 This allows developers to properly define a schema to the content.
 -}
-data TypedNodeBuilder a = TypedNodeBuilder !Text (a -> [NodeShape] -> Try CoreNodeInfo)
+data TypedNodeBuilder a = TypedNodeBuilder !OperatorName (a -> [NodeShape] -> Try CoreNodeInfo)
 
 instance Show NodeBuilder where
-  show (NodeBuilder n _) = "<" ++ unpack n ++ ">"
+  show (NodeBuilder (OperatorName n) _) = "<" ++ unpack n ++ ">"
 
 instance Show NodeBuilderRegistry where
   show (NodeBuilderRegistry _) = "NodeBuilderRegistry"
 
-registryNode :: NodeBuilderRegistry -> NodeDefName -> Maybe NodeBuilder
+registryNode :: NodeBuilderRegistry -> OperatorName -> Maybe NodeBuilder
 registryNode = _registryNode
 
 buildNodeRegistry :: [NodeBuilder] -> NodeBuilderRegistry
@@ -91,20 +90,20 @@ buildNodeRegistry l = NodeBuilderRegistry f where
   m = M.map N.head . myGroupBy $ (nbName &&& id) <$> l
   f ndn = M.lookup ndn m
 
-buildOpExtra :: (HasCallStack, Message a) => Text -> (a -> Try CoreNodeInfo) -> NodeBuilder
+buildOpExtra :: (HasCallStack, Message a) => OperatorName -> (a -> Try CoreNodeInfo) -> NodeBuilder
 buildOpExtra opName f = untypedBuilder $ TypedNodeBuilder opName f' where
   f' a [] = f a
   f' _ l = tryError $ "buildOpExtra: "<>show' opName<>": got extra parents: "<>show' l
 
 {-| Takes one argument, no extra.
 -}
-buildOp1 :: HasCallStack => Text -> (NodeShape -> Try CoreNodeInfo) -> NodeBuilder
+buildOp1 :: HasCallStack => OperatorName -> (NodeShape -> Try CoreNodeInfo) -> NodeBuilder
 buildOp1 opName f = NodeBuilder opName f' where
   f' _ [] = tryError $ "buildOp1: "<>show' opName<>": missing parents "
   f' _ [ns] = f ns
   f' _ l = tryError $ "buildOp1: "<>show' opName<>": got extra parents: "<>show' l
 
-buildOp1Extra :: HasCallStack => Message a => Text -> (NodeShape -> a -> Try CoreNodeInfo) -> NodeBuilder
+buildOp1Extra :: HasCallStack => Message a => OperatorName -> (NodeShape -> a -> Try CoreNodeInfo) -> NodeBuilder
 buildOp1Extra opName f = untypedBuilder $ TypedNodeBuilder opName f' where
   f' _ [] = tryError $ "buildOp1Extra: "<>show' opName<>": missing parents "
   f' a [ns] = f ns a
@@ -112,13 +111,13 @@ buildOp1Extra opName f = untypedBuilder $ TypedNodeBuilder opName f' where
 
 {-| Takes one argument, no extra.
 -}
-buildOp2 :: HasCallStack => Text -> (NodeShape -> NodeShape -> Try CoreNodeInfo) -> NodeBuilder
+buildOp2 :: HasCallStack => OperatorName -> (NodeShape -> NodeShape -> Try CoreNodeInfo) -> NodeBuilder
 buildOp2 opName f = NodeBuilder opName f' where
   f' _ [] = tryError $ "buildOp2: "<>show' opName<>": missing parents "
   f' _ [ns1, ns2] = f ns1 ns2
   f' _ l = tryError $ "buildOp2: "<>show' opName<>": got extra parents: "<>show' l
 
-buildOp2Extra :: (HasCallStack, Message a) => Text -> (NodeShape -> NodeShape -> a -> Try CoreNodeInfo) -> NodeBuilder
+buildOp2Extra :: (HasCallStack, Message a) => OperatorName -> (NodeShape -> NodeShape -> a -> Try CoreNodeInfo) -> NodeBuilder
 buildOp2Extra opName f = untypedBuilder $ TypedNodeBuilder opName f' where
   f' _ [] = tryError $ "buildOp2Extra: "<>show' opName<>": missing parents "
   f' a [ns1, ns2] = f ns1 ns2 a
@@ -126,27 +125,27 @@ buildOp2Extra opName f = untypedBuilder $ TypedNodeBuilder opName f' where
 
 {-| Takes one argument, no extra.
 -}
-buildOp3 :: HasCallStack => Text -> (NodeShape -> NodeShape -> NodeShape -> Try CoreNodeInfo) -> NodeBuilder
+buildOp3 :: HasCallStack => OperatorName -> (NodeShape -> NodeShape -> NodeShape -> Try CoreNodeInfo) -> NodeBuilder
 buildOp3 opName f = NodeBuilder opName f' where
   f' _ [ns1, ns2, ns3] = f ns1 ns2 ns3
   f' _ l = tryError $ "buildOp3: "<>show' opName<>": expected 3 parent nodes, but got: "<>show' l
 
 {-| Takes one dataframe, no extra.
 -}
-buildOpD :: HasCallStack => Text -> (DataType -> Try CoreNodeInfo) -> NodeBuilder
+buildOpD :: HasCallStack => OperatorName -> (DataType -> Try CoreNodeInfo) -> NodeBuilder
 -- TODO check that there is no extra
 buildOpD opName f = buildOp1 opName f' where
   f' (NodeShape dt Local) = tryError $ "buildOpD: "<>show' opName<>": expected distributed node, but got a local node of type "<>show' dt<>" instead."
   f' (NodeShape dt Distributed) = f dt
 
-buildOpDExtra :: (HasCallStack, Message a) => Text -> (DataType -> a -> Try CoreNodeInfo) -> NodeBuilder
+buildOpDExtra :: (HasCallStack, Message a) => OperatorName -> (DataType -> a -> Try CoreNodeInfo) -> NodeBuilder
 buildOpDExtra opName f = buildOp1Extra opName f' where
   f' (NodeShape dt Local) _ = tryError $ "buildOpDExtra: "<>show' opName<>": expected distributed node, but got a local node of type "<>show' dt<>" instead."
   f' (NodeShape dt Distributed) x = f dt x
 
 {-| Takes two dataframes, no extra.
 -}
-buildOpDD :: HasCallStack => Text -> (DataType -> DataType -> Try CoreNodeInfo) -> NodeBuilder
+buildOpDD :: HasCallStack => OperatorName -> (DataType -> DataType -> Try CoreNodeInfo) -> NodeBuilder
 -- TODO check that there is no extra
 buildOpDD opName f = buildOp2 opName f' where
   f' (NodeShape dt1 Distributed) (NodeShape dt2 Distributed) = f dt1 dt2
@@ -154,7 +153,7 @@ buildOpDD opName f = buildOp2 opName f' where
 
 {-| Takes two dataframes, with extra.
 -}
-buildOpDDExtra :: (Message a) => Text -> (DataType -> DataType -> a -> Try CoreNodeInfo) -> NodeBuilder
+buildOpDDExtra :: (Message a) => OperatorName -> (DataType -> DataType -> a -> Try CoreNodeInfo) -> NodeBuilder
 buildOpDDExtra opName f = buildOp2Extra opName f' where
   f' (NodeShape dt1 Distributed) (NodeShape dt2 Distributed) x = f dt1 dt2 x
   f' ns1 ns2 _ = tryError $ "buildOpDD: "<>show' opName<>": expected two distributed nodes, but got a local node of type: "<>show' (ns1, ns2)
@@ -162,7 +161,7 @@ buildOpDDExtra opName f = buildOp2Extra opName f' where
 
 {-| Takes one dataframe, one local, no extra.
 -}
-buildOpDL :: Text -> (DataType -> DataType -> Try CoreNodeInfo) -> NodeBuilder
+buildOpDL :: OperatorName -> (DataType -> DataType -> Try CoreNodeInfo) -> NodeBuilder
 -- TODO check that there is no extra
 buildOpDL opName f = buildOp2 opName f' where
   f' (NodeShape dt1 Distributed) (NodeShape dt2 Local) = f dt1 dt2
@@ -170,13 +169,13 @@ buildOpDL opName f = buildOp2 opName f' where
 
 {-| Takes one observable, no extra.
 -}
-buildOpL :: Text -> (DataType -> Try CoreNodeInfo) -> NodeBuilder
+buildOpL :: OperatorName -> (DataType -> Try CoreNodeInfo) -> NodeBuilder
 -- TODO check that there is no extra
 buildOpL opName f = buildOp1 opName f' where
   f' (NodeShape dt Local) = f dt
   f' (NodeShape dt Distributed) = tryError $ "buildOpD: "<>show' opName<>": expected local node, but got a distributed node of type "<>show' dt<>" instead."
 
-buildOpLExtra :: Message a => Text -> (DataType -> a -> Try CoreNodeInfo) -> NodeBuilder
+buildOpLExtra :: Message a => OperatorName -> (DataType -> a -> Try CoreNodeInfo) -> NodeBuilder
 buildOpLExtra opName f = buildOp1Extra opName f' where
   f' (NodeShape dt Distributed) _ = tryError $ "buildOpLExtra: "<>show' opName<>": expected local node, but got a distributed node of type "<>show' dt<>" instead."
   f' (NodeShape dt Local) x = f dt x
@@ -185,10 +184,10 @@ buildOpLExtra opName f = buildOp1Extra opName f' where
 
 This should be used in special occasions, use the specialized ones instead.
 -}
-buildOpVariableExtra :: Message a => Text -> ([NodeShape] -> a -> Try CoreNodeInfo) -> NodeBuilder
+buildOpVariableExtra :: Message a => OperatorName -> ([NodeShape] -> a -> Try CoreNodeInfo) -> NodeBuilder
 buildOpVariableExtra opName f = untypedBuilder $ TypedNodeBuilder opName (flip f)
 
-buildOpVariable :: Text -> ([NodeShape] -> Try CoreNodeInfo) -> NodeBuilder
+buildOpVariable :: OperatorName -> ([NodeShape] -> Try CoreNodeInfo) -> NodeBuilder
 buildOpVariable opName f = NodeBuilder opName f' where
   f' _ l = f l
 
@@ -197,7 +196,7 @@ buildOpVariable opName f = NodeBuilder opName f' where
 untypedBuilder :: Message a => TypedNodeBuilder a -> NodeBuilder
 untypedBuilder (TypedNodeBuilder n f) = NodeBuilder n (_convertTyped f)
 
-cniStandardOp :: Message a => Locality -> Text -> DataType -> a -> CoreNodeInfo
+cniStandardOp :: Message a => Locality -> OperatorName -> DataType -> a -> CoreNodeInfo
 cniStandardOp loc opName dt extra = CoreNodeInfo {
     cniShape = NodeShape {
       nsType = dt,
@@ -211,7 +210,7 @@ cniStandardOp loc opName dt extra = CoreNodeInfo {
   }
 
 {-| Builds a standard operator node that does not take extra arguments. -}
-cniStandardOp' :: Locality -> Text -> DataType -> CoreNodeInfo
+cniStandardOp' :: Locality -> OperatorName -> DataType -> CoreNodeInfo
 cniStandardOp' loc opName dt = CoreNodeInfo {
     cniShape = NodeShape {
       nsType = dt,

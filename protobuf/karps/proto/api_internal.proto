@@ -8,6 +8,7 @@ package karps.core;
 
 import "karps/proto/computation.proto";
 import "karps/proto/graph.proto";
+import "karps/proto/spark.proto";
 import "tensorflow/core/framework/graph.proto";
 
 // The names of the different compiling phases, in order of action.
@@ -93,11 +94,6 @@ message CompilerStep {
 }
 
 
-// Internal node id. Should not be used by the user (only paths for them).
-message NodeId {
-    string value = 1;
-}
-
 // ******** logging **********
 
 enum MessageSeverity {
@@ -139,6 +135,11 @@ message NodeBuilderRequest {
     string op_name = 1;
     OpExtra extra = 2;
     repeated Node parents = 3;
+    // The path that defines the scope of the node.
+    // The full path of the created node will be prefixed
+    // by this path.
+    // Can be empty.
+    Path requested_scope = 4;
 }
 
 message NodeBuilderResponse {
@@ -166,5 +167,8 @@ message GraphTransformResponse {
     // They are returned in order.
     repeated CompilerStep steps = 4;
     ErrorMessage error = 5;
+
+    // The actions to execute on the various backends.
+    karps.spark.SparkGraph spark = 6;
 }
 

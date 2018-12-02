@@ -15,6 +15,7 @@ module Spark.Common.StructuresInternal(
   ComputationID(..),
   catNodePath,
   fieldName,
+  appendPath,
   unsafeFieldName,
   emptyFieldPath,
   nullFieldPath,
@@ -118,6 +119,9 @@ nodePathAppendSuffix (NodePath v) t = NodePath $ V.snoc (V.init v) x' where
     x = unNodeName (V.last v)
     x' = NodeName (x <> t)
 
+appendPath :: NodePath -> NodeName -> NodePath
+appendPath (NodePath v) n = NodePath $ V.snoc v n
+
 -- | The concatenated path. This is the inverse function of fieldPath.
 -- | TODO: this one should be hidden?
 catNodePath :: NodePath -> T.Text
@@ -176,12 +180,12 @@ instance FromProto PG.Path NodePath where
 instance ToProto PG.Path NodePath where
   toProto (NodePath v) = def & PG.path .~ (V.toList $ (unNodeName <$> v))
 
-instance FromProto PAI.NodeId NodeId where
+instance FromProto PG.NodeId NodeId where
   -- TODO: check that value is not empty
-  fromProto p = pure $ NodeId (E.encodeUtf8 (p ^. PAI.value))
+  fromProto p = pure $ NodeId (E.encodeUtf8 (p ^. PG.value))
 
-instance ToProto PAI.NodeId NodeId where
-  toProto (NodeId bs) = def & PAI.value .~ (show' bs)
+instance ToProto PG.NodeId NodeId where
+  toProto (NodeId bs) = def & PG.value .~ (E.decodeUtf8 bs)
 
 instance Ord FieldName where
   compare f1 f2 = compare (unFieldName f1) (unFieldName f2)

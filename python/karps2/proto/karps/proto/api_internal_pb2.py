@@ -16,6 +16,7 @@ _sym_db = _symbol_database.Default()
 
 from karps.proto import computation_pb2 as karps_dot_proto_dot_computation__pb2
 from karps.proto import graph_pb2 as karps_dot_proto_dot_graph__pb2
+from karps.proto import spark_pb2 as karps_dot_proto_dot_spark__pb2
 from tensorflow.core.framework import graph_pb2 as tensorflow_dot_core_dot_framework_dot_graph__pb2
 
 
@@ -23,9 +24,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='karps/proto/api_internal.proto',
   package='karps.core',
   syntax='proto3',
-  serialized_pb=_b('\n\x1ekarps/proto/api_internal.proto\x12\nkarps.core\x1a\x1dkarps/proto/computation.proto\x1a\x17karps/proto/graph.proto\x1a%tensorflow/core/framework/graph.proto\"\xa7\x01\n\x0bNodeMapItem\x12 \n\x04node\x18\x01 \x01(\x0b\x32\x12.karps.core.NodeId\x12\x1e\n\x04path\x18\x02 \x01(\x0b\x32\x10.karps.core.Path\x12.\n\x0b\x63omputation\x18\x03 \x01(\x0b\x32\x19.karps.core.ComputationId\x12&\n\x07session\x18\x04 \x01(\x0b\x32\x15.karps.core.SessionId\"\x84\x01\n\x0c\x43ompilerStep\x12)\n\x05phase\x18\x01 \x01(\x0e\x32\x1a.karps.core.CompilingPhase\x12 \n\x05graph\x18\x02 \x01(\x0b\x32\x11.karps.core.Graph\x12\'\n\tgraph_def\x18\x03 \x01(\x0b\x32\x14.tensorflow.GraphDef\"\x17\n\x06NodeId\x12\r\n\x05value\x18\x01 \x01(\t\"\x8b\x02\n\x0f\x41nalysisMessage\x12.\n\x0b\x63omputation\x18\x01 \x01(\x0b\x32\x19.karps.core.ComputationId\x12&\n\x07session\x18\x02 \x01(\x0b\x32\x15.karps.core.SessionId\x12\'\n\x0brelevant_id\x18\x03 \x01(\x0b\x32\x12.karps.core.NodeId\x12\x1e\n\x04path\x18\x04 \x01(\x0b\x32\x10.karps.core.Path\x12\x0f\n\x07\x63ontent\x18\x05 \x01(\t\x12*\n\x05level\x18\x06 \x01(\x0e\x32\x1b.karps.core.MessageSeverity\x12\x1a\n\x12stack_trace_pretty\x18\x07 \x01(\t\"\xde\x01\n\x0c\x45rrorMessage\x12\x0f\n\x07message\x18\x01 \x01(\t\x12\x37\n\x08hs_stack\x18\x02 \x03(\x0b\x32%.karps.core.ErrorMessage.StackElement\x12\x0c\n\x04path\x18\x03 \x03(\t\x1av\n\x0cStackElement\x12\x10\n\x08\x66unction\x18\x01 \x01(\t\x12\x0f\n\x07package\x18\x02 \x01(\t\x12\x0e\n\x06module\x18\x03 \x01(\t\x12\x0c\n\x04\x66ile\x18\x04 \x01(\t\x12\x12\n\nstart_line\x18\x05 \x01(\x05\x12\x11\n\tstart_col\x18\x06 \x01(\x05\"l\n\x12NodeBuilderRequest\x12\x0f\n\x07op_name\x18\x01 \x01(\t\x12\"\n\x05\x65xtra\x18\x02 \x01(\x0b\x32\x13.karps.core.OpExtra\x12!\n\x07parents\x18\x03 \x03(\x0b\x32\x10.karps.core.Node\"a\n\x13NodeBuilderResponse\x12\'\n\x05\x65rror\x18\x01 \x01(\x0b\x32\x18.karps.core.ErrorMessage\x12!\n\x07success\x18\x02 \x01(\x0b\x32\x10.karps.core.Node\"o\n\x15GraphTransformRequest\x12+\n\x10\x66unctional_graph\x18\x03 \x01(\x0b\x32\x11.karps.core.Graph\x12)\n\x0frequested_paths\x18\x05 \x03(\x0b\x32\x10.karps.core.Path\"\xc2\x01\n\x16GraphTransformResponse\x12\'\n\x0cpinned_graph\x18\x01 \x01(\x0b\x32\x11.karps.core.Graph\x12-\n\x08messages\x18\x03 \x03(\x0b\x32\x1b.karps.core.AnalysisMessage\x12\'\n\x05steps\x18\x04 \x03(\x0b\x32\x18.karps.core.CompilerStep\x12\'\n\x05\x65rror\x18\x05 \x01(\x0b\x32\x18.karps.core.ErrorMessage*\xbd\x02\n\x0e\x43ompilingPhase\x12\x0b\n\x07INITIAL\x10\x00\x12\x16\n\x12REMOVE_UNREACHABLE\x10\x01\x12 \n\x1cREMOVE_OBSERVABLE_BROADCASTS\x10\n\x12\x19\n\x15\x44\x41TA_SOURCE_INSERTION\x10\x02\x12\x12\n\x0ePOINTER_SWAP_1\x10\x03\x12\x16\n\x12MERGE_AGGREGATIONS\x10\x07\x12\x1d\n\x19MERGE_PREAGG_AGGREGATIONS\x10\x0b\x12\x14\n\x10MERGE_TRANSFORMS\x10\x08\x12\x18\n\x14MERGE_AGGREGATIONS_2\x10\t\x12\x19\n\x15\x46UNCTIONAL_FLATTENING\x10\x04\x12\x16\n\x12\x41UTOCACHE_FULLFILL\x10\x05\x12\x0f\n\x0b\x43\x41\x43HE_CHECK\x10\x06\x12\n\n\x05\x46INAL\x10\xe8\x07*3\n\x0fMessageSeverity\x12\x08\n\x04INFO\x10\x00\x12\x0b\n\x07WARNING\x10\x01\x12\t\n\x05\x46\x41TAL\x10\x02\x62\x06proto3')
+  serialized_pb=_b('\n\x1ekarps/proto/api_internal.proto\x12\nkarps.core\x1a\x1dkarps/proto/computation.proto\x1a\x17karps/proto/graph.proto\x1a\x17karps/proto/spark.proto\x1a%tensorflow/core/framework/graph.proto\"\xa7\x01\n\x0bNodeMapItem\x12 \n\x04node\x18\x01 \x01(\x0b\x32\x12.karps.core.NodeId\x12\x1e\n\x04path\x18\x02 \x01(\x0b\x32\x10.karps.core.Path\x12.\n\x0b\x63omputation\x18\x03 \x01(\x0b\x32\x19.karps.core.ComputationId\x12&\n\x07session\x18\x04 \x01(\x0b\x32\x15.karps.core.SessionId\"\x84\x01\n\x0c\x43ompilerStep\x12)\n\x05phase\x18\x01 \x01(\x0e\x32\x1a.karps.core.CompilingPhase\x12 \n\x05graph\x18\x02 \x01(\x0b\x32\x11.karps.core.Graph\x12\'\n\tgraph_def\x18\x03 \x01(\x0b\x32\x14.tensorflow.GraphDef\"\x8b\x02\n\x0f\x41nalysisMessage\x12.\n\x0b\x63omputation\x18\x01 \x01(\x0b\x32\x19.karps.core.ComputationId\x12&\n\x07session\x18\x02 \x01(\x0b\x32\x15.karps.core.SessionId\x12\'\n\x0brelevant_id\x18\x03 \x01(\x0b\x32\x12.karps.core.NodeId\x12\x1e\n\x04path\x18\x04 \x01(\x0b\x32\x10.karps.core.Path\x12\x0f\n\x07\x63ontent\x18\x05 \x01(\t\x12*\n\x05level\x18\x06 \x01(\x0e\x32\x1b.karps.core.MessageSeverity\x12\x1a\n\x12stack_trace_pretty\x18\x07 \x01(\t\"\xde\x01\n\x0c\x45rrorMessage\x12\x0f\n\x07message\x18\x01 \x01(\t\x12\x37\n\x08hs_stack\x18\x02 \x03(\x0b\x32%.karps.core.ErrorMessage.StackElement\x12\x0c\n\x04path\x18\x03 \x03(\t\x1av\n\x0cStackElement\x12\x10\n\x08\x66unction\x18\x01 \x01(\t\x12\x0f\n\x07package\x18\x02 \x01(\t\x12\x0e\n\x06module\x18\x03 \x01(\t\x12\x0c\n\x04\x66ile\x18\x04 \x01(\t\x12\x12\n\nstart_line\x18\x05 \x01(\x05\x12\x11\n\tstart_col\x18\x06 \x01(\x05\"\x97\x01\n\x12NodeBuilderRequest\x12\x0f\n\x07op_name\x18\x01 \x01(\t\x12\"\n\x05\x65xtra\x18\x02 \x01(\x0b\x32\x13.karps.core.OpExtra\x12!\n\x07parents\x18\x03 \x03(\x0b\x32\x10.karps.core.Node\x12)\n\x0frequested_scope\x18\x04 \x01(\x0b\x32\x10.karps.core.Path\"a\n\x13NodeBuilderResponse\x12\'\n\x05\x65rror\x18\x01 \x01(\x0b\x32\x18.karps.core.ErrorMessage\x12!\n\x07success\x18\x02 \x01(\x0b\x32\x10.karps.core.Node\"o\n\x15GraphTransformRequest\x12+\n\x10\x66unctional_graph\x18\x03 \x01(\x0b\x32\x11.karps.core.Graph\x12)\n\x0frequested_paths\x18\x05 \x03(\x0b\x32\x10.karps.core.Path\"\xea\x01\n\x16GraphTransformResponse\x12\'\n\x0cpinned_graph\x18\x01 \x01(\x0b\x32\x11.karps.core.Graph\x12-\n\x08messages\x18\x03 \x03(\x0b\x32\x1b.karps.core.AnalysisMessage\x12\'\n\x05steps\x18\x04 \x03(\x0b\x32\x18.karps.core.CompilerStep\x12\'\n\x05\x65rror\x18\x05 \x01(\x0b\x32\x18.karps.core.ErrorMessage\x12&\n\x05spark\x18\x06 \x01(\x0b\x32\x17.karps.spark.SparkGraph*\xbd\x02\n\x0e\x43ompilingPhase\x12\x0b\n\x07INITIAL\x10\x00\x12\x16\n\x12REMOVE_UNREACHABLE\x10\x01\x12 \n\x1cREMOVE_OBSERVABLE_BROADCASTS\x10\n\x12\x19\n\x15\x44\x41TA_SOURCE_INSERTION\x10\x02\x12\x12\n\x0ePOINTER_SWAP_1\x10\x03\x12\x16\n\x12MERGE_AGGREGATIONS\x10\x07\x12\x1d\n\x19MERGE_PREAGG_AGGREGATIONS\x10\x0b\x12\x14\n\x10MERGE_TRANSFORMS\x10\x08\x12\x18\n\x14MERGE_AGGREGATIONS_2\x10\t\x12\x19\n\x15\x46UNCTIONAL_FLATTENING\x10\x04\x12\x16\n\x12\x41UTOCACHE_FULLFILL\x10\x05\x12\x0f\n\x0b\x43\x41\x43HE_CHECK\x10\x06\x12\n\n\x05\x46INAL\x10\xe8\x07*3\n\x0fMessageSeverity\x12\x08\n\x04INFO\x10\x00\x12\x0b\n\x07WARNING\x10\x01\x12\t\n\x05\x46\x41TAL\x10\x02\x62\x06proto3')
   ,
-  dependencies=[karps_dot_proto_dot_computation__pb2.DESCRIPTOR,karps_dot_proto_dot_graph__pb2.DESCRIPTOR,tensorflow_dot_core_dot_framework_dot_graph__pb2.DESCRIPTOR,])
+  dependencies=[karps_dot_proto_dot_computation__pb2.DESCRIPTOR,karps_dot_proto_dot_graph__pb2.DESCRIPTOR,karps_dot_proto_dot_spark__pb2.DESCRIPTOR,tensorflow_dot_core_dot_framework_dot_graph__pb2.DESCRIPTOR,])
 
 _COMPILINGPHASE = _descriptor.EnumDescriptor(
   name='CompilingPhase',
@@ -88,8 +89,8 @@ _COMPILINGPHASE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=1486,
-  serialized_end=1803,
+  serialized_start=1570,
+  serialized_end=1887,
 )
 _sym_db.RegisterEnumDescriptor(_COMPILINGPHASE)
 
@@ -115,8 +116,8 @@ _MESSAGESEVERITY = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=1805,
-  serialized_end=1856,
+  serialized_start=1889,
+  serialized_end=1940,
 )
 _sym_db.RegisterEnumDescriptor(_MESSAGESEVERITY)
 
@@ -187,8 +188,8 @@ _NODEMAPITEM = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=142,
-  serialized_end=309,
+  serialized_start=167,
+  serialized_end=334,
 )
 
 
@@ -232,38 +233,7 @@ _COMPILERSTEP = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=312,
-  serialized_end=444,
-)
-
-
-_NODEID = _descriptor.Descriptor(
-  name='NodeId',
-  full_name='karps.core.NodeId',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='value', full_name='karps.core.NodeId.value', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=446,
+  serialized_start=337,
   serialized_end=469,
 )
 
@@ -479,6 +449,13 @@ _NODEBUILDERREQUEST = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='requested_scope', full_name='karps.core.NodeBuilderRequest.requested_scope', index=3,
+      number=4, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -491,8 +468,8 @@ _NODEBUILDERREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=966,
-  serialized_end=1074,
+  serialized_start=967,
+  serialized_end=1118,
 )
 
 
@@ -529,8 +506,8 @@ _NODEBUILDERRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1076,
-  serialized_end=1173,
+  serialized_start=1120,
+  serialized_end=1217,
 )
 
 
@@ -567,8 +544,8 @@ _GRAPHTRANSFORMREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1175,
-  serialized_end=1286,
+  serialized_start=1219,
+  serialized_end=1330,
 )
 
 
@@ -607,6 +584,13 @@ _GRAPHTRANSFORMRESPONSE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='spark', full_name='karps.core.GraphTransformResponse.spark', index=4,
+      number=6, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -619,11 +603,11 @@ _GRAPHTRANSFORMRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1289,
-  serialized_end=1483,
+  serialized_start=1333,
+  serialized_end=1567,
 )
 
-_NODEMAPITEM.fields_by_name['node'].message_type = _NODEID
+_NODEMAPITEM.fields_by_name['node'].message_type = karps_dot_proto_dot_graph__pb2._NODEID
 _NODEMAPITEM.fields_by_name['path'].message_type = karps_dot_proto_dot_graph__pb2._PATH
 _NODEMAPITEM.fields_by_name['computation'].message_type = karps_dot_proto_dot_computation__pb2._COMPUTATIONID
 _NODEMAPITEM.fields_by_name['session'].message_type = karps_dot_proto_dot_computation__pb2._SESSIONID
@@ -632,13 +616,14 @@ _COMPILERSTEP.fields_by_name['graph'].message_type = karps_dot_proto_dot_graph__
 _COMPILERSTEP.fields_by_name['graph_def'].message_type = tensorflow_dot_core_dot_framework_dot_graph__pb2._GRAPHDEF
 _ANALYSISMESSAGE.fields_by_name['computation'].message_type = karps_dot_proto_dot_computation__pb2._COMPUTATIONID
 _ANALYSISMESSAGE.fields_by_name['session'].message_type = karps_dot_proto_dot_computation__pb2._SESSIONID
-_ANALYSISMESSAGE.fields_by_name['relevant_id'].message_type = _NODEID
+_ANALYSISMESSAGE.fields_by_name['relevant_id'].message_type = karps_dot_proto_dot_graph__pb2._NODEID
 _ANALYSISMESSAGE.fields_by_name['path'].message_type = karps_dot_proto_dot_graph__pb2._PATH
 _ANALYSISMESSAGE.fields_by_name['level'].enum_type = _MESSAGESEVERITY
 _ERRORMESSAGE_STACKELEMENT.containing_type = _ERRORMESSAGE
 _ERRORMESSAGE.fields_by_name['hs_stack'].message_type = _ERRORMESSAGE_STACKELEMENT
 _NODEBUILDERREQUEST.fields_by_name['extra'].message_type = karps_dot_proto_dot_graph__pb2._OPEXTRA
 _NODEBUILDERREQUEST.fields_by_name['parents'].message_type = karps_dot_proto_dot_graph__pb2._NODE
+_NODEBUILDERREQUEST.fields_by_name['requested_scope'].message_type = karps_dot_proto_dot_graph__pb2._PATH
 _NODEBUILDERRESPONSE.fields_by_name['error'].message_type = _ERRORMESSAGE
 _NODEBUILDERRESPONSE.fields_by_name['success'].message_type = karps_dot_proto_dot_graph__pb2._NODE
 _GRAPHTRANSFORMREQUEST.fields_by_name['functional_graph'].message_type = karps_dot_proto_dot_graph__pb2._GRAPH
@@ -647,9 +632,9 @@ _GRAPHTRANSFORMRESPONSE.fields_by_name['pinned_graph'].message_type = karps_dot_
 _GRAPHTRANSFORMRESPONSE.fields_by_name['messages'].message_type = _ANALYSISMESSAGE
 _GRAPHTRANSFORMRESPONSE.fields_by_name['steps'].message_type = _COMPILERSTEP
 _GRAPHTRANSFORMRESPONSE.fields_by_name['error'].message_type = _ERRORMESSAGE
+_GRAPHTRANSFORMRESPONSE.fields_by_name['spark'].message_type = karps_dot_proto_dot_spark__pb2._SPARKGRAPH
 DESCRIPTOR.message_types_by_name['NodeMapItem'] = _NODEMAPITEM
 DESCRIPTOR.message_types_by_name['CompilerStep'] = _COMPILERSTEP
-DESCRIPTOR.message_types_by_name['NodeId'] = _NODEID
 DESCRIPTOR.message_types_by_name['AnalysisMessage'] = _ANALYSISMESSAGE
 DESCRIPTOR.message_types_by_name['ErrorMessage'] = _ERRORMESSAGE
 DESCRIPTOR.message_types_by_name['NodeBuilderRequest'] = _NODEBUILDERREQUEST
@@ -673,13 +658,6 @@ CompilerStep = _reflection.GeneratedProtocolMessageType('CompilerStep', (_messag
   # @@protoc_insertion_point(class_scope:karps.core.CompilerStep)
   ))
 _sym_db.RegisterMessage(CompilerStep)
-
-NodeId = _reflection.GeneratedProtocolMessageType('NodeId', (_message.Message,), dict(
-  DESCRIPTOR = _NODEID,
-  __module__ = 'karps.proto.api_internal_pb2'
-  # @@protoc_insertion_point(class_scope:karps.core.NodeId)
-  ))
-_sym_db.RegisterMessage(NodeId)
 
 AnalysisMessage = _reflection.GeneratedProtocolMessageType('AnalysisMessage', (_message.Message,), dict(
   DESCRIPTOR = _ANALYSISMESSAGE,

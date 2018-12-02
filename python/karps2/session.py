@@ -3,7 +3,7 @@ import os
 import pandas as pd
 import tempfile
 
-from .proto import types_pb2, check_proto_error, api_internal_pb2 as api, graph_pb2, std_pb2 as std
+from .proto import types_pb2, check_proto_error, api_internal_pb2 as api, graph_pb2, standard_pb2 as std
 from .types import DataType, as_sql_type
 from .row import as_cell
 from .objects import call_op, DataFrame, Observable, AbstractNode
@@ -36,7 +36,8 @@ class Session(object):
         """
         if isinstance(obj, pd.DataFrame):
             proto = _pandas_proto(obj)
-            return call_op("org.karps.DataLiteral", extra=proto, session=self)
+            return call_op("org.karps.DataLiteral",
+                           extra=proto, session=self, add_debug=False)
         cwt = _build_cwt(obj, schema)
         # In the case of the dataframe, the top level should be an array.
         assert cwt.type.is_array_type, cwt.type
@@ -116,16 +117,15 @@ def _build_cwt(obj, schema):
 
 
 def _pandas_proto(pdf: pd.DataFrame) -> std.DataLiteral:
-    tpe = zip(list(pdf.dtypes.index), list(pdf.dtypes))
+    tpe = list(zip(list(pdf.dtypes.index), list(pdf.dtypes)))
     pdt = as_sql_type(tpe)
     d = tempfile.mkdtemp()
     f = os.path.join(d, "data.parquet")
-    print(f)
     pdf.to_parquet(f, compression='snappy')
     with open(f, 'rb') as o:
-        ba = bytearray(o.read())
+        ba = bytes(o.read())
     return std.DataLiteral(
-        data_type=pdt,
+        data_type=pdt.to_proto,
         parquet=ba
     )
 

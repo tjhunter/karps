@@ -18,11 +18,11 @@ import qualified Proto.Karps.Proto.ApiInternal_Fields as PI
 
 {-| The class of types that can be read from a proto description. -}
 class FromProto p x | x -> p where
-  fromProto :: (Message p, HasCallStack) => p -> Try x
+  fromProto :: (HasCallStack) => p -> Try x
 
 {-| The class of types that can be exported to a proto type. -}
 class ToProto p x | x -> p where
-  toProto :: (Message p) => x -> p
+  toProto :: x -> p
 
 extractMaybe :: forall m a1 a' b. (Message m, HasCallStack) => m -> FoldLike (Maybe a1) m a' (Maybe a1) b -> Text -> Try a1
 extractMaybe msg fun ctx =

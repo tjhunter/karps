@@ -33,6 +33,7 @@ import qualified Data.ProtoLens.Reexport.Lens.Labels as Lens.Labels
 import qualified Data.ProtoLens.Reexport.Text.Read as Text.Read
 import qualified Proto.Karps.Proto.Computation
 import qualified Proto.Karps.Proto.Graph
+import qualified Proto.Karps.Proto.Spark
 import qualified Proto.Tensorflow.Core.Framework.Graph
 
 computation ::
@@ -168,6 +169,14 @@ maybe'relevantId ::
 maybe'relevantId
   = Lens.Labels.lensOf
       ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "maybe'relevantId")
+maybe'requestedScope ::
+                     forall f s t a b .
+                       (Lens.Labels.HasLens f s t "maybe'requestedScope" a b) =>
+                       Lens.Family2.LensLike f s t a b
+maybe'requestedScope
+  = Lens.Labels.lensOf
+      ((Lens.Labels.proxy#) ::
+         (Lens.Labels.Proxy#) "maybe'requestedScope")
 maybe'session ::
               forall f s t a b .
                 (Lens.Labels.HasLens f s t "maybe'session" a b) =>
@@ -175,6 +184,12 @@ maybe'session ::
 maybe'session
   = Lens.Labels.lensOf
       ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "maybe'session")
+maybe'spark ::
+            forall f s t a b . (Lens.Labels.HasLens f s t "maybe'spark" a b) =>
+              Lens.Family2.LensLike f s t a b
+maybe'spark
+  = Lens.Labels.lensOf
+      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "maybe'spark")
 maybe'success ::
               forall f s t a b .
                 (Lens.Labels.HasLens f s t "maybe'success" a b) =>
@@ -255,12 +270,25 @@ requestedPaths ::
 requestedPaths
   = Lens.Labels.lensOf
       ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "requestedPaths")
+requestedScope ::
+               forall f s t a b .
+                 (Lens.Labels.HasLens f s t "requestedScope" a b) =>
+                 Lens.Family2.LensLike f s t a b
+requestedScope
+  = Lens.Labels.lensOf
+      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "requestedScope")
 session ::
         forall f s t a b . (Lens.Labels.HasLens f s t "session" a b) =>
           Lens.Family2.LensLike f s t a b
 session
   = Lens.Labels.lensOf
       ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "session")
+spark ::
+      forall f s t a b . (Lens.Labels.HasLens f s t "spark" a b) =>
+        Lens.Family2.LensLike f s t a b
+spark
+  = Lens.Labels.lensOf
+      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "spark")
 stackTracePretty ::
                  forall f s t a b .
                    (Lens.Labels.HasLens f s t "stackTracePretty" a b) =>
@@ -292,9 +320,3 @@ success ::
 success
   = Lens.Labels.lensOf
       ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "success")
-value ::
-      forall f s t a b . (Lens.Labels.HasLens f s t "value" a b) =>
-        Lens.Family2.LensLike f s t a b
-value
-  = Lens.Labels.lensOf
-      ((Lens.Labels.proxy#) :: (Lens.Labels.Proxy#) "value")

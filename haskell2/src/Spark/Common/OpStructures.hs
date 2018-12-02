@@ -1,7 +1,4 @@
-{-# LANGUAGE OverloadedStrings #-}
---{-# LANGUAGE DuplicateRecordFields #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 {-|
 A description of the operations that can be performed on
@@ -11,7 +8,7 @@ module Spark.Common.OpStructures(
   SqlFunctionName,
   UdafClassName,
   UdfClassName,
-  OperatorName,
+  OperatorName(..),
   HdfsPath(..),
   DataInputStamp(..),
   Locality(..),
@@ -33,8 +30,7 @@ module Spark.Common.OpStructures(
   makeOperator,
   coreNodeInfo,
   emptyExtra,
-  localityFromProto,
-  localityToProto
+  localityFromProto
 ) where
 
 import qualified Data.Vector as V
@@ -42,6 +38,7 @@ import Data.ByteString(ByteString)
 import Data.Text as T
 import Data.Vector(Vector)
 import Data.ProtoLens.Message(def)
+import Data.String
 import Control.Monad(join)
 import Formatting
 import Lens.Family2 ((&), (.~), (^.))
@@ -78,7 +75,7 @@ type UdfClassName = T.Text
 
 {-| The name of an operator defined in Karps.
 -}
-type OperatorName = T.Text
+newtype OperatorName = OperatorName { unOperatorName :: T.Text} deriving (Eq, Show, Ord, IsString)
 
 {-| A path in the Hadoop File System (HDFS).
 
@@ -374,7 +371,7 @@ data NodeOp =
 makeOperator :: T.Text -> SQLType a -> StandardOperator
 makeOperator txt sqlt =
   StandardOperator {
-    soName = txt,
+    soName = OperatorName txt,
     soOutputType = unSQLType sqlt,
     soExtra = emptyExtra  }
 
@@ -382,9 +379,15 @@ localityFromProto :: PG.Locality -> Locality
 localityFromProto PG.LOCAL = Local
 localityFromProto PG.DISTRIBUTED = Distributed
 
-localityToProto :: Locality -> PG.Locality
-localityToProto Local = PG.LOCAL
-localityToProto Distributed = PG.DISTRIBUTED
+instance FromProto T.Text OperatorName where
+  -- TODO check if not empty
+  fromProto = pure . OperatorName
+
+instance ToProto T.Text OperatorName where
+  toProto (OperatorName x) = x
+
+instance FromProto PG.Locality Locality where
+  fromProto = pure . localityFromProto
 
 instance ToProto PG.Locality Locality where
   toProto Distributed = PG.DISTRIBUTED

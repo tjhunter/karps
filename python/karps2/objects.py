@@ -212,7 +212,7 @@ def make_dataframe(
 
 
 def call_op(op_name, extra=None, parents=None,
-            deps=None, session=None) -> AbstractNode:
+            deps=None, session=None, add_debug=True) -> AbstractNode:
     def clean(obj):
         if not isinstance(obj, AbstractNode):
             raise ValueError("{}:{}".format(type(obj), obj))
@@ -226,7 +226,7 @@ def call_op(op_name, extra=None, parents=None,
     for p in parents:
         assert session is p.kp_session, (session, p.kp_session, p)
     content = extra.SerializeToString() if extra else None
-    content_str = str(extra) if extra else None
+    content_str = str(extra) if extra and add_debug else None
     oe_p = gpb.OpExtra(content=content, content_debug=content_str)
     req = api.NodeBuilderRequest(op_name=op_name,
                                  extra=oe_p,
@@ -236,7 +236,6 @@ def call_op(op_name, extra=None, parents=None,
         raise ValueError(str(resp.error) + str(type(resp.error)) + str(resp))
     assert resp.success, resp
     n_p = resp.success
-    n_p.path.path.append(op_name.split(".")[-1])
     if n_p.locality == gpb.DISTRIBUTED:
         return DataFrame(n_p, parents, deps, session)
     else:
