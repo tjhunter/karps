@@ -163,33 +163,42 @@ to be roughly unique with high probability.
 -}
 buildOpNodeInScope ::
   CoreNodeInfo ->
+  OperatorName ->
   NodePath ->
   [NodeId] -> -- Parents
   [NodeId] -> -- Deps
   OperatorNode
-buildOpNodeInScope cni scope_path parent_ids dep_ids =
+buildOpNodeInScope cni oname scope_path parent_ids dep_ids =
   OperatorNode {
     onId = id2,
     onPath = xpath,
-    onNodeInfo = cni
-  } where s1 = SHA.init
-          s2 = SHA.updates s1 ["parents"]
-          s3 = SHA.updates s2 $ unNodeId <$> parent_ids
-          s4 = SHA.updates s3 ["deps"]
-          s5 = SHA.updates s4 $ unNodeId <$> dep_ids
-          s6 = _updateCNI s5 cni
-          id2 = NodeId . encode . SHA.finalize $ s6
-          xname = _defaultName "FIXME" id2
-          xpath = appendPath scope_path xname
+    onNodeInfo = cni,
+    onOpName = oname
+  } where
+    --(OpExtra bs_extra _ _) = extra
+    CoreNodeInfo ns extra = cni
+    bs_shape = encodeUtf8 $ show' ns -- TODO could be optimized
+    -- l :: [ByteString]
+    l = ["parents"] <> (unNodeId <$> parent_ids)
+        <> ["deps"] <> (unNodeId <$> dep_ids)
+        <> ["ns"] <> [bs_shape]
+        <> ["extra"] <> [] -- FIXME missing the content!!
+        <> ["op"] <> [encodeUtf8 (unOperatorName oname)]
+    s1 = SHA.init
+    s2 = SHA.updates s1 l
+    id2 = NodeId . encode . SHA.finalize $ s2
+    xname = _defaultName oname id2
+    xpath = appendPath scope_path xname
 
 buildOpNode ::
   CoreNodeInfo ->
+  OperatorName ->
   NodePath ->
   [NodeId] -> -- Parents
   [NodeId] -> -- Deps
   OperatorNode
-buildOpNode cni path parent_ids dep_ids =
-  (buildOpNodeInScope cni path parent_ids dep_ids) { onPath = path }
+buildOpNode cni oname path parent_ids dep_ids =
+  (buildOpNodeInScope cni oname path parent_ids dep_ids) { onPath = path }
 
 _defaultName :: OperatorName -> NodeId -> NodeName
 _defaultName (OperatorName ndn) nid = NodeName n where
@@ -284,18 +293,6 @@ _opNodeId node nc =
     -- Not sure if it is a good idea in general.
     (NodeId . encode . SHA.finalize) c4
 
-
---
--- _defaultNodeName :: ComputeNode loc a -> NodeName
--- _defaultNodeName node =
---   let opName = (prettyShowOp . nodeOp) node
---       namePieces = T.splitOn (T.pack ".") opName
---       lastOpt = (listToMaybe . reverse) namePieces
---       l = fromMaybe (T.pack "???") lastOpt
---       idbs = nodeId node
---       idt = (T.take 6 . decodeUtf8 . unNodeId) idbs
---       n = T.concat [T.toLower l, T.pack "_", idt]
---   in NodeName n
 
 --
 -- castType :: SQLType a -> ComputeNode loc b -> Try (ComputeNode loc a)

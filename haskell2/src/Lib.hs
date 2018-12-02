@@ -162,8 +162,8 @@ _buildNode registry (NodeBuilderRequest op_name extras parents pathpol nidpol) =
   parent_nids <- _extractNid parents
   let dep_nids = [] -- TODO: deps
   let on' = case pathpol of
-              UseScope scope -> buildOpNodeInScope cni scope parent_nids dep_nids
-              UsePath p -> buildOpNode cni p parent_nids dep_nids
+              UseScope scope -> buildOpNodeInScope cni op_name scope parent_nids dep_nids
+              UsePath p -> buildOpNode cni op_name p parent_nids dep_nids
   let on = case nidpol of
               ReuseId nid' -> on' { onId = nid' }
               RecomputeId -> on'
