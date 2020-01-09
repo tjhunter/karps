@@ -185,6 +185,18 @@ the set of all values can be tagged with _types_. A type is essentially a subset
 Types are mostly useful when writing programs and for clarity, not so much for our mathematical 
 derivations.
 
+
+_Definition: finite function._ A finite function is a function with discrete support:
+
+$$
+F\left[A,B\right]=\left\{ f\in B^{A}|\text{supp}\left(f\right)<\infty\right\} 
+$$
+
+```hs
+type FFun a b = a -> b
+```
+
+
 _Definition: dataset._ A dataset is a _finite measure_ over the set of values. 
 $d:\mathcal{U}\rightarrow\mathbb{N}$ with the restriction: 
 $$
@@ -192,7 +204,7 @@ $$
 $$
 In terms of types, a dataset is simple a function that counts how many times a value is observed:
 ```hs
-type Dataset a = a -> Nat
+type Dataset a = FFun a Nat
 ```
 
 __Note__ Basic arithmetic over sets ensures that the function defined above is a measure in the 
@@ -476,6 +488,10 @@ $$
 TODO: it should be possible to define joins just based on the axioms above and on the distributivity
 laws, but this does not bring much to the discussion.
 
+## Correspondance to function
+
+Talk about `FFun a b` equivalent to a dataset with special properties and vice-versa.
+
 ## Groups
 
 A group corresponds to the notion that data points can somehow be associated together. As a byproduct it allows
@@ -484,7 +500,7 @@ to express transforms on potentially many datasets all at once.
 __Definition: group__ A group is a function from values to datasets:
 
 ```hs
-type Group k v = k -> Dataset v
+type Group k v = FFun k (Dataset v)
 ```
 
 Of course, this is a very high-level definition, and we will see how it works out in practice.
@@ -495,6 +511,9 @@ Currying: `(k, v) -> Nat`, which suggest an alternative representation for group
 ```hs
 type Group k v = Dataset (k, v)
 ```
+
+TODO: check trivially about the size of the support.
+
 
 We will use one representation or the other according to the situation. This remark also justifies 
 why a specific type for groups of groups is hardly found in practice, as they can be reduced to a group with a single
@@ -570,7 +589,7 @@ the entropy.
 The implementation of this operation is straightforward:
 
 ```hs
-normalize :: Dataset a -> Dataset (a, Nat)
+normalize :: Dataset a -> FFun a Nat
 normalize d = shuffle count (groupBy id d)
 ```
 
